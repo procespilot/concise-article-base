@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { X, AlertCircle } from "lucide-react";
 import { sanitizeInput, sanitizeHtml } from "@/utils/sanitization";
 import { validateArticleData, ValidationResult } from "@/utils/validation";
+import { debounce } from "@/utils/performance";
 
 interface Article {
   id?: string;
@@ -44,7 +46,7 @@ interface ArticleFormProps {
   isEditing?: boolean;
 }
 
-const ArticleForm = ({ 
+const ArticleForm = React.memo(({ 
   formData, 
   onFormDataChange, 
   categories, 
@@ -64,6 +66,30 @@ const ArticleForm = ({
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const isControlled = formData && onFormDataChange;
+
+  // Memoized validation function
+  const validateForm = useCallback((): ValidationResult => {
+    return validateArticleData({
+      title: title.trim(),
+      content: content.trim(),
+      category_id: categoryId.trim(),
+      excerpt: excerpt.trim(),
+      keywords
+    });
+  }, [title, content, categoryId, excerpt, keywords]);
+
+  // Debounced validation to avoid excessive validation calls
+  const debouncedValidation = useMemo(
+    () => debounce(() => {
+      const validation = validateForm();
+      if (!validation.isValid) {
+        setValidationErrors(validation.errors);
+      } else {
+        setValidationErrors([]);
+      }
+    }, 300),
+    [validateForm]
+  );
 
   useEffect(() => {
     if (isControlled) {
@@ -97,85 +123,75 @@ const ArticleForm = ({
     }
   }, [formData, initialData, isControlled]);
 
-  const validateForm = (): ValidationResult => {
-    return validateArticleData({
-      title: title.trim(),
-      content: content.trim(),
-      category_id: categoryId.trim(),
-      excerpt: excerpt.trim(),
-      keywords
-    });
-  };
-
-  const updateFormData = (updates: any) => {
+  const updateFormData = useCallback((updates: any) => {
     if (isControlled && onFormDataChange) {
       onFormDataChange({ ...formData, ...updates });
     }
-  };
+  }, [isControlled, onFormDataChange, formData]);
 
-  const handleTitleChange = (value: string) => {
+  const handleTitleChange = useCallback((value: string) => {
     const sanitizedValue = sanitizeInput(value);
     setTitle(sanitizedValue);
     updateFormData({ title: sanitizedValue });
-    setValidationErrors([]);
-  };
+    debouncedValidation();
+  }, [updateFormData, debouncedValidation]);
 
-  const handleExcerptChange = (value: string) => {
+  const handleExcerptChange = useCallback((value: string) => {
     const sanitizedValue = sanitizeInput(value);
     setExcerpt(sanitizedValue);
     updateFormData({ excerpt: sanitizedValue });
-  };
+  }, [updateFormData]);
 
-  const handleContentChange = (value: string) => {
+  const handleContentChange = useCallback((value: string) => {
     const sanitizedValue = sanitizeHtml(value);
     setContent(sanitizedValue);
     updateFormData({ content: sanitizedValue });
-    setValidationErrors([]);
-  };
+    debouncedValidation();
+  }, [updateFormData, debouncedValidation]);
 
-  const handleCategoryChange = (value: string) => {
+  const handleCategoryChange = useCallback((value: string) => {
     setCategoryId(value);
     updateFormData({ category_id: value });
-    setValidationErrors([]);
-  };
+    debouncedValidation();
+  }, [updateFormData, debouncedValidation]);
 
-  const handleStatusChange = (value: string) => {
+  const handleStatusChange = useCallback((value: string) => {
     setStatus(value);
     updateFormData({ status: value });
-  };
+  }, [updateFormData]);
 
-  const handleFeaturedChange = (checked: boolean) => {
+  const handleFeaturedChange = useCallback((checked: boolean) => {
     setFeatured(checked);
     updateFormData({ featured: checked });
-  };
+  }, [updateFormData]);
 
-  const handleKeywordsChange = (newKeywords: string[]) => {
+  const handleKeywordsChange = useCallback((newKeywords: string[]) => {
     setKeywords(newKeywords);
     updateFormData({ keywords: newKeywords });
-  };
+  }, [updateFormData]);
 
-  const handleAddKeyword = () => {
+  const handleAddKeyword = useCallback(() => {
     const trimmedKeyword = sanitizeInput(keywordInput.trim());
     if (trimmedKeyword && !keywords.includes(trimmedKeyword) && keywords.length < 10) {
       const newKeywords = [...keywords, trimmedKeyword];
       handleKeywordsChange(newKeywords);
       setKeywordInput('');
     }
-  };
+  }, [keywordInput, keywords, handleKeywordsChange]);
 
-  const handleRemoveKeyword = (keywordToRemove: string) => {
+  const handleRemoveKeyword = useCallback((keywordToRemove: string) => {
     const newKeywords = keywords.filter(keyword => keyword !== keywordToRemove);
     handleKeywordsChange(newKeywords);
-  };
+  }, [keywords, handleKeywordsChange]);
 
-  const handleKeywordInputKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeywordInputKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddKeyword();
     }
-  };
+  }, [handleAddKeyword]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     const validation = validateForm();
@@ -219,7 +235,13 @@ const ArticleForm = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [validateForm, onSubmit, title, excerpt, content, categoryId, status, featured, keywords, isControlled]);
+
+  // Memoized character count components
+  const titleCharCount = useMemo(() => `${title.length}/200 karakters`, [title.length]);
+  const excerptCharCount = useMemo(() => `${excerpt.length}/500 karakters`, [excerpt.length]);
+  const contentCharCount = useMemo(() => `${content.length}/50,000 karakters`, [content.length]);
+  const keywordCount = useMemo(() => `${keywords.length}/10 trefwoorden`, [keywords.length]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -246,7 +268,7 @@ const ArticleForm = ({
           required
           maxLength={200}
         />
-        <p className="text-sm text-gray-500 mt-1">{title.length}/200 karakters</p>
+        <p className="text-sm text-gray-500 mt-1">{titleCharCount}</p>
       </div>
 
       <div>
@@ -259,7 +281,7 @@ const ArticleForm = ({
           rows={3}
           maxLength={500}
         />
-        <p className="text-sm text-gray-500 mt-1">{excerpt.length}/500 karakters</p>
+        <p className="text-sm text-gray-500 mt-1">{excerptCharCount}</p>
       </div>
 
       <div>
@@ -273,7 +295,7 @@ const ArticleForm = ({
           required
           maxLength={50000}
         />
-        <p className="text-sm text-gray-500 mt-1">{content.length}/50,000 karakters</p>
+        <p className="text-sm text-gray-500 mt-1">{contentCharCount}</p>
       </div>
 
       <div>
@@ -350,7 +372,7 @@ const ArticleForm = ({
               </Badge>
             ))}
           </div>
-          <p className="text-sm text-gray-500">{keywords.length}/10 trefwoorden</p>
+          <p className="text-sm text-gray-500">{keywordCount}</p>
         </div>
       </div>
 
@@ -367,6 +389,8 @@ const ArticleForm = ({
       )}
     </form>
   );
-};
+});
+
+ArticleForm.displayName = 'ArticleForm';
 
 export default ArticleForm;

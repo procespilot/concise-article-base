@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -6,16 +6,19 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import Header from "@/components/Header";
 import Dashboard from "@/components/Dashboard";
 import ArticlesList from "@/components/ArticlesList";
-import ArticleDetail from "@/components/ArticleDetail";
-import ArticleEditor from "@/components/ArticleEditor";
-import Analytics from "@/components/Analytics";
 import Categories from "@/components/Categories";
-import Users from "@/components/Users";
-import Settings from "@/components/Settings";
 import AuthPage from "@/components/AuthPage";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useCommonShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { 
+  LazyAnalytics, 
+  LazyArticleDetail, 
+  LazyArticleEditor, 
+  LazyUsers, 
+  LazySettings,
+  ComponentLoader 
+} from "@/components/LazyComponents";
 
 const Index = () => {
   const {
@@ -30,7 +33,6 @@ const Index = () => {
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Keyboard shortcuts
   useCommonShortcuts({
     onSearch: () => {
       if (searchInputRef.current) {
@@ -99,7 +101,6 @@ const Index = () => {
     }
     if (success) {
       handleBackToList();
-      // Force refresh all data to ensure live preview updates
       await supabaseData.refreshAllData();
     }
   };
@@ -112,7 +113,6 @@ const Index = () => {
     setIsCreatingArticle(false);
   };
 
-  // Wrapper functions to match expected return types
   const handleRefreshCategories = async () => {
     await supabaseData.refetchCategories();
   };
@@ -121,7 +121,6 @@ const Index = () => {
     await supabaseData.refetchUsers();
   };
 
-  // Breadcrumb logic
   const getBreadcrumbs = () => {
     const breadcrumbs = [];
     if (activeSection === "dashboard") {
@@ -169,18 +168,20 @@ const Index = () => {
   };
 
   const renderContent = () => {
-    // If creating or editing an article
     if (isCreatingArticle || editingArticleId) {
-      return <ArticleEditor 
-        articleId={editingArticleId || undefined} 
-        onBack={handleBackToList} 
-        onSave={handleSaveArticle} 
-        articles={supabaseData.articles} 
-        categories={supabaseData.categories} 
-      />;
+      return (
+        <Suspense fallback={<ComponentLoader />}>
+          <LazyArticleEditor 
+            articleId={editingArticleId || undefined} 
+            onBack={handleBackToList} 
+            onSave={handleSaveArticle} 
+            articles={supabaseData.articles} 
+            categories={supabaseData.categories} 
+          />
+        </Suspense>
+      );
     }
 
-    // If viewing an article detail
     if (selectedArticleId) {
       const article = supabaseData.articles.find(a => a.id === selectedArticleId);
       if (!article) {
@@ -188,11 +189,15 @@ const Index = () => {
             <p className="text-gray-600">Artikel niet gevonden</p>
           </div>;
       }
-      return <ArticleDetail 
-        article={article} 
-        onBack={handleBackToList} 
-        onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined} 
-      />;
+      return (
+        <Suspense fallback={<ComponentLoader />}>
+          <LazyArticleDetail 
+            article={article} 
+            onBack={handleBackToList} 
+            onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined} 
+          />
+        </Suspense>
+      );
     }
 
     switch (activeSection) {
@@ -221,11 +226,14 @@ const Index = () => {
           searchInputRef={searchInputRef} 
         />;
       case "analytics":
-        return isManager ? 
-          <Analytics 
-            articles={supabaseData.articles} 
-            categories={supabaseData.categories} 
-          /> : 
+        return isManager ? (
+          <Suspense fallback={<ComponentLoader />}>
+            <LazyAnalytics 
+              articles={supabaseData.articles} 
+              categories={supabaseData.categories} 
+            />
+          </Suspense>
+        ) : (
           <ArticlesList 
             articles={supabaseData.articles} 
             categories={supabaseData.categories} 
@@ -233,7 +241,8 @@ const Index = () => {
             onCreateArticle={handleCreateArticle} 
             isManager={isManager} 
             searchInputRef={searchInputRef} 
-          />;
+          />
+        );
       case "categories":
         return <Categories 
           categories={supabaseData.categories} 
@@ -241,12 +250,20 @@ const Index = () => {
           onRefresh={handleRefreshCategories} 
         />;
       case "users":
-        return <Users 
-          users={supabaseData.users} 
-          onRefresh={handleRefreshUsers} 
-        />;
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <LazyUsers 
+              users={supabaseData.users} 
+              onRefresh={handleRefreshUsers} 
+            />
+          </Suspense>
+        );
       case "settings":
-        return <Settings />;
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <LazySettings />
+          </Suspense>
+        );
       default:
         return isManager ? 
           <Dashboard 

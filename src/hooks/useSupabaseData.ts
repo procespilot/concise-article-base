@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { handleError, getSupabaseErrorMessage } from '@/utils/errorHandling';
 import { validateArticleData } from '@/utils/validation';
+import { measurePerformance } from '@/utils/performance';
 
 interface Article {
   id: string;
@@ -47,7 +48,8 @@ export const useSupabaseData = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
+    const perf = measurePerformance('fetchArticles');
     try {
       console.log('Fetching articles...');
       const { data, error } = await supabase
@@ -70,10 +72,13 @@ export const useSupabaseData = () => {
       console.error('Error fetching articles:', error);
       handleError(getSupabaseErrorMessage(error), toast);
       return [];
+    } finally {
+      perf.end();
     }
-  };
+  }, [toast]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
+    const perf = measurePerformance('fetchCategories');
     try {
       console.log('Fetching categories...');
       const { data, error } = await supabase
@@ -93,10 +98,13 @@ export const useSupabaseData = () => {
       console.error('Error fetching categories:', error);
       handleError(getSupabaseErrorMessage(error), toast);
       return [];
+    } finally {
+      perf.end();
     }
-  };
+  }, [toast]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
+    const perf = measurePerformance('fetchUsers');
     try {
       console.log('Fetching users...');
       const { data: usersData, error: usersError } = await supabase
@@ -126,10 +134,12 @@ export const useSupabaseData = () => {
       console.error('Error fetching users:', error);
       handleError(getSupabaseErrorMessage(error), toast);
       return [];
+    } finally {
+      perf.end();
     }
-  };
+  }, [toast]);
 
-  const createArticle = async (articleData: {
+  const createArticle = useCallback(async (articleData: {
     title: string;
     excerpt: string;
     content: string;
@@ -138,6 +148,7 @@ export const useSupabaseData = () => {
     featured: boolean;
     keywords: string[];
   }) => {
+    const perf = measurePerformance('createArticle');
     try {
       console.log('Creating article:', articleData);
       
@@ -196,10 +207,12 @@ export const useSupabaseData = () => {
       console.error('Error creating article:', error);
       handleError(getSupabaseErrorMessage(error), toast);
       return false;
+    } finally {
+      perf.end();
     }
-  };
+  }, [toast, fetchArticles]);
 
-  const updateArticle = async (id: string, articleData: {
+  const updateArticle = useCallback(async (id: string, articleData: {
     title: string;
     excerpt: string;
     content: string;
@@ -208,10 +221,10 @@ export const useSupabaseData = () => {
     featured: boolean;
     keywords: string[];
   }) => {
+    const perf = measurePerformance('updateArticle');
     try {
       console.log('Updating article:', id, articleData);
       
-      // Validate data
       const validation = validateArticleData(articleData);
       if (!validation.isValid) {
         toast({
@@ -238,8 +251,6 @@ export const useSupabaseData = () => {
       }
       
       console.log('Article updated successfully');
-      
-      // Refresh articles immediately
       await fetchArticles();
       
       toast({
@@ -251,10 +262,13 @@ export const useSupabaseData = () => {
       console.error('Error updating article:', error);
       handleError(getSupabaseErrorMessage(error), toast);
       return false;
+    } finally {
+      perf.end();
     }
-  };
+  }, [toast, fetchArticles]);
 
-  const deleteArticle = async (id: string) => {
+  const deleteArticle = useCallback(async (id: string) => {
+    const perf = measurePerformance('deleteArticle');
     try {
       console.log('Deleting article:', id);
       
@@ -269,8 +283,6 @@ export const useSupabaseData = () => {
       }
       
       console.log('Article deleted successfully');
-      
-      // Refresh articles immediately
       await fetchArticles();
       
       toast({
@@ -286,10 +298,12 @@ export const useSupabaseData = () => {
         variant: "destructive"
       });
       return false;
+    } finally {
+      perf.end();
     }
-  };
+  }, [toast, fetchArticles]);
 
-  const incrementViews = async (id: string) => {
+  const incrementViews = useCallback(async (id: string) => {
     try {
       console.log('Incrementing views for article:', id);
       
@@ -315,15 +329,15 @@ export const useSupabaseData = () => {
         console.error('Error incrementing views:', error);
       } else {
         console.log('Views incremented successfully');
-        // Refresh articles to show updated view count
         await fetchArticles();
       }
     } catch (error) {
       console.error('Error incrementing views:', error);
     }
-  };
+  }, [fetchArticles]);
 
-  const refreshAllData = async () => {
+  const refreshAllData = useCallback(async () => {
+    const perf = measurePerformance('refreshAllData');
     console.log('Refreshing all data...');
     setLoading(true);
     await Promise.all([
@@ -333,26 +347,17 @@ export const useSupabaseData = () => {
     ]);
     setLoading(false);
     console.log('All data refreshed');
-  };
+    perf.end();
+  }, [fetchArticles, fetchCategories, fetchUsers]);
 
-  const refetchArticles = async () => {
-    const data = await fetchArticles();
-    return data;
-  };
-
-  const refetchCategories = async () => {
-    const data = await fetchCategories();
-    return data;
-  };
-
-  const refetchUsers = async () => {
-    const data = await fetchUsers();
-    return data;
-  };
+  // Memoized refetch functions
+  const refetchArticles = useMemo(() => fetchArticles, [fetchArticles]);
+  const refetchCategories = useMemo(() => fetchCategories, [fetchCategories]);
+  const refetchUsers = useMemo(() => fetchUsers, [fetchUsers]);
 
   useEffect(() => {
     refreshAllData();
-  }, []);
+  }, [refreshAllData]);
 
   return {
     articles,
