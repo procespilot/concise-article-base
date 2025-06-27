@@ -8,6 +8,9 @@ import ArticlesList from "@/components/ArticlesList";
 import ArticleDetail from "@/components/ArticleDetail";
 import ArticleEditor from "@/components/ArticleEditor";
 import Analytics from "@/components/Analytics";
+import Categories from "@/components/Categories";
+import Users from "@/components/Users";
+import Settings from "@/components/Settings";
 import LoginPage from "@/components/LoginPage";
 import { UserProvider } from "@/contexts/UserContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -24,43 +27,42 @@ const IndexContent = () => {
   }
 
   const handleArticleClick = (articleId: number) => {
-    console.log("Article clicked:", articleId); // Debug log
+    console.log("Article clicked:", articleId);
     setSelectedArticleId(articleId);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
   };
 
   const handleBackToList = () => {
-    console.log("Back to list"); // Debug log
+    console.log("Back to list");
     setSelectedArticleId(null);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
   };
 
   const handleCreateArticle = () => {
-    console.log("Handle create article"); // Debug log
+    console.log("Handle create article");
     setIsCreatingArticle(true);
     setSelectedArticleId(null);
     setEditingArticleId(null);
-    setActiveSection("articles"); // Ensure we're on articles section
+    setActiveSection("articles");
   };
 
   const handleEditArticle = (articleId: number) => {
-    console.log("Edit article:", articleId); // Debug log
+    console.log("Edit article:", articleId);
     setEditingArticleId(articleId);
     setSelectedArticleId(null);
     setIsCreatingArticle(false);
   };
 
   const handleSaveArticle = () => {
-    console.log("Save article"); // Debug log
+    console.log("Save article");
     handleBackToList();
   };
 
   const handleSectionChange = (section: string) => {
-    console.log("Section change:", section); // Debug log
+    console.log("Section change:", section);
     setActiveSection(section);
-    // Reset article states when switching sections
     setSelectedArticleId(null);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
@@ -112,41 +114,11 @@ const IndexContent = () => {
           />
         );
       case "categories":
-        return (
-          <div className="animate-fade-in">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Categorieën</h1>
-            <p className="text-gray-600">
-              {isManager 
-                ? "Beheer je knowledge base categorieën en structuur" 
-                : "Blader door artikelen per categorie"
-              }
-            </p>
-          </div>
-        );
+        return <Categories />;
       case "users":
-        return isManager ? (
-          <div className="animate-fade-in">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Gebruikers</h1>
-            <p className="text-gray-600">Beheer gebruikerstoegang en rollen</p>
-          </div>
-        ) : (
-          <ArticlesList 
-            onArticleClick={handleArticleClick}
-            onCreateArticle={handleCreateArticle}
-          />
-        );
+        return <Users />;
       case "settings":
-        return (
-          <div className="animate-fade-in">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Instellingen</h1>
-            <p className="text-gray-600">
-              {isManager 
-                ? "Configureer je ClearBase omgeving" 
-                : "Beheer je persoonlijke instellingen"
-              }
-            </p>
-          </div>
-        );
+        return <Settings />;
       default:
         return isManager ? <Dashboard /> : (
           <ArticlesList 
