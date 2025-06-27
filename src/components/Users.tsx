@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, User, Plus, Mail } from "lucide-react";
+import { RefreshCw, User, Plus, Mail, Phone } from "lucide-react";
 import UserForm from './UserForm';
 
 interface UsersProps {
@@ -16,6 +16,28 @@ const Users = ({ users, onRefresh }: UsersProps) => {
 
   const handleUserAdded = async () => {
     await onRefresh();
+  };
+
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'destructive';
+      case 'manager':
+        return 'default';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'Admin';
+      case 'manager':
+        return 'Manager';
+      default:
+        return 'Gebruiker';
+    }
   };
 
   return (
@@ -60,6 +82,12 @@ const Users = ({ users, onRefresh }: UsersProps) => {
                           {user.email}
                         </div>
                       )}
+                      {user.phone && (
+                        <div className="flex items-center text-gray-600 text-sm">
+                          <Phone className="w-4 h-4 mr-2" />
+                          {user.phone}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -69,9 +97,9 @@ const Users = ({ users, onRefresh }: UsersProps) => {
                     {user.user_roles?.map((roleObj: any, index: number) => (
                       <Badge 
                         key={index} 
-                        variant={roleObj.role === 'admin' ? 'destructive' : roleObj.role === 'manager' ? 'default' : 'secondary'}
+                        variant={getRoleBadgeVariant(roleObj.role)}
                       >
-                        {roleObj.role === 'admin' ? 'Admin' : roleObj.role === 'manager' ? 'Manager' : 'Gebruiker'}
+                        {getRoleDisplayName(roleObj.role)}
                       </Badge>
                     ))}
                   </div>

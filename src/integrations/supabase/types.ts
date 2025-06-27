@@ -100,6 +100,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          phone: string | null
           updated_at: string | null
         }
         Insert: {
@@ -108,6 +109,7 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          phone?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -116,7 +118,35 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          phone?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          performed_by: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          performed_by?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          performed_by?: string | null
+          target_user_id?: string | null
         }
         Relationships: []
       }
@@ -146,9 +176,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_user_with_role: {
+        Args: {
+          p_email: string
+          p_first_name?: string
+          p_last_name?: string
+          p_phone?: string
+          p_role?: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: Json
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_users_with_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          created_at: string
+          roles: Json
+        }[]
       }
       has_role: {
         Args: {

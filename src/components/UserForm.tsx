@@ -43,30 +43,21 @@ const UserForm = ({ isOpen, onClose, onUserAdded }: UserFormProps) => {
     setIsSubmitting(true);
 
     try {
-      // Create a new user profile manually
-      const newUserId = crypto.randomUUID();
-      
-      // Insert into profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: newUserId,
-          email: email.trim(),
-          first_name: firstName.trim() || null,
-          last_name: lastName.trim() || null
-        });
+      // Use the secure database function to create user
+      const { data, error } = await supabase.rpc('create_user_with_role', {
+        p_email: email.trim(),
+        p_first_name: firstName.trim() || null,
+        p_last_name: lastName.trim() || null,
+        p_phone: phone.trim() || null,
+        p_role: role
+      });
 
-      if (profileError) throw profileError;
+      if (error) throw error;
 
-      // Assign role to the user
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: newUserId,
-          role: role
-        });
-
-      if (roleError) throw roleError;
+      // Check if the function returned an error
+      if (data && data.error) {
+        throw new Error(data.error);
+      }
 
       toast({
         title: "Gebruiker toegevoegd",

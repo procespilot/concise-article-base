@@ -32,6 +32,7 @@ interface UserProfile {
   first_name: string | null;
   last_name: string | null;
   email: string | null;
+  phone: string | null;
   created_at: string;
   user_roles: { role: string }[];
 }
@@ -87,30 +88,24 @@ export const useSupabaseData = () => {
 
   const fetchUsers = async () => {
     try {
-      // Get profiles with basic fields only (removing phone and other non-existent fields)
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, email, created_at')
-        .order('created_at', { ascending: false });
+      // Use the optimized database function to get users with roles
+      const { data: usersData, error: usersError } = await supabase
+        .rpc('get_users_with_roles');
 
-      if (profilesError) throw profilesError;
+      if (usersError) throw usersError;
 
-      // Get user roles for each profile
-      const usersWithRoles = await Promise.all(
-        (profilesData || []).map(async (profile) => {
-          const { data: rolesData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profile.id);
+      // Transform the data to match the expected format
+      const transformedUsers = (usersData || []).map((user: any) => ({
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        phone: user.phone,
+        created_at: user.created_at,
+        user_roles: user.roles || []
+      }));
 
-          return {
-            ...profile,
-            user_roles: rolesData || []
-          };
-        })
-      );
-
-      setUsers(usersWithRoles);
+      setUsers(transformedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
