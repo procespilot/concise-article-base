@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Search, Plus, Filter, BookOpen, Clock, Eye, Star, Calendar, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUser } from "@/contexts/UserContext";
 import SearchHighlight from "./SearchHighlight";
 
 interface ArticlesListProps {
@@ -20,10 +18,10 @@ interface ArticlesListProps {
   categories: any[];
   onArticleClick?: (articleId: string) => void;
   onCreateArticle?: () => void;
+  isManager: boolean;
 }
 
-const ArticlesList = ({ articles, categories, onArticleClick, onCreateArticle }: ArticlesListProps) => {
-  const { isManager } = useUser();
+const ArticlesList = ({ articles, categories, onArticleClick, onCreateArticle, isManager }: ArticlesListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Alle categorieën");
   const [authorFilter, setAuthorFilter] = useState("Alle auteurs");
