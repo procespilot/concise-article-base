@@ -43,6 +43,7 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
   const { isManager } = useAuth();
   const { state } = useSidebar();
   const [isStatsOpen, setIsStatsOpen] = useState(true);
+  const isCollapsed = state === "collapsed";
 
   const userMenuItems = [
     { id: 'articles', icon: FileText, label: 'Artikelen' },
@@ -75,7 +76,7 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
           <div className="w-10 h-10 bg-blue-500 flex items-center justify-center">
             <span className="text-black font-medium text-sm">CB</span>
           </div>
-          {state === "expanded" && (
+          {!isCollapsed && (
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-light text-black">ClearBase</h1>
               {isManager && (
@@ -94,18 +95,18 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
             <SidebarGroupContent>
               <Button 
                 className={`mb-6 bg-blue-500 hover:bg-blue-600 text-black border-0 ${
-                  state === "collapsed" ? "w-10 h-10 p-0" : "w-full"
+                  isCollapsed ? "w-10 h-10 p-0" : "w-full"
                 }`}
                 onClick={handleCreateArticle}
               >
                 <Plus className="w-4 h-4" />
-                {state === "expanded" && <span className="ml-2">Nieuw artikel</span>}
+                {!isCollapsed && <span className="ml-2">Nieuw artikel</span>}
               </Button>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
 
-        {state === "expanded" && (
+        {!isCollapsed && (
           <SidebarGroup className="mb-8">
             <SidebarGroupContent>
               <div className="relative mb-6">
@@ -131,10 +132,10 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                       activeSection === item.id 
                         ? 'bg-gray-100 text-black border-r-2 border-blue-500' 
                         : ''
-                    } ${state === "collapsed" ? "justify-center px-2" : "px-3"}`}
+                    } ${isCollapsed ? "justify-center px-2" : "px-3"}`}
                   >
                     <item.icon className="w-4 h-4" />
-                    {state === "expanded" && (
+                    {!isCollapsed && (
                       <span className="text-sm font-normal ml-3">{item.label}</span>
                     )}
                   </SidebarMenuButton>
@@ -144,7 +145,7 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isManager && state === "expanded" && (
+        {isManager && !isCollapsed && (
           <SidebarGroup>
             <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
               <SidebarGroupLabel asChild>
