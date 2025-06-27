@@ -11,26 +11,40 @@ import Analytics from "@/components/Analytics";
 import Categories from "@/components/Categories";
 import Users from "@/components/Users";
 import Settings from "@/components/Settings";
-import LoginPage from "@/components/LoginPage";
-import { UserProvider } from "@/contexts/UserContext";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import AuthPage from "@/components/AuthPage";
+import { useAuth } from "@/hooks/useAuth";
+import { useSupabaseData } from "@/hooks/useSupabaseData";
 
-const IndexContent = () => {
-  const { isAuthenticated, isManager } = useAuth();
+const Index = () => {
+  const { isAuthenticated, isManager, loading: authLoading } = useAuth();
+  const supabaseData = useSupabaseData();
+  
   const [activeSection, setActiveSection] = useState(isManager ? "dashboard" : "articles");
-  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
-  const [editingArticleId, setEditingArticleId] = useState<number | null>(null);
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
+  const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
 
-  if (!isAuthenticated) {
-    return <LoginPage />;
+  if (authLoading || supabaseData.loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-clearbase-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Laden...</p>
+        </div>
+      </div>
+    );
   }
 
-  const handleArticleClick = (articleId: number) => {
+  if (!isAuthenticated) {
+    return <AuthPage />;
+  }
+
+  const handleArticleClick = (articleId: string) => {
     console.log("Article clicked:", articleId);
     setSelectedArticleId(articleId);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
+    supabaseData.incrementViews(articleId);
   };
 
   const handleBackToList = () => {
@@ -48,16 +62,26 @@ const IndexContent = () => {
     setActiveSection("articles");
   };
 
-  const handleEditArticle = (articleId: number) => {
+  const handleEditArticle = (articleId: string) => {
     console.log("Edit article:", articleId);
     setEditingArticleId(articleId);
     setSelectedArticleId(null);
     setIsCreatingArticle(false);
   };
 
-  const handleSaveArticle = () => {
-    console.log("Save article");
-    handleBackToList();
+  const handleSaveArticle = async (articleData: any) => {
+    console.log("Save article", articleData);
+    let success = false;
+    
+    if (isCreatingArticle) {
+      success = await supabaseData.createArticle(articleData);
+    } else if (editingArticleId) {
+      success = await supabaseData.updateArticle(editingArticleId, articleData);
+    }
+    
+    if (success) {
+      handleBackToList();
+    }
   };
 
   const handleSectionChange = (section: string) => {
@@ -76,15 +100,26 @@ const IndexContent = () => {
           articleId={editingArticleId || undefined}
           onBack={handleBackToList}
           onSave={handleSaveArticle}
+          articles={supabaseData.articles}
+          categories={supabaseData.categories}
         />
       );
     }
 
     // If viewing an article detail
     if (selectedArticleId) {
+      const article = supabaseData.articles.find(a => a.id === selectedArticleId);
+      if (!article) {
+        return (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Artikel niet gevonden</p>
+          </div>
+        );
+      }
+      
       return (
         <ArticleDetail 
-          articleId={selectedArticleId} 
+          article={article}
           onBack={handleBackToList}
           onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined}
         />
@@ -93,8 +128,16 @@ const IndexContent = () => {
 
     switch (activeSection) {
       case "dashboard":
-        return isManager ? <Dashboard /> : (
+        return isManager ? (
+          <Dashboard 
+            articles={supabaseData.articles}
+            categories={supabaseData.categories}
+            users={supabaseData.users}
+          />
+        ) : (
           <ArticlesList 
+            articles={supabaseData.articles}
+            categories={supabaseData.categories}
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
           />
@@ -102,26 +145,54 @@ const IndexContent = () => {
       case "articles":
         return (
           <ArticlesList 
+            articles={supabaseData.articles}
+            categories={supabaseData.categories}
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
           />
         );
       case "analytics":
-        return isManager ? <Analytics /> : (
+        return isManager ? (
+          <Analytics 
+            articles={supabaseData.articles}
+            categories={supabaseData.categories}
+          />
+        ) : (
           <ArticlesList 
+            articles={supabaseData.articles}
+            categories={supabaseData.categories}
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
           />
         );
       case "categories":
-        return <Categories />;
+        return (
+          <Categories 
+            categories={supabaseData.categories}
+            articles={supabaseData.articles}
+            onRefresh={supabaseData.refetchCategories}
+          />
+        );
       case "users":
-        return <Users />;
+        return (
+          <Users 
+            users={supabaseData.users}
+            onRefresh={supabaseData.refetchUsers}
+          />
+        );
       case "settings":
         return <Settings />;
       default:
-        return isManager ? <Dashboard /> : (
+        return isManager ? (
+          <Dashboard 
+            articles={supabaseData.articles}
+            categories={supabaseData.categories}
+            users={supabaseData.users}
+          />
+        ) : (
           <ArticlesList 
+            articles={supabaseData.articles}
+            categories={supabaseData.categories}
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
           />
@@ -150,16 +221,6 @@ const IndexContent = () => {
         </SidebarInset>
       </div>
     </SidebarProvider>
-  );
-};
-
-const Index = () => {
-  return (
-    <AuthProvider>
-      <UserProvider>
-        <IndexContent />
-      </UserProvider>
-    </AuthProvider>
   );
 };
 
