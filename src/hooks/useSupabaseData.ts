@@ -66,6 +66,7 @@ export const useSupabaseData = () => {
       
       console.log('Articles fetched successfully:', data?.length || 0, 'articles');
       setArticles(data || []);
+      return data || [];
     } catch (error) {
       console.error('Error fetching articles:', error);
       toast({
@@ -73,6 +74,7 @@ export const useSupabaseData = () => {
         description: "Probeer de pagina te verversen",
         variant: "destructive"
       });
+      return [];
     }
   };
 
@@ -91,6 +93,7 @@ export const useSupabaseData = () => {
       
       console.log('Categories fetched successfully:', data?.length || 0, 'categories');
       setCategories(data || []);
+      return data || [];
     } catch (error) {
       console.error('Error fetching categories:', error);
       toast({
@@ -98,6 +101,7 @@ export const useSupabaseData = () => {
         description: "Probeer de pagina te verversen",
         variant: "destructive"
       });
+      return [];
     }
   };
 
@@ -126,6 +130,7 @@ export const useSupabaseData = () => {
 
       console.log('Users fetched successfully:', transformedUsers?.length || 0, 'users');
       setUsers(transformedUsers);
+      return transformedUsers;
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -133,6 +138,7 @@ export const useSupabaseData = () => {
         description: "Probeer de pagina te verversen",
         variant: "destructive"
       });
+      return [];
     }
   };
 
@@ -156,7 +162,6 @@ export const useSupabaseData = () => {
 
       console.log('Current user:', userData.user.id);
 
-      // Clean the data to ensure proper handling of category_id
       const cleanedData = {
         ...articleData,
         category_id: articleData.category_id && articleData.category_id.trim() !== '' ? articleData.category_id : null
@@ -168,7 +173,11 @@ export const useSupabaseData = () => {
           ...cleanedData,
           author_id: userData.user.id
         }])
-        .select()
+        .select(`
+          *,
+          categories(name),
+          profiles(first_name, last_name)
+        `)
         .single();
 
       if (error) {
@@ -177,7 +186,10 @@ export const useSupabaseData = () => {
       }
       
       console.log('Article created successfully:', data);
-      await fetchArticles();
+      
+      // Refresh articles immediately
+      const updatedArticles = await fetchArticles();
+      
       toast({
         title: "Artikel aangemaakt",
         description: "Je artikel is succesvol aangemaakt"
@@ -206,7 +218,6 @@ export const useSupabaseData = () => {
     try {
       console.log('Updating article:', id, articleData);
       
-      // Clean the data to ensure proper handling of category_id
       const cleanedData = {
         ...articleData,
         category_id: articleData.category_id && articleData.category_id.trim() !== '' ? articleData.category_id : null
@@ -223,7 +234,10 @@ export const useSupabaseData = () => {
       }
       
       console.log('Article updated successfully');
+      
+      // Refresh articles immediately
       await fetchArticles();
+      
       toast({
         title: "Artikel bijgewerkt",
         description: "Je wijzigingen zijn opgeslagen"
@@ -255,7 +269,10 @@ export const useSupabaseData = () => {
       }
       
       console.log('Article deleted successfully');
+      
+      // Refresh articles immediately
       await fetchArticles();
+      
       toast({
         title: "Artikel verwijderd",
         description: "Het artikel is succesvol verwijderd"
@@ -276,7 +293,6 @@ export const useSupabaseData = () => {
     try {
       console.log('Incrementing views for article:', id);
       
-      // First get current view count
       const { data: currentArticle, error: fetchError } = await supabase
         .from('articles')
         .select('views')
@@ -290,7 +306,6 @@ export const useSupabaseData = () => {
 
       const currentViews = currentArticle?.views || 0;
       
-      // Update with incremented view count
       const { error } = await supabase
         .from('articles')
         .update({ views: currentViews + 1 })
@@ -308,20 +323,20 @@ export const useSupabaseData = () => {
     }
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      console.log('Loading all data...');
-      setLoading(true);
-      await Promise.all([
-        fetchArticles(),
-        fetchCategories(),
-        fetchUsers()
-      ]);
-      setLoading(false);
-      console.log('All data loaded');
-    };
+  const refreshAllData = async () => {
+    console.log('Refreshing all data...');
+    setLoading(true);
+    await Promise.all([
+      fetchArticles(),
+      fetchCategories(),
+      fetchUsers()
+    ]);
+    setLoading(false);
+    console.log('All data refreshed');
+  };
 
-    loadData();
+  useEffect(() => {
+    refreshAllData();
   }, []);
 
   return {
@@ -335,6 +350,7 @@ export const useSupabaseData = () => {
     incrementViews,
     refetchArticles: fetchArticles,
     refetchCategories: fetchCategories,
-    refetchUsers: fetchUsers
+    refetchUsers: fetchUsers,
+    refreshAllData
   };
 };

@@ -100,6 +100,8 @@ const Index = () => {
     }
     if (success) {
       handleBackToList();
+      // Force refresh all data to ensure live preview updates
+      await supabaseData.refreshAllData();
     }
   };
 
@@ -161,7 +163,13 @@ const Index = () => {
   const renderContent = () => {
     // If creating or editing an article
     if (isCreatingArticle || editingArticleId) {
-      return <ArticleEditor articleId={editingArticleId || undefined} onBack={handleBackToList} onSave={handleSaveArticle} articles={supabaseData.articles} categories={supabaseData.categories} />;
+      return <ArticleEditor 
+        articleId={editingArticleId || undefined} 
+        onBack={handleBackToList} 
+        onSave={handleSaveArticle} 
+        articles={supabaseData.articles} 
+        categories={supabaseData.categories} 
+      />;
     }
 
     // If viewing an article detail
@@ -172,31 +180,91 @@ const Index = () => {
             <p className="text-gray-600">Artikel niet gevonden</p>
           </div>;
       }
-      return <ArticleDetail article={article} onBack={handleBackToList} onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined} />;
+      return <ArticleDetail 
+        article={article} 
+        onBack={handleBackToList} 
+        onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined} 
+      />;
     }
 
     switch (activeSection) {
       case "dashboard":
-        return isManager ? <Dashboard articles={supabaseData.articles} categories={supabaseData.categories} users={supabaseData.users} /> : <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
+        return isManager ? 
+          <Dashboard 
+            articles={supabaseData.articles} 
+            categories={supabaseData.categories} 
+            users={supabaseData.users} 
+          /> : 
+          <ArticlesList 
+            articles={supabaseData.articles} 
+            categories={supabaseData.categories} 
+            onArticleClick={handleArticleClick} 
+            onCreateArticle={handleCreateArticle} 
+            isManager={isManager} 
+            searchInputRef={searchInputRef} 
+          />;
       case "articles":
-        return <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
+        return <ArticlesList 
+          articles={supabaseData.articles} 
+          categories={supabaseData.categories} 
+          onArticleClick={handleArticleClick} 
+          onCreateArticle={handleCreateArticle} 
+          isManager={isManager} 
+          searchInputRef={searchInputRef} 
+        />;
       case "analytics":
-        return isManager ? <Analytics articles={supabaseData.articles} categories={supabaseData.categories} /> : <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
+        return isManager ? 
+          <Analytics 
+            articles={supabaseData.articles} 
+            categories={supabaseData.categories} 
+          /> : 
+          <ArticlesList 
+            articles={supabaseData.articles} 
+            categories={supabaseData.categories} 
+            onArticleClick={handleArticleClick} 
+            onCreateArticle={handleCreateArticle} 
+            isManager={isManager} 
+            searchInputRef={searchInputRef} 
+          />;
       case "categories":
-        return <Categories categories={supabaseData.categories} articles={supabaseData.articles} onRefresh={supabaseData.refetchCategories} />;
+        return <Categories 
+          categories={supabaseData.categories} 
+          articles={supabaseData.articles} 
+          onRefresh={supabaseData.refetchCategories} 
+        />;
       case "users":
-        return <Users users={supabaseData.users} onRefresh={supabaseData.refetchUsers} />;
+        return <Users 
+          users={supabaseData.users} 
+          onRefresh={supabaseData.refetchUsers} 
+        />;
       case "settings":
         return <Settings />;
       default:
-        return isManager ? <Dashboard articles={supabaseData.articles} categories={supabaseData.categories} users={supabaseData.users} /> : <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
+        return isManager ? 
+          <Dashboard 
+            articles={supabaseData.articles} 
+            categories={supabaseData.categories} 
+            users={supabaseData.users} 
+          /> : 
+          <ArticlesList 
+            articles={supabaseData.articles} 
+            categories={supabaseData.categories} 
+            onArticleClick={handleArticleClick} 
+            onCreateArticle={handleCreateArticle} 
+            isManager={isManager} 
+            searchInputRef={searchInputRef} 
+          />;
     }
   };
 
   return <div className="min-h-screen bg-white">
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-white">
-          <AppSidebar activeSection={activeSection} onSectionChange={handleSectionChange} onCreateArticle={handleCreateArticle} />
+          <AppSidebar 
+            activeSection={activeSection} 
+            onSectionChange={handleSectionChange} 
+            onCreateArticle={handleCreateArticle} 
+          />
           <SidebarInset className="flex-1">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 px-4 bg-white">
               <SidebarTrigger className="-ml-1" />
