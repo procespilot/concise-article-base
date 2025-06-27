@@ -112,6 +112,15 @@ const Index = () => {
     setIsCreatingArticle(false);
   };
 
+  // Wrapper functions to match expected return types
+  const handleRefreshCategories = async () => {
+    await supabaseData.refetchCategories();
+  };
+
+  const handleRefreshUsers = async () => {
+    await supabaseData.refetchUsers();
+  };
+
   // Breadcrumb logic
   const getBreadcrumbs = () => {
     const breadcrumbs = [];
@@ -229,12 +238,12 @@ const Index = () => {
         return <Categories 
           categories={supabaseData.categories} 
           articles={supabaseData.articles} 
-          onRefresh={supabaseData.refetchCategories} 
+          onRefresh={handleRefreshCategories} 
         />;
       case "users":
         return <Users 
           users={supabaseData.users} 
-          onRefresh={supabaseData.refetchUsers} 
+          onRefresh={handleRefreshUsers} 
         />;
       case "settings":
         return <Settings />;
