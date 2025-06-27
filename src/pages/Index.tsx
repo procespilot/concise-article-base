@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -17,16 +16,17 @@ import AuthPage from "@/components/AuthPage";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useCommonShortcuts } from "@/hooks/useKeyboardShortcuts";
-
 const Index = () => {
-  const { isAuthenticated, isManager, loading: authLoading } = useAuth();
+  const {
+    isAuthenticated,
+    isManager,
+    loading: authLoading
+  } = useAuth();
   const supabaseData = useSupabaseData();
-  
   const [activeSection, setActiveSection] = useState(isManager ? "dashboard" : "articles");
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
-  
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Keyboard shortcuts
@@ -47,19 +47,14 @@ const Index = () => {
       }
     }
   });
-
   if (authLoading || supabaseData.loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+    return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <LoadingSpinner size="lg" text="Applicatie laden..." />
-      </div>
-    );
+      </div>;
   }
-
   if (!isAuthenticated) {
     return <AuthPage />;
   }
-
   const handleArticleClick = (articleId: string) => {
     console.log("Article clicked:", articleId);
     setSelectedArticleId(articleId);
@@ -67,14 +62,12 @@ const Index = () => {
     setIsCreatingArticle(false);
     supabaseData.incrementViews(articleId);
   };
-
   const handleBackToList = () => {
     console.log("Back to list");
     setSelectedArticleId(null);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
   };
-
   const handleCreateArticle = () => {
     console.log("Handle create article");
     setIsCreatingArticle(true);
@@ -82,29 +75,24 @@ const Index = () => {
     setEditingArticleId(null);
     setActiveSection("articles");
   };
-
   const handleEditArticle = (articleId: string) => {
     console.log("Edit article:", articleId);
     setEditingArticleId(articleId);
     setSelectedArticleId(null);
     setIsCreatingArticle(false);
   };
-
   const handleSaveArticle = async (articleData: any) => {
     console.log("Save article", articleData);
     let success = false;
-    
     if (isCreatingArticle) {
       success = await supabaseData.createArticle(articleData);
     } else if (editingArticleId) {
       success = await supabaseData.updateArticle(editingArticleId, articleData);
     }
-    
     if (success) {
       handleBackToList();
     }
   };
-
   const handleSectionChange = (section: string) => {
     console.log("Section change:", section);
     setActiveSection(section);
@@ -116,32 +104,33 @@ const Index = () => {
   // Breadcrumb logic
   const getBreadcrumbs = () => {
     const breadcrumbs = [];
-    
     if (activeSection === "dashboard") {
-      breadcrumbs.push({ label: "Dashboard", isActive: true });
+      breadcrumbs.push({
+        label: "Dashboard",
+        isActive: true
+      });
     } else if (activeSection === "articles") {
-      breadcrumbs.push({ 
-        label: "Artikelen", 
+      breadcrumbs.push({
+        label: "Artikelen",
         onClick: () => handleBackToList(),
         isActive: !selectedArticleId && !editingArticleId && !isCreatingArticle
       });
-      
       if (selectedArticleId) {
         const article = supabaseData.articles.find(a => a.id === selectedArticleId);
-        breadcrumbs.push({ 
-          label: article?.title || "Artikel", 
-          isActive: true 
+        breadcrumbs.push({
+          label: article?.title || "Artikel",
+          isActive: true
         });
       } else if (editingArticleId) {
         const article = supabaseData.articles.find(a => a.id === editingArticleId);
-        breadcrumbs.push({ 
-          label: `${article?.title || "Artikel"} bewerken`, 
-          isActive: true 
+        breadcrumbs.push({
+          label: `${article?.title || "Artikel"} bewerken`,
+          isActive: true
         });
       } else if (isCreatingArticle) {
-        breadcrumbs.push({ 
-          label: "Nieuw artikel", 
-          isActive: true 
+        breadcrumbs.push({
+          label: "Nieuw artikel",
+          isActive: true
         });
       }
     } else {
@@ -151,137 +140,50 @@ const Index = () => {
         users: "Gebruikers",
         settings: "Instellingen"
       };
-      breadcrumbs.push({ label: sectionNames[activeSection] || activeSection, isActive: true });
+      breadcrumbs.push({
+        label: sectionNames[activeSection] || activeSection,
+        isActive: true
+      });
     }
-    
     return breadcrumbs;
   };
-
   const renderContent = () => {
     // If creating or editing an article
     if (isCreatingArticle || editingArticleId) {
-      return (
-        <ArticleEditor
-          articleId={editingArticleId || undefined}
-          onBack={handleBackToList}
-          onSave={handleSaveArticle}
-          articles={supabaseData.articles}
-          categories={supabaseData.categories}
-        />
-      );
+      return <ArticleEditor articleId={editingArticleId || undefined} onBack={handleBackToList} onSave={handleSaveArticle} articles={supabaseData.articles} categories={supabaseData.categories} />;
     }
 
     // If viewing an article detail
     if (selectedArticleId) {
       const article = supabaseData.articles.find(a => a.id === selectedArticleId);
       if (!article) {
-        return (
-          <div className="text-center py-12">
+        return <div className="text-center py-12">
             <p className="text-gray-600 dark:text-gray-400">Artikel niet gevonden</p>
-          </div>
-        );
+          </div>;
       }
-      
-      return (
-        <ArticleDetail 
-          article={article}
-          onBack={handleBackToList}
-          onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined}
-        />
-      );
+      return <ArticleDetail article={article} onBack={handleBackToList} onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined} />;
     }
-
     switch (activeSection) {
       case "dashboard":
-        return isManager ? (
-          <Dashboard 
-            articles={supabaseData.articles}
-            categories={supabaseData.categories}
-            users={supabaseData.users}
-          />
-        ) : (
-          <ArticlesList 
-            articles={supabaseData.articles}
-            categories={supabaseData.categories}
-            onArticleClick={handleArticleClick}
-            onCreateArticle={handleCreateArticle}
-            isManager={isManager}
-            searchInputRef={searchInputRef}
-          />
-        );
+        return isManager ? <Dashboard articles={supabaseData.articles} categories={supabaseData.categories} users={supabaseData.users} /> : <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
       case "articles":
-        return (
-          <ArticlesList 
-            articles={supabaseData.articles}
-            categories={supabaseData.categories}
-            onArticleClick={handleArticleClick}
-            onCreateArticle={handleCreateArticle}
-            isManager={isManager}
-            searchInputRef={searchInputRef}
-          />
-        );
+        return <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
       case "analytics":
-        return isManager ? (
-          <Analytics 
-            articles={supabaseData.articles}
-            categories={supabaseData.categories}
-          />
-        ) : (
-          <ArticlesList 
-            articles={supabaseData.articles}
-            categories={supabaseData.categories}
-            onArticleClick={handleArticleClick}
-            onCreateArticle={handleCreateArticle}
-            isManager={isManager}
-            searchInputRef={searchInputRef}
-          />
-        );
+        return isManager ? <Analytics articles={supabaseData.articles} categories={supabaseData.categories} /> : <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
       case "categories":
-        return (
-          <Categories 
-            categories={supabaseData.categories}
-            articles={supabaseData.articles}
-            onRefresh={supabaseData.refetchCategories}
-          />
-        );
+        return <Categories categories={supabaseData.categories} articles={supabaseData.articles} onRefresh={supabaseData.refetchCategories} />;
       case "users":
-        return (
-          <Users 
-            users={supabaseData.users}
-            onRefresh={supabaseData.refetchUsers}
-          />
-        );
+        return <Users users={supabaseData.users} onRefresh={supabaseData.refetchUsers} />;
       case "settings":
         return <Settings />;
       default:
-        return isManager ? (
-          <Dashboard 
-            articles={supabaseData.articles}
-            categories={supabaseData.categories}
-            users={supabaseData.users}
-          />
-        ) : (
-          <ArticlesList 
-            articles={supabaseData.articles}
-            categories={supabaseData.categories}
-            onArticleClick={handleArticleClick}
-            onCreateArticle={handleCreateArticle}
-            isManager={isManager}
-            searchInputRef={searchInputRef}
-          />
-        );
+        return isManager ? <Dashboard articles={supabaseData.articles} categories={supabaseData.categories} users={supabaseData.users} /> : <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
     }
   };
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+  return <div className="min-h-screen bg-white dark:bg-gray-900">
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
-          <AppSidebar 
-            activeSection={activeSection} 
-            onSectionChange={handleSectionChange}
-            onCreateArticle={handleCreateArticle}
-          />
+          <AppSidebar activeSection={activeSection} onSectionChange={handleSectionChange} onCreateArticle={handleCreateArticle} />
           <SidebarInset className="flex-1">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 px-4 bg-white dark:bg-gray-800">
               <SidebarTrigger className="-ml-1" />
@@ -289,15 +191,13 @@ const Index = () => {
                 <Header />
               </div>
             </header>
-            <main className="flex-1 p-8 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+            <main className="flex-1 p-8 overflow-y-auto bg-white">
               <Breadcrumbs items={getBreadcrumbs()} />
               {renderContent()}
             </main>
           </SidebarInset>
         </div>
       </SidebarProvider>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
