@@ -33,6 +33,8 @@ interface UserProfile {
   last_name: string | null;
   email: string | null;
   phone: string | null;
+  is_active: boolean;
+  activated_at: string | null;
   created_at: string;
   user_roles: { role: string }[];
 }
@@ -88,19 +90,21 @@ export const useSupabaseData = () => {
 
   const fetchUsers = async () => {
     try {
-      // Use the optimized database function to get users with roles
+      // Use the enhanced database function to get users with roles and activation status
       const { data: usersData, error: usersError } = await supabase
         .rpc('get_users_with_roles');
 
       if (usersError) throw usersError;
 
-      // Transform the data to match the expected format
+      // Transform the data to match the expected format with activation fields
       const transformedUsers = (usersData || []).map((user: any) => ({
         id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
         phone: user.phone,
+        is_active: user.is_active,
+        activated_at: user.activated_at,
         created_at: user.created_at,
         user_roles: user.roles || []
       }));

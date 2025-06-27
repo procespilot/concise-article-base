@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, User, Plus, Mail, Phone } from "lucide-react";
+import { RefreshCw, User, Plus, Mail, Phone, Shield, ShieldCheck, ShieldX } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import UserForm from './UserForm';
 
 interface UsersProps {
@@ -13,9 +15,88 @@ interface UsersProps {
 
 const Users = ({ users, onRefresh }: UsersProps) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [activatingUsers, setActivatingUsers] = useState<Set<string>>(new Set());
+  const [deactivatingUsers, setDeactivatingUsers] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
   const handleUserAdded = async () => {
     await onRefresh();
+  };
+
+  const handleActivateUser = async (userId: string) => {
+    setActivatingUsers(prev => new Set(prev).add(userId));
+    
+    try {
+      const { data, error } = await supabase.rpc('activate_user', {
+        p_user_id: userId
+      });
+
+      if (error) throw error;
+
+      const result = data as { error?: string; success?: boolean; message?: string };
+      
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      toast({
+        title: "Gebruiker geactiveerd",
+        description: "De gebruiker is succesvol geactiveerd"
+      });
+
+      await onRefresh();
+    } catch (error) {
+      console.error('Error activating user:', error);
+      toast({
+        title: "Fout bij activeren",
+        description: error instanceof Error ? error.message : "Probeer het opnieuw",
+        variant: "destructive"
+      });
+    } finally {
+      setActivatingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleDeactivateUser = async (userId: string) => {
+    setDeactivatingUsers(prev => new Set(prev).add(userId));
+    
+    try {
+      const { data, error } = await supabase.rpc('deactivate_user', {
+        p_user_id: userId
+      });
+
+      if (error) throw error;
+
+      const result = data as { error?: string; success?: boolean; message?: string };
+      
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      toast({
+        title: "Gebruiker gedeactiveerd",
+        description: "De gebruiker is succesvol gedeactiveerd"
+      });
+
+      await onRefresh();
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+      toast({
+        title: "Fout bij deactiveren",
+        description: error instanceof Error ? error.message : "Probeer het opnieuw",
+        variant: "destructive"
+      });
+    } finally {
+      setDeactivatingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    }
   };
 
   const getRoleBadgeVariant = (role: string) => {
@@ -40,6 +121,14 @@ const Users = ({ users, onRefresh }: UsersProps) => {
     }
   };
 
+  const getStatusIcon = (isActive: boolean) => {
+    return isActive ? (
+      <ShieldCheck className="w-4 h-4 text-green-600" />
+    ) : (
+      <ShieldX className="w-4 h-4 text-red-600" />
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -61,7 +150,7 @@ const Users = ({ users, onRefresh }: UsersProps) => {
 
       <div className="grid grid-cols-1 gap-4">
         {users.map((user) => (
-          <Card key={user.id}>
+          <Card key={user.id} className={!user.is_active ? 'opacity-60 border-red-200' : ''}>
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
@@ -69,12 +158,15 @@ const Users = ({ users, onRefresh }: UsersProps) => {
                     <User className="w-6 h-6 text-clearbase-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg">
-                      {user.first_name || user.last_name 
-                        ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
-                        : 'Geen naam'
-                      }
-                    </h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-lg">
+                        {user.first_name || user.last_name 
+                          ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+                          : 'Geen naam'
+                        }
+                      </h3>
+                      {getStatusIcon(user.is_active)}
+                    </div>
                     <div className="space-y-1 mt-2">
                       {user.email && (
                         <div className="flex items-center text-gray-600 text-sm">
@@ -88,21 +180,56 @@ const Users = ({ users, onRefresh }: UsersProps) => {
                           {user.phone}
                         </div>
                       )}
+                      {user.activated_at && (
+                        <div className="flex items-center text-gray-600 text-sm">
+                          <Shield className="w-4 h-4 mr-2" />
+                          Geactiveerd: {new Date(user.activated_at).toLocaleDateString('nl-NL')}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex flex-col items-end space-y-2">
-                  <div className="flex flex-wrap gap-1">
-                    {user.user_roles?.map((roleObj: any, index: number) => (
-                      <Badge 
-                        key={index} 
-                        variant={getRoleBadgeVariant(roleObj.role)}
-                      >
-                        {getRoleDisplayName(roleObj.role)}
-                      </Badge>
-                    ))}
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <div className="flex gap-1">
+                      {user.user_roles?.map((roleObj: any, index: number) => (
+                        <Badge 
+                          key={index} 
+                          variant={getRoleBadgeVariant(roleObj.role)}
+                        >
+                          {getRoleDisplayName(roleObj.role)}
+                        </Badge>
+                      ))}
+                    </div>
+                    <Badge variant={user.is_active ? "default" : "destructive"}>
+                      {user.is_active ? "Actief" : "Inactief"}
+                    </Badge>
                   </div>
+                  
+                  <div className="flex gap-2">
+                    {!user.is_active && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleActivateUser(user.id)}
+                        disabled={activatingUsers.has(user.id)}
+                      >
+                        {activatingUsers.has(user.id) ? 'Activeren...' : 'Activeren'}
+                      </Button>
+                    )}
+                    {user.is_active && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeactivateUser(user.id)}
+                        disabled={deactivatingUsers.has(user.id)}
+                      >
+                        {deactivatingUsers.has(user.id) ? 'Deactiveren...' : 'Deactiveren'}
+                      </Button>
+                    )}
+                  </div>
+                  
                   <span className="text-sm text-gray-500">
                     Toegevoegd: {new Date(user.created_at).toLocaleDateString('nl-NL')}
                   </span>

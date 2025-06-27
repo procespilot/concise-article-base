@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ const UserForm = ({ isOpen, onClose, onUserAdded }: UserFormProps) => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'user' | 'manager' | 'admin'>('user');
+  const [autoActivate, setAutoActivate] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -43,28 +45,43 @@ const UserForm = ({ isOpen, onClose, onUserAdded }: UserFormProps) => {
     setIsSubmitting(true);
 
     try {
-      // Use the secure database function to create user
+      // Use the enhanced secure database function to create user
       const { data, error } = await supabase.rpc('create_user_with_role', {
         p_email: email.trim(),
         p_first_name: firstName.trim() || null,
         p_last_name: lastName.trim() || null,
         p_phone: phone.trim() || null,
-        p_role: role
+        p_role: role,
+        p_auto_activate: autoActivate
       });
 
       if (error) throw error;
 
       // Type-safe check for the function response
-      const result = data as { error?: string; success?: boolean; user_id?: string };
+      const result = data as { 
+        error?: string; 
+        success?: boolean; 
+        user_id?: string;
+        activation_token?: string;
+        requires_activation?: boolean;
+      };
       
       if (result && result.error) {
         throw new Error(result.error);
       }
 
-      toast({
-        title: "Gebruiker toegevoegd",
-        description: "De nieuwe gebruiker is succesvol toegevoegd"
-      });
+      // Show appropriate success message based on activation status
+      if (result.requires_activation && result.activation_token) {
+        toast({
+          title: "Gebruiker aangemaakt",
+          description: `Gebruiker aangemaakt maar moet nog geactiveerd worden. Activation token: ${result.activation_token.substring(0, 8)}...`
+        });
+      } else {
+        toast({
+          title: "Gebruiker toegevoegd",
+          description: "De nieuwe gebruiker is succesvol toegevoegd en geactiveerd"
+        });
+      }
 
       // Reset form
       setFirstName('');
@@ -72,6 +89,7 @@ const UserForm = ({ isOpen, onClose, onUserAdded }: UserFormProps) => {
       setEmail('');
       setPhone('');
       setRole('user');
+      setAutoActivate(true);
       
       onUserAdded();
       onClose();
@@ -149,6 +167,17 @@ const UserForm = ({ isOpen, onClose, onUserAdded }: UserFormProps) => {
                 <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="autoActivate"
+              checked={autoActivate}
+              onCheckedChange={(checked) => setAutoActivate(checked as boolean)}
+            />
+            <Label htmlFor="autoActivate" className="text-sm">
+              Automatisch activeren
+            </Label>
           </div>
 
           <DialogFooter>

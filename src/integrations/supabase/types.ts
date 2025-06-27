@@ -95,28 +95,37 @@ export type Database = {
       }
       profiles: {
         Row: {
+          activated_at: string | null
+          activation_token: string | null
           created_at: string | null
           email: string | null
           first_name: string | null
           id: string
+          is_active: boolean | null
           last_name: string | null
           phone: string | null
           updated_at: string | null
         }
         Insert: {
+          activated_at?: string | null
+          activation_token?: string | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
           id: string
+          is_active?: boolean | null
           last_name?: string | null
           phone?: string | null
           updated_at?: string | null
         }
         Update: {
+          activated_at?: string | null
+          activation_token?: string | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
           id?: string
+          is_active?: boolean | null
           last_name?: string | null
           phone?: string | null
           updated_at?: string | null
@@ -176,14 +185,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_user: {
+        Args: { p_user_id: string; p_activation_token?: string }
+        Returns: Json
+      }
       create_user_with_role: {
-        Args: {
-          p_email: string
-          p_first_name?: string
-          p_last_name?: string
-          p_phone?: string
-          p_role?: Database["public"]["Enums"]["app_role"]
-        }
+        Args:
+          | {
+              p_email: string
+              p_first_name?: string
+              p_last_name?: string
+              p_phone?: string
+              p_role?: Database["public"]["Enums"]["app_role"]
+            }
+          | {
+              p_email: string
+              p_first_name?: string
+              p_last_name?: string
+              p_phone?: string
+              p_role?: Database["public"]["Enums"]["app_role"]
+              p_auto_activate?: boolean
+            }
+        Returns: Json
+      }
+      deactivate_user: {
+        Args: { p_user_id: string }
         Returns: Json
       }
       get_current_user_role: {
@@ -198,6 +224,8 @@ export type Database = {
           last_name: string
           email: string
           phone: string
+          is_active: boolean
+          activated_at: string
           created_at: string
           roles: Json
         }[]
