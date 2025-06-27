@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,9 +10,10 @@ import UserForm from './UserForm';
 interface UsersProps {
   users: any[];
   onRefresh: () => Promise<void>;
+  onCreateUser?: () => void;
 }
 
-const Users = ({ users, onRefresh }: UsersProps) => {
+const Users = ({ users, onRefresh, onCreateUser }: UsersProps) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [activatingUsers, setActivatingUsers] = useState<Set<string>>(new Set());
   const [deactivatingUsers, setDeactivatingUsers] = useState<Set<string>>(new Set());
@@ -21,6 +21,14 @@ const Users = ({ users, onRefresh }: UsersProps) => {
 
   const handleUserAdded = async () => {
     await onRefresh();
+  };
+
+  const handleAddUserClick = () => {
+    if (onCreateUser) {
+      onCreateUser();
+    } else {
+      setIsFormOpen(true);
+    }
   };
 
   const handleActivateUser = async (userId: string) => {
@@ -137,7 +145,7 @@ const Users = ({ users, onRefresh }: UsersProps) => {
           <p className="text-gray-600">Beheer gebruikers en hun rollen</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setIsFormOpen(true)} className="bg-blue-500 text-black hover:bg-blue-600">
+          <Button onClick={handleAddUserClick} className="bg-blue-500 text-black hover:bg-blue-600">
             <Plus className="w-4 h-4 mr-2" />
             Gebruiker toevoegen
           </Button>
@@ -246,7 +254,7 @@ const Users = ({ users, onRefresh }: UsersProps) => {
           <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-black mb-2">Geen gebruikers gevonden</h3>
           <p className="text-gray-600 mb-4">Begin met het toevoegen van je eerste gebruiker.</p>
-          <Button onClick={() => setIsFormOpen(true)} className="bg-blue-500 text-black hover:bg-blue-600">
+          <Button onClick={handleAddUserClick} className="bg-blue-500 text-black hover:bg-blue-600">
             <Plus className="w-4 h-4 mr-2" />
             Eerste gebruiker toevoegen
           </Button>
