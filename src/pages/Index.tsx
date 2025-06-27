@@ -24,34 +24,41 @@ const IndexContent = () => {
   }
 
   const handleArticleClick = (articleId: number) => {
+    console.log("Article clicked:", articleId); // Debug log
     setSelectedArticleId(articleId);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
   };
 
   const handleBackToList = () => {
+    console.log("Back to list"); // Debug log
     setSelectedArticleId(null);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
   };
 
   const handleCreateArticle = () => {
+    console.log("Handle create article"); // Debug log
     setIsCreatingArticle(true);
     setSelectedArticleId(null);
     setEditingArticleId(null);
+    setActiveSection("articles"); // Ensure we're on articles section
   };
 
   const handleEditArticle = (articleId: number) => {
+    console.log("Edit article:", articleId); // Debug log
     setEditingArticleId(articleId);
     setSelectedArticleId(null);
     setIsCreatingArticle(false);
   };
 
   const handleSaveArticle = () => {
+    console.log("Save article"); // Debug log
     handleBackToList();
   };
 
   const handleSectionChange = (section: string) => {
+    console.log("Section change:", section); // Debug log
     setActiveSection(section);
     // Reset article states when switching sections
     setSelectedArticleId(null);
@@ -153,7 +160,11 @@ const IndexContent = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <AppSidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
+        <AppSidebar 
+          activeSection={activeSection} 
+          onSectionChange={handleSectionChange}
+          onCreateArticle={handleCreateArticle}
+        />
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />

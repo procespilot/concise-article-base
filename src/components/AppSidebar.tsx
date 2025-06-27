@@ -38,9 +38,10 @@ import { useAuth } from "@/contexts/AuthContext";
 interface AppSidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  onCreateArticle?: () => void;
 }
 
-export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
+export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: AppSidebarProps) {
   const { isManager } = useAuth();
   const { state } = useSidebar();
   const [isStatsOpen, setIsStatsOpen] = useState(true);
@@ -63,9 +64,10 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
   const menuItems = isManager ? managerMenuItems : userMenuItems;
 
   const handleCreateArticle = () => {
-    // Switch to articles section and trigger create mode
-    onSectionChange('articles');
-    // We'll need to add a way to trigger create mode - for now just navigate to articles
+    console.log("Create article clicked"); // Debug log
+    if (onCreateArticle) {
+      onCreateArticle();
+    }
   };
 
   return (
