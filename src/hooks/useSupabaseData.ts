@@ -16,7 +16,6 @@ interface Article {
   category_id: string | null;
   author_id: string | null;
   categories: { name: string } | null;
-  profiles: { first_name: string | null; last_name: string | null } | null;
 }
 
 interface Category {
@@ -53,8 +52,7 @@ export const useSupabaseData = () => {
         .from('articles')
         .select(`
           *,
-          categories(name),
-          profiles(first_name, last_name)
+          categories(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -174,8 +172,7 @@ export const useSupabaseData = () => {
         }])
         .select(`
           *,
-          categories(name),
-          profiles(first_name, last_name)
+          categories(name)
         `)
         .single();
 
