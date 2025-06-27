@@ -5,41 +5,55 @@ import Sidebar from "@/components/Sidebar";
 import Dashboard from "@/components/Dashboard";
 import ArticlesList from "@/components/ArticlesList";
 import Analytics from "@/components/Analytics";
+import { UserProvider, useUser } from "@/contexts/UserContext";
 
-const Index = () => {
-  const [activeSection, setActiveSection] = useState("dashboard");
+const IndexContent = () => {
+  const { isManager } = useUser();
+  const [activeSection, setActiveSection] = useState(isManager ? "dashboard" : "articles");
 
   const renderContent = () => {
     switch (activeSection) {
       case "dashboard":
-        return <Dashboard />;
+        return isManager ? <Dashboard /> : <ArticlesList />;
       case "articles":
         return <ArticlesList />;
       case "analytics":
-        return <Analytics />;
+        return isManager ? <Analytics /> : <ArticlesList />;
       case "categories":
         return (
           <div className="animate-fade-in">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Categorieën</h1>
-            <p className="text-gray-600">Beheer je knowledge base categorieën en structuur</p>
+            <p className="text-gray-600">
+              {isManager 
+                ? "Beheer je knowledge base categorieën en structuur" 
+                : "Blader door artikelen per categorie"
+              }
+            </p>
           </div>
         );
       case "users":
-        return (
+        return isManager ? (
           <div className="animate-fade-in">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Gebruikers</h1>
             <p className="text-gray-600">Beheer gebruikerstoegang en rollen</p>
           </div>
+        ) : (
+          <ArticlesList />
         );
       case "settings":
         return (
           <div className="animate-fade-in">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Instellingen</h1>
-            <p className="text-gray-600">Configureer je ClearBase omgeving</p>
+            <p className="text-gray-600">
+              {isManager 
+                ? "Configureer je ClearBase omgeving" 
+                : "Beheer je persoonlijke instellingen"
+              }
+            </p>
           </div>
         );
       default:
-        return <Dashboard />;
+        return isManager ? <Dashboard /> : <ArticlesList />;
     }
   };
 
@@ -56,6 +70,14 @@ const Index = () => {
         </main>
       </div>
     </div>
+  );
+};
+
+const Index = () => {
+  return (
+    <UserProvider>
+      <IndexContent />
+    </UserProvider>
   );
 };
 
