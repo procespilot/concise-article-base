@@ -276,9 +276,25 @@ export const useSupabaseData = () => {
     try {
       console.log('Incrementing views for article:', id);
       
-      const { error } = await supabase.rpc('increment_article_views', {
-        article_id: id
-      });
+      // First get current view count
+      const { data: currentArticle, error: fetchError } = await supabase
+        .from('articles')
+        .select('views')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current views:', fetchError);
+        return;
+      }
+
+      const currentViews = currentArticle?.views || 0;
+      
+      // Update with incremented view count
+      const { error } = await supabase
+        .from('articles')
+        .update({ views: currentViews + 1 })
+        .eq('id', id);
 
       if (error) {
         console.error('Error incrementing views:', error);
