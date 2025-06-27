@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -32,58 +33,81 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-clearbase-600">
-            ClearBase
-          </CardTitle>
-          <p className="text-gray-600">Log in op je account</p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email">E-mailadres</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="je@email.com"
-              />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md">
+        <Card className="card-hover border-0 shadow-xl bg-card/50 backdrop-blur-sm">
+          <CardHeader className="text-center space-y-4 pb-8">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center shadow-glow">
+              <span className="text-2xl font-bold text-white">CB</span>
             </div>
             <div>
-              <Label htmlFor="password">Wachtwoord</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-              />
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                ClearBase
+              </CardTitle>
+              <p className="text-muted-foreground mt-2">Log in op je kennisbank</p>
             </div>
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <Button 
-              type="submit" 
-              className="w-full bg-clearbase-600 hover:bg-clearbase-700"
-              disabled={loading}
-            >
-              {loading ? "Inloggen..." : "Inloggen"}
-            </Button>
-          </form>
-          <div className="mt-4 text-sm text-gray-600">
-            <p>Demo accounts:</p>
-            <p>Manager: manager@example.com / password</p>
-            <p>Gebruiker: user@example.com / password</p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">E-mailadres</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="je@email.com"
+                    className="input-focus h-11"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-medium">Wachtwoord</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="input-focus h-11"
+                  />
+                </div>
+              </div>
+              
+              {error && (
+                <Alert variant="destructive" className="animate-scale-in">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-semibold"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <LoadingSpinner size="sm" />
+                    Inloggen...
+                  </div>
+                ) : (
+                  "Inloggen"
+                )}
+              </Button>
+            </form>
+            
+            <div className="mt-8 p-4 bg-muted/30 rounded-lg border">
+              <p className="text-sm font-medium text-center mb-3">Demo accounts</p>
+              <div className="space-y-2 text-sm text-muted-foreground text-center">
+                <p><span className="font-medium">Manager:</span> manager@example.com / password</p>
+                <p><span className="font-medium">Gebruiker:</span> user@example.com / password</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    --background: 255 255 255;
+    --background: 250 250 250;
     --foreground: 15 23 42;
 
     --card: 255 255 255;
@@ -16,8 +16,8 @@
     --popover: 255 255 255;
     --popover-foreground: 15 23 42;
 
-    --primary: 37 99 235;
-    --primary-foreground: 248 250 252;
+    --primary: 59 130 246;
+    --primary-foreground: 255 255 255;
 
     --secondary: 241 245 249;
     --secondary-foreground: 15 23 42;
@@ -33,57 +33,57 @@
 
     --border: 226 232 240;
     --input: 226 232 240;
-    --ring: 37 99 235;
+    --ring: 59 130 246;
 
     --radius: 0.75rem;
 
     --sidebar-background: 248 250 252;
     --sidebar-foreground: 71 85 105;
-    --sidebar-primary: 37 99 235;
-    --sidebar-primary-foreground: 248 250 252;
+    --sidebar-primary: 59 130 246;
+    --sidebar-primary-foreground: 255 255 255;
     --sidebar-accent: 241 245 249;
     --sidebar-accent-foreground: 15 23 42;
     --sidebar-border: 226 232 240;
-    --sidebar-ring: 37 99 235;
+    --sidebar-ring: 59 130 246;
   }
 
   .dark {
-    --background: 2 8 23;
-    --foreground: 248 250 252;
+    --background: 31 41 55;
+    --foreground: 249 250 251;
 
-    --card: 2 8 23;
-    --card-foreground: 248 250 252;
+    --card: 55 65 81;
+    --card-foreground: 249 250 251;
 
-    --popover: 2 8 23;
-    --popover-foreground: 248 250 252;
+    --popover: 55 65 81;
+    --popover-foreground: 249 250 251;
 
-    --primary: 59 130 246;
+    --primary: 96 165 250;
     --primary-foreground: 15 23 42;
 
-    --secondary: 30 41 59;
-    --secondary-foreground: 248 250 252;
+    --secondary: 75 85 99;
+    --secondary-foreground: 249 250 251;
 
-    --muted: 30 41 59;
-    --muted-foreground: 148 163 184;
+    --muted: 75 85 99;
+    --muted-foreground: 156 163 175;
 
-    --accent: 30 41 59;
-    --accent-foreground: 248 250 252;
+    --accent: 75 85 99;
+    --accent-foreground: 249 250 251;
 
-    --destructive: 220 38 38;
-    --destructive-foreground: 248 250 252;
+    --destructive: 239 68 68;
+    --destructive-foreground: 249 250 251;
 
-    --border: 30 41 59;
-    --input: 30 41 59;
-    --ring: 59 130 246;
+    --border: 75 85 99;
+    --input: 75 85 99;
+    --ring: 96 165 250;
     
-    --sidebar-background: 15 23 42;
-    --sidebar-foreground: 203 213 225;
-    --sidebar-primary: 59 130 246;
+    --sidebar-background: 31 41 55;
+    --sidebar-foreground: 209 213 219;
+    --sidebar-primary: 96 165 250;
     --sidebar-primary-foreground: 15 23 42;
-    --sidebar-accent: 30 41 59;
-    --sidebar-accent-foreground: 248 250 252;
-    --sidebar-border: 30 41 59;
-    --sidebar-ring: 59 130 246;
+    --sidebar-accent: 75 85 99;
+    --sidebar-accent-foreground: 249 250 251;
+    --sidebar-border: 75 85 99;
+    --sidebar-ring: 96 165 250;
   }
 }
 
@@ -93,7 +93,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
   
   .prose {
@@ -101,6 +102,46 @@
   }
   
   .gradient-bg {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+  }
+
+  .button-gradient {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  }
+
+  .button-gradient:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  }
+
+  .dark .button-gradient {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  }
+
+  .dark .button-gradient:hover {
+    background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+  }
+}
+
+@layer components {
+  .centered-container {
+    @apply flex flex-col items-center justify-center max-w-4xl mx-auto px-4;
+  }
+
+  .button-group {
+    @apply flex flex-wrap items-center justify-center gap-3;
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/20;
+  }
+
+  .input-focus {
+    @apply transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }

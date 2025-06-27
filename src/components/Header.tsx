@@ -40,41 +40,41 @@ const Header = () => {
   };
 
   return (
-    <header className="flex items-center justify-between w-full bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <header className="flex items-center justify-between w-full bg-card/50 backdrop-blur-sm border-b border-border/50 px-6 py-4 shadow-sm">
       <div className="flex items-center flex-1 max-w-md">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder="Globaal zoeken... (Ctrl+K)"
-            className="pl-10 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+            className="pl-10 bg-background/50 border-border/50 input-focus h-10"
           />
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <KeyboardShortcutsHelp />
         <ThemeToggle />
         
-        <Button variant="outline" size="icon" className="relative">
+        <Button variant="outline" size="icon" className="relative hover:shadow-glow">
           <Bell className="h-4 w-4" />
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500">
+          <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive animate-pulse">
             3
           </Badge>
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-clearbase-600 text-white">
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:shadow-glow">
+              <Avatar className="h-10 w-10 border-2 border-primary/20">
+                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                   {user?.email?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-sm border-border/50 shadow-xl">
             <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-2">
                 <p className="text-sm font-medium leading-none">
                   {user?.email}
                 </p>
@@ -88,14 +88,14 @@ const Header = () => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="hover:bg-gray-100 dark:hover:bg-gray-700">
+            <DropdownMenuItem className="hover:bg-accent/50 cursor-pointer">
               <User className="mr-2 h-4 w-4" />
               Profiel
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={handleSignOut}
-              className="hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400"
+              className="hover:bg-destructive/10 text-destructive cursor-pointer"
             >
               Uitloggen
             </DropdownMenuItem>
