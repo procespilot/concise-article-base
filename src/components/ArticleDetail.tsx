@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { ArrowLeft, Clock, Eye, Star, User, Tag } from "lucide-react";
+import { ArrowLeft, Clock, Eye, Star, User, Tag, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,9 +9,10 @@ import { useUser } from "@/contexts/UserContext";
 interface ArticleDetailProps {
   articleId: number;
   onBack: () => void;
+  onEdit?: () => void;
 }
 
-const ArticleDetail = ({ articleId, onBack }: ArticleDetailProps) => {
+const ArticleDetail = ({ articleId, onBack, onEdit }: ArticleDetailProps) => {
   const { articles } = useUser();
   const [rating, setRating] = useState(0);
   
@@ -35,19 +35,26 @@ const ArticleDetail = ({ articleId, onBack }: ArticleDetailProps) => {
 
   const handleRating = (score: number) => {
     setRating(score);
-    // In a real app, this would save to backend
     console.log(`Artikel ${articleId} beoordeeld met ${score} sterren`);
   };
 
   return (
     <div className="animate-fade-in max-w-4xl mx-auto">
-      <Button variant="outline" onClick={onBack} className="mb-6">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Terug naar overzicht
-      </Button>
+      <div className="flex items-center justify-between mb-6">
+        <Button variant="outline" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Terug naar overzicht
+        </Button>
+        
+        {onEdit && (
+          <Button onClick={onEdit} className="bg-clearbase-600 hover:bg-clearbase-700">
+            <Edit className="w-4 h-4 mr-2" />
+            Bewerken
+          </Button>
+        )}
+      </div>
 
       <article className="space-y-6">
-        {/* Header */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             {article.featured && (
@@ -76,7 +83,6 @@ const ArticleDetail = ({ articleId, onBack }: ArticleDetailProps) => {
             </div>
           </div>
 
-          {/* Keywords */}
           <div className="flex flex-wrap gap-2">
             <Tag className="w-4 h-4 text-gray-500" />
             {article.keywords.map((keyword) => (
@@ -89,13 +95,11 @@ const ArticleDetail = ({ articleId, onBack }: ArticleDetailProps) => {
 
         <Separator />
 
-        {/* Content */}
         <Card>
           <CardContent className="pt-6">
             <div className="prose max-w-none">
               <p className="text-lg text-gray-700 mb-6">{article.excerpt}</p>
               <div className="space-y-4 text-gray-800">
-                {/* Simulated article content */}
                 <p>{article.content}</p>
                 <p>
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
@@ -112,7 +116,6 @@ const ArticleDetail = ({ articleId, onBack }: ArticleDetailProps) => {
           </CardContent>
         </Card>
 
-        {/* Rating */}
         <Card>
           <CardContent className="pt-6">
             <h3 className="text-lg font-semibold mb-4">Was dit artikel nuttig?</h3>

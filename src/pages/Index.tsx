@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -6,6 +5,7 @@ import Header from "@/components/Header";
 import Dashboard from "@/components/Dashboard";
 import ArticlesList from "@/components/ArticlesList";
 import ArticleDetail from "@/components/ArticleDetail";
+import ArticleEditor from "@/components/ArticleEditor";
 import Analytics from "@/components/Analytics";
 import LoginPage from "@/components/LoginPage";
 import { UserProvider } from "@/contexts/UserContext";
@@ -15,6 +15,8 @@ const IndexContent = () => {
   const { isAuthenticated, isManager } = useAuth();
   const [activeSection, setActiveSection] = useState(isManager ? "dashboard" : "articles");
   const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
+  const [editingArticleId, setEditingArticleId] = useState<number | null>(null);
+  const [isCreatingArticle, setIsCreatingArticle] = useState(false);
 
   if (!isAuthenticated) {
     return <LoginPage />;
@@ -22,24 +24,51 @@ const IndexContent = () => {
 
   const handleArticleClick = (articleId: number) => {
     setSelectedArticleId(articleId);
+    setEditingArticleId(null);
+    setIsCreatingArticle(false);
   };
 
   const handleBackToList = () => {
     setSelectedArticleId(null);
+    setEditingArticleId(null);
+    setIsCreatingArticle(false);
   };
 
   const handleCreateArticle = () => {
-    // TODO: Implement article creation
-    console.log("Create new article");
+    setIsCreatingArticle(true);
+    setSelectedArticleId(null);
+    setEditingArticleId(null);
+  };
+
+  const handleEditArticle = (articleId: number) => {
+    setEditingArticleId(articleId);
+    setSelectedArticleId(null);
+    setIsCreatingArticle(false);
+  };
+
+  const handleSaveArticle = () => {
+    handleBackToList();
   };
 
   const renderContent = () => {
+    // If creating or editing an article
+    if (isCreatingArticle || editingArticleId) {
+      return (
+        <ArticleEditor
+          articleId={editingArticleId || undefined}
+          onBack={handleBackToList}
+          onSave={handleSaveArticle}
+        />
+      );
+    }
+
     // If viewing an article detail
     if (selectedArticleId) {
       return (
         <ArticleDetail 
           articleId={selectedArticleId} 
           onBack={handleBackToList}
+          onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined}
         />
       );
     }
