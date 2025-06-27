@@ -8,13 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 
 interface Article {
   id?: string;
@@ -33,23 +26,30 @@ interface Category {
 }
 
 interface ArticleFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (articleData: {
+  formData?: {
     title: string;
     excerpt: string;
     content: string;
     category_id: string;
-    status: string;
-    featured: boolean;
     keywords: string[];
-  }) => Promise<boolean>;
+    status: "Concept" | "Gepubliceerd";
+    featured: boolean;
+  };
+  onFormDataChange?: (data: any) => void;
   categories: Category[];
+  onSubmit?: (articleData: any) => Promise<boolean>;
   initialData?: Article;
   isEditing?: boolean;
 }
 
-const ArticleForm = ({ isOpen, onClose, onSubmit, categories, initialData, isEditing = false }: ArticleFormProps) => {
+const ArticleForm = ({ 
+  formData, 
+  onFormDataChange, 
+  categories, 
+  onSubmit, 
+  initialData, 
+  isEditing = false 
+}: ArticleFormProps) => {
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
@@ -60,8 +60,21 @@ const ArticleForm = ({ isOpen, onClose, onSubmit, categories, initialData, isEdi
   const [keywordInput, setKeywordInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Use formData if provided (for ArticleEditor), otherwise use individual state
+  const isControlled = formData && onFormDataChange;
+
   useEffect(() => {
-    if (initialData) {
+    if (isControlled) {
+      // Controlled by parent component (ArticleEditor)
+      setTitle(formData.title);
+      setExcerpt(formData.excerpt);
+      setContent(formData.content);
+      setCategoryId(formData.category_id);
+      setStatus(formData.status);
+      setFeatured(formData.featured);
+      setKeywords(formData.keywords);
+    } else if (initialData) {
+      // Populate from initialData (for dialog mode)
       console.log('Populating form with initial data:', initialData);
       setTitle(initialData.title || '');
       setExcerpt(initialData.excerpt || '');
@@ -71,7 +84,7 @@ const ArticleForm = ({ isOpen, onClose, onSubmit, categories, initialData, isEdi
       setFeatured(initialData.featured || false);
       setKeywords(initialData.keywords || []);
     } else {
-      // Reset form when not editing
+      // Reset form
       setTitle('');
       setExcerpt('');
       setContent('');
@@ -80,18 +93,61 @@ const ArticleForm = ({ isOpen, onClose, onSubmit, categories, initialData, isEdi
       setFeatured(false);
       setKeywords([]);
     }
-  }, [initialData, isOpen]);
+  }, [formData, initialData, isControlled]);
+
+  const updateFormData = (updates: any) => {
+    if (isControlled && onFormDataChange) {
+      onFormDataChange({ ...formData, ...updates });
+    }
+  };
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    updateFormData({ title: value });
+  };
+
+  const handleExcerptChange = (value: string) => {
+    setExcerpt(value);
+    updateFormData({ excerpt: value });
+  };
+
+  const handleContentChange = (value: string) => {
+    setContent(value);
+    updateFormData({ content: value });
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategoryId(value);
+    updateFormData({ category_id: value });
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value);
+    updateFormData({ status: value });
+  };
+
+  const handleFeaturedChange = (checked: boolean) => {
+    setFeatured(checked);
+    updateFormData({ featured: checked });
+  };
+
+  const handleKeywordsChange = (newKeywords: string[]) => {
+    setKeywords(newKeywords);
+    updateFormData({ keywords: newKeywords });
+  };
 
   const handleAddKeyword = () => {
     const trimmedKeyword = keywordInput.trim();
     if (trimmedKeyword && !keywords.includes(trimmedKeyword)) {
-      setKeywords([...keywords, trimmedKeyword]);
+      const newKeywords = [...keywords, trimmedKeyword];
+      handleKeywordsChange(newKeywords);
       setKeywordInput('');
     }
   };
 
   const handleRemoveKeyword = (keywordToRemove: string) => {
-    setKeywords(keywords.filter(keyword => keyword !== keywordToRemove));
+    const newKeywords = keywords.filter(keyword => keyword !== keywordToRemove);
+    handleKeywordsChange(newKeywords);
   };
 
   const handleKeywordInputKeyPress = (e: React.KeyboardEvent) => {
@@ -106,6 +162,11 @@ const ArticleForm = ({ isOpen, onClose, onSubmit, categories, initialData, isEdi
     
     if (!title.trim() || !content.trim() || !categoryId) {
       console.log('Form validation failed - missing required fields');
+      return;
+    }
+
+    if (!onSubmit) {
+      console.log('No onSubmit handler provided');
       return;
     }
 
@@ -134,16 +195,17 @@ const ArticleForm = ({ isOpen, onClose, onSubmit, categories, initialData, isEdi
 
       if (success) {
         console.log('Article submitted successfully');
-        onClose();
-        // Reset form
-        setTitle('');
-        setExcerpt('');
-        setContent('');
-        setCategoryId('');
-        setStatus('Concept');
-        setFeatured(false);
-        setKeywords([]);
-        setKeywordInput('');
+        // Reset form if not controlled
+        if (!isControlled) {
+          setTitle('');
+          setExcerpt('');
+          setContent('');
+          setCategoryId('');
+          setStatus('Concept');
+          setFeatured(false);
+          setKeywords([]);
+          setKeywordInput('');
+        }
       }
     } catch (error) {
       console.error('Error submitting article:', error);
@@ -153,130 +215,120 @@ const ArticleForm = ({ isOpen, onClose, onSubmit, categories, initialData, isEdi
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Artikel bewerken' : 'Nieuw artikel'}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="title">Titel *</Label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="title">Titel *</Label>
+        <Input
+          id="title"
+          value={title}
+          onChange={(e) => handleTitleChange(e.target.value)}
+          placeholder="Artikel titel"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="excerpt">Samenvatting</Label>
+        <Textarea
+          id="excerpt"
+          value={excerpt}
+          onChange={(e) => handleExcerptChange(e.target.value)}
+          placeholder="Korte samenvatting van het artikel"
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="content">Inhoud *</Label>
+        <Textarea
+          id="content"
+          value={content}
+          onChange={(e) => handleContentChange(e.target.value)}
+          placeholder="Artikel inhoud"
+          rows={8}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="category">Categorie *</Label>
+        <Select value={categoryId} onValueChange={handleCategoryChange} required>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecteer een categorie" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="status">Status</Label>
+        <Select value={status} onValueChange={handleStatusChange}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Concept">Concept</SelectItem>
+            <SelectItem value="Review">Review</SelectItem>
+            <SelectItem value="Gepubliceerd">Gepubliceerd</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="featured"
+          checked={featured}
+          onCheckedChange={handleFeaturedChange}
+        />
+        <Label htmlFor="featured">Uitgelicht artikel</Label>
+      </div>
+
+      <div>
+        <Label htmlFor="keywords">Trefwoorden</Label>
+        <div className="space-y-2">
+          <div className="flex gap-2">
             <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Artikel titel"
-              required
+              id="keywords"
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              onKeyPress={handleKeywordInputKeyPress}
+              placeholder="Voeg trefwoord toe en druk Enter"
             />
-          </div>
-
-          <div>
-            <Label htmlFor="excerpt">Samenvatting</Label>
-            <Textarea
-              id="excerpt"
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Korte samenvatting van het artikel"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="content">Inhoud *</Label>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Artikel inhoud"
-              rows={8}
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="category">Categorie *</Label>
-            <Select value={categoryId} onValueChange={setCategoryId} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecteer een categorie" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Concept">Concept</SelectItem>
-                <SelectItem value="Review">Review</SelectItem>
-                <SelectItem value="Gepubliceerd">Gepubliceerd</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="featured"
-              checked={featured}
-              onCheckedChange={(checked) => setFeatured(checked as boolean)}
-            />
-            <Label htmlFor="featured">Uitgelicht artikel</Label>
-          </div>
-
-          <div>
-            <Label htmlFor="keywords">Trefwoorden</Label>
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <Input
-                  id="keywords"
-                  value={keywordInput}
-                  onChange={(e) => setKeywordInput(e.target.value)}
-                  onKeyPress={handleKeywordInputKeyPress}
-                  placeholder="Voeg trefwoord toe en druk Enter"
-                />
-                <Button type="button" onClick={handleAddKeyword} variant="outline">
-                  Toevoegen
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {keywords.map((keyword) => (
-                  <Badge key={keyword} variant="secondary">
-                    {keyword}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveKeyword(keyword)}
-                      className="ml-1 hover:text-red-500"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuleren
+            <Button type="button" onClick={handleAddKeyword} variant="outline">
+              Toevoegen
             </Button>
-            <Button type="submit" disabled={isSubmitting || !title.trim() || !content.trim() || !categoryId}>
-              {isSubmitting ? (isEditing ? 'Bijwerken...' : 'Aanmaken...') : (isEditing ? 'Artikel bijwerken' : 'Artikel aanmaken')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {keywords.map((keyword) => (
+              <Badge key={keyword} variant="secondary">
+                {keyword}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveKeyword(keyword)}
+                  className="ml-1 hover:text-red-500"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {onSubmit && (
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitting || !title.trim() || !content.trim() || !categoryId}>
+            {isSubmitting ? (isEditing ? 'Bijwerken...' : 'Aanmaken...') : (isEditing ? 'Artikel bijwerken' : 'Artikel aanmaken')}
+          </Button>
+        </div>
+      )}
+    </form>
   );
 };
 
