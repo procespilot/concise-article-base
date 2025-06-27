@@ -19,7 +19,7 @@ interface ArticleFormData {
   title: string;
   excerpt: string;
   content: string;
-  category: string;
+  category_id: string;
   keywords: string[];
   status: "Concept" | "Gepubliceerd";
   featured: boolean;
@@ -28,7 +28,7 @@ interface ArticleFormData {
 interface ArticleFormProps {
   formData: ArticleFormData;
   onFormDataChange: (data: ArticleFormData) => void;
-  categories: string[];
+  categories: any[];
 }
 
 const ArticleForm = ({ formData, onFormDataChange, categories }: ArticleFormProps) => {
@@ -114,16 +114,16 @@ const ArticleForm = ({ formData, onFormDataChange, categories }: ArticleFormProp
           <div>
             <Label htmlFor="category">Categorie</Label>
             <Select
-              value={formData.category}
-              onValueChange={(value) => updateFormData("category", value)}
+              value={formData.category_id}
+              onValueChange={(value) => updateFormData("category_id", value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecteer categorie" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
                   </SelectItem>
                 ))}
               </SelectContent>
