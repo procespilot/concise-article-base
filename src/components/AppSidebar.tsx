@@ -13,7 +13,10 @@ interface AppSidebarProps {
 const AppSidebar = ({ activeSection, onSectionChange, onCreateArticle }: AppSidebarProps) => {
   const { isManager } = useAuth();
 
+  console.log('AppSidebar - isManager:', isManager); // Debug log
+
   const handleSectionClick = (section: string) => {
+    console.log('Section clicked:', section); // Debug log
     onSectionChange(section);
   };
 
@@ -29,6 +32,8 @@ const AppSidebar = ({ activeSection, onSectionChange, onCreateArticle }: AppSide
       { id: 'settings', label: 'Instellingen', icon: Settings }
     ] : [])
   ];
+
+  console.log('Menu items:', menuItems); // Debug log
 
   return (
     <Sidebar>
