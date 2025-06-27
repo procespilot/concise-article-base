@@ -10,6 +10,7 @@ import Categories from "@/components/Categories";
 import AuthPage from "@/components/AuthPage";
 import UserForm from "@/components/UserForm";
 import CategoryForm from "@/components/CategoryForm";
+import UserRoleDebug from "@/components/UserRoleDebug";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useCommonShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -184,6 +185,11 @@ const Index = () => {
   };
 
   const renderContent = () => {
+    // Add debug section for troubleshooting
+    if (activeSection === "debug") {
+      return <UserRoleDebug />;
+    }
+
     if (isCreatingArticle || editingArticleId) {
       return (
         <Suspense fallback={<ComponentLoader />}>
@@ -321,6 +327,13 @@ const Index = () => {
               <div className="flex-1">
                 <Header />
               </div>
+              {/* Temporary debug button*/}
+              <button 
+                onClick={() => handleSectionChange("debug")} 
+                className="text-xs bg-red-100 px-2 py-1 rounded"
+              >
+                DEBUG
+              </button>
             </header>
             <main className="flex-1 p-8 overflow-y-auto bg-white">
               <Breadcrumbs items={getBreadcrumbs()} />
