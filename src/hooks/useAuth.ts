@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -60,25 +59,30 @@ export const useAuth = () => {
           // Defer data fetching to prevent deadlocks
           setTimeout(async () => {
             try {
-              const [profileResult, roleResult] = await Promise.all([
-                supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', session.user.id)
-                  .maybeSingle(),
-                supabase
-                  .from('user_roles')
-                  .select('role')
-                  .eq('user_id', session.user.id)
-                  .maybeSingle()
-              ]);
+              // Get profile data using the new RLS policies
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .maybeSingle();
 
-              if (profileResult.data) {
-                setProfile(profileResult.data);
+              if (profileData) {
+                setProfile(profileData);
               }
               
-              if (roleResult.data) {
-                setUserRole(roleResult.data.role);
+              // Get user role directly from user_roles table
+              const { data: roleData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+              if (roleData) {
+                console.log('User role found:', roleData.role);
+                setUserRole(roleData.role);
+              } else {
+                console.log('No role found, defaulting to user');
+                setUserRole('user');
               }
             } catch (error) {
               console.error('Error fetching user data:', error);

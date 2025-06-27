@@ -8,11 +8,12 @@ const UserRoleDebug = () => {
   const { user, userRole, isManager, isAdmin } = useAuth();
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
+  const [currentUserRoles, setCurrentUserRoles] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get current user's profile
+        // Get current user's profile using new RLS policies
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
@@ -20,9 +21,16 @@ const UserRoleDebug = () => {
             .eq('id', user.id)
             .single();
           setCurrentUserProfile(profile);
+
+          // Get current user's roles directly
+          const { data: roles } = await supabase
+            .from('user_roles')
+            .select('*')
+            .eq('user_id', user.id);
+          setCurrentUserRoles(roles || []);
         }
 
-        // Get all users with roles
+        // Get all users with roles using RPC function
         const { data: users, error } = await supabase.rpc('get_users_with_roles');
         if (error) {
           console.error('Error fetching users:', error);
@@ -51,6 +59,7 @@ const UserRoleDebug = () => {
             <p><strong>Is Manager:</strong> {isManager ? 'Ja' : 'Nee'}</p>
             <p><strong>Is Admin:</strong> {isAdmin ? 'Ja' : 'Nee'}</p>
             <p><strong>Profile Data:</strong> {JSON.stringify(currentUserProfile, null, 2)}</p>
+            <p><strong>Direct Role Query:</strong> {JSON.stringify(currentUserRoles, null, 2)}</p>
           </div>
         </CardContent>
       </Card>
