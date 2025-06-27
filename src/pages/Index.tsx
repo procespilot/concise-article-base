@@ -140,6 +140,7 @@ const Index = () => {
             categories={supabaseData.categories}
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
+            isManager={isManager}
           />
         );
       case "articles":
@@ -149,6 +150,7 @@ const Index = () => {
             categories={supabaseData.categories}
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
+            isManager={isManager}
           />
         );
       case "analytics":
@@ -163,6 +165,7 @@ const Index = () => {
             categories={supabaseData.categories}
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
+            isManager={isManager}
           />
         );
       case "categories":
@@ -195,6 +198,7 @@ const Index = () => {
             categories={supabaseData.categories}
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
+            isManager={isManager}
           />
         );
     }
