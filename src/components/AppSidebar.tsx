@@ -131,11 +131,11 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                       activeSection === item.id 
                         ? 'bg-gray-100 text-black border-r-2 border-blue-500' 
                         : ''
-                    } ${state === "collapsed" ? "justify-center" : ""}`}
+                    } ${state === "collapsed" ? "justify-center px-2" : "px-3"}`}
                   >
                     <item.icon className="w-4 h-4" />
                     {state === "expanded" && (
-                      <span className="text-sm font-normal">{item.label}</span>
+                      <span className="text-sm font-normal ml-3">{item.label}</span>
                     )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
