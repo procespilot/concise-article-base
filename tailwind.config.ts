@@ -2,7 +2,6 @@
 import type { Config } from "tailwindcss";
 
 export default {
-	darkMode: ["class"],
 	content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
@@ -63,7 +62,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Space Gray color palette
+				// Space Gray color palette - only grays
 				spacegray: {
 					50: '#f9fafb',
 					100: '#f3f4f6', 
@@ -74,16 +73,7 @@ export default {
 					600: '#4b5563',
 					700: '#374151',
 					800: '#1f2937',
-					900: '#111827',
-					950: '#030712'
-				},
-				// Apple Space Gray colors
-				apple: {
-					'space-gray-light': '#8e8e93',
-					'space-gray': '#636366',
-					'space-gray-dark': '#48484a',
-					'space-gray-darker': '#3a3a3c',
-					'space-gray-darkest': '#2c2c2e'
+					900: '#111827'
 				}
 			},
 			borderRadius: {
@@ -92,22 +82,6 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
-				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
-				},
-				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				},
 				'fade-in': {
 					from: {
 						opacity: '0',
@@ -130,14 +104,12 @@ export default {
 				}
 			},
 			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.5s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out'
 			},
 			boxShadow: {
-				'glow': '0 0 20px rgba(107, 114, 128, 0.3)',
-				'glow-lg': '0 0 40px rgba(107, 114, 128, 0.4)',
+				'glow': '0 0 20px rgba(107, 114, 128, 0.2)',
+				'glow-lg': '0 0 30px rgba(107, 114, 128, 0.3)',
 			}
 		}
 	},

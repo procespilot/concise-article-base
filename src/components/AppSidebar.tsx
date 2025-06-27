@@ -64,24 +64,24 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
   const menuItems = isManager ? managerMenuItems : userMenuItems;
 
   const handleCreateArticle = () => {
-    console.log("Create article clicked"); // Debug log
+    console.log("Create article clicked");
     if (onCreateArticle) {
       onCreateArticle();
     }
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-      <SidebarHeader className="border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+    <Sidebar collapsible="icon" className="border-r bg-white border-gray-200">
+      <SidebarHeader className="border-b bg-white border-gray-200">
         <div className="flex items-center gap-2 px-2 py-2">
-          <div className="w-8 h-8 bg-clearbase-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-spacegray-500 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">CB</span>
           </div>
           {state === "expanded" && (
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">ClearBase</h1>
+              <h1 className="text-lg font-bold text-black">ClearBase</h1>
               {isManager && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge className="text-xs bg-spacegray-100 text-spacegray-700 border-spacegray-300">
                   Manager
                 </Badge>
               )}
@@ -90,13 +90,13 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="bg-white dark:bg-gray-800">
+      <SidebarContent className="bg-white">
         {isManager && (
           <SidebarGroup>
             <SidebarGroupContent>
               <div className="px-2 py-2">
                 <Button 
-                  className="w-full bg-clearbase-600 hover:bg-clearbase-700 text-white" 
+                  className="w-full bg-spacegray-600 hover:bg-spacegray-700 text-white" 
                   size="sm"
                   onClick={handleCreateArticle}
                 >
@@ -112,10 +112,10 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
           <SidebarGroupContent>
             <div className="px-2 py-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-spacegray-400 w-4 h-4" />
                 <Input 
                   placeholder={state === "expanded" ? "Zoek artikelen..." : ""} 
-                  className="pl-10 text-sm bg-gray-50 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 border-gray-200 dark:border-gray-600"
+                  className="pl-10 text-sm bg-gray-50 focus:bg-white border-gray-200 focus:border-spacegray-500 focus:ring-spacegray-500"
                 />
               </div>
             </div>
@@ -130,9 +130,9 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                   <SidebarMenuButton
                     onClick={() => onSectionChange(item.id)}
                     isActive={activeSection === item.id}
-                    className={`w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 ${
+                    className={`w-full bg-white text-spacegray-700 hover:bg-gray-100 hover:text-black ${
                       activeSection === item.id 
-                        ? 'bg-clearbase-100 dark:bg-clearbase-900 text-clearbase-700 dark:text-clearbase-300 border-r-2 border-clearbase-600' 
+                        ? 'bg-spacegray-100 text-spacegray-700 border-r-2 border-spacegray-600' 
                         : ''
                     }`}
                   >
@@ -149,30 +149,30 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
           <SidebarGroup>
             <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
               <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="flex items-center justify-between w-full group/collapsible bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <CollapsibleTrigger className="flex items-center justify-between w-full group/collapsible bg-white text-spacegray-700 hover:bg-gray-50">
                   <span className="font-medium">Snelle statistieken</span>
                   <ChevronDown className="w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
               <CollapsibleContent>
                 <SidebarGroupContent>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mx-2 border border-gray-200 dark:border-gray-600">
-                    <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="bg-gray-50 rounded-lg p-4 mx-2 border border-gray-200">
+                    <div className="space-y-2 text-sm text-spacegray-600">
                       <div className="flex justify-between">
                         <span>Totaal artikelen</span>
-                        <span className="font-medium text-gray-900 dark:text-gray-100">127</span>
+                        <span className="font-medium text-black">127</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Gepubliceerd</span>
-                        <span className="font-medium text-green-600 dark:text-green-400">89</span>
+                        <span className="font-medium text-spacegray-700">89</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Concepten</span>
-                        <span className="font-medium text-yellow-600 dark:text-yellow-400">28</span>
+                        <span className="font-medium text-spacegray-600">28</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Views deze maand</span>
-                        <span className="font-medium text-gray-900 dark:text-gray-100">2,341</span>
+                        <span className="font-medium text-black">2,341</span>
                       </div>
                     </div>
                   </div>
