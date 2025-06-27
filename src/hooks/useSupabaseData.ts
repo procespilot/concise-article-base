@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +49,7 @@ export const useSupabaseData = () => {
 
   const fetchArticles = async () => {
     try {
+      console.log('Fetching articles...');
       const { data, error } = await supabase
         .from('articles')
         .select(`
@@ -57,7 +59,12 @@ export const useSupabaseData = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching articles:', error);
+        throw error;
+      }
+      
+      console.log('Articles fetched successfully:', data?.length || 0, 'articles');
       setArticles(data || []);
     } catch (error) {
       console.error('Error fetching articles:', error);
@@ -71,12 +78,18 @@ export const useSupabaseData = () => {
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+      }
+      
+      console.log('Categories fetched successfully:', data?.length || 0, 'categories');
       setCategories(data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -90,13 +103,15 @@ export const useSupabaseData = () => {
 
   const fetchUsers = async () => {
     try {
-      // Use the enhanced database function to get users with roles and activation status
+      console.log('Fetching users...');
       const { data: usersData, error: usersError } = await supabase
         .rpc('get_users_with_roles');
 
-      if (usersError) throw usersError;
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        throw usersError;
+      }
 
-      // Transform the data to match the expected format with activation fields
       const transformedUsers = (usersData || []).map((user: any) => ({
         id: user.id,
         first_name: user.first_name,
@@ -109,6 +124,7 @@ export const useSupabaseData = () => {
         user_roles: user.roles || []
       }));
 
+      console.log('Users fetched successfully:', transformedUsers?.length || 0, 'users');
       setUsers(transformedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -130,18 +146,31 @@ export const useSupabaseData = () => {
     keywords: string[];
   }) => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error('Niet ingelogd');
+      console.log('Creating article:', articleData);
+      
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        console.error('Authentication error:', userError);
+        throw new Error('Niet ingelogd');
+      }
 
-      const { error } = await supabase
+      console.log('Current user:', userData.user.id);
+
+      const { data, error } = await supabase
         .from('articles')
         .insert([{
           ...articleData,
           author_id: userData.user.id
-        }]);
+        }])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating article:', error);
+        throw error;
+      }
       
+      console.log('Article created successfully:', data);
       await fetchArticles();
       toast({
         title: "Artikel aangemaakt",
@@ -152,7 +181,7 @@ export const useSupabaseData = () => {
       console.error('Error creating article:', error);
       toast({
         title: "Fout bij aanmaken artikel",
-        description: "Probeer het opnieuw",
+        description: error instanceof Error ? error.message : "Probeer het opnieuw",
         variant: "destructive"
       });
       return false;
@@ -169,13 +198,19 @@ export const useSupabaseData = () => {
     keywords: string[];
   }) => {
     try {
+      console.log('Updating article:', id, articleData);
+      
       const { error } = await supabase
         .from('articles')
         .update(articleData)
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating article:', error);
+        throw error;
+      }
       
+      console.log('Article updated successfully');
       await fetchArticles();
       toast({
         title: "Artikel bijgewerkt",
@@ -186,7 +221,7 @@ export const useSupabaseData = () => {
       console.error('Error updating article:', error);
       toast({
         title: "Fout bij bijwerken artikel",
-        description: "Probeer het opnieuw",
+        description: error instanceof Error ? error.message : "Probeer het opnieuw",
         variant: "destructive"
       });
       return false;
@@ -195,13 +230,19 @@ export const useSupabaseData = () => {
 
   const deleteArticle = async (id: string) => {
     try {
+      console.log('Deleting article:', id);
+      
       const { error } = await supabase
         .from('articles')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting article:', error);
+        throw error;
+      }
       
+      console.log('Article deleted successfully');
       await fetchArticles();
       toast({
         title: "Artikel verwijderd",
@@ -212,7 +253,7 @@ export const useSupabaseData = () => {
       console.error('Error deleting article:', error);
       toast({
         title: "Fout bij verwijderen artikel",
-        description: "Probeer het opnieuw",
+        description: error instanceof Error ? error.message : "Probeer het opnieuw",
         variant: "destructive"
       });
       return false;
@@ -221,13 +262,18 @@ export const useSupabaseData = () => {
 
   const incrementViews = async (id: string) => {
     try {
-      // Simple update for views
-      const article = articles.find(a => a.id === id);
-      if (article) {
-        await supabase
-          .from('articles')
-          .update({ views: article.views + 1 })
-          .eq('id', id);
+      console.log('Incrementing views for article:', id);
+      
+      const { error } = await supabase
+        .from('articles')
+        .update({ views: 1 })
+        .eq('id', id)
+        .select();
+
+      if (error) {
+        console.error('Error incrementing views:', error);
+      } else {
+        console.log('Views incremented successfully');
       }
     } catch (error) {
       console.error('Error incrementing views:', error);
@@ -236,6 +282,7 @@ export const useSupabaseData = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      console.log('Loading all data...');
       setLoading(true);
       await Promise.all([
         fetchArticles(),
@@ -243,6 +290,7 @@ export const useSupabaseData = () => {
         fetchUsers()
       ]);
       setLoading(false);
+      console.log('All data loaded');
     };
 
     loadData();

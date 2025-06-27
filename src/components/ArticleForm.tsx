@@ -1,73 +1,174 @@
 
-import { useState } from "react";
-import { X, Plus } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { X } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
-interface ArticleFormData {
+interface Article {
+  id?: string;
   title: string;
   excerpt: string;
   content: string;
   category_id: string;
-  keywords: string[];
-  status: "Concept" | "Gepubliceerd";
+  status: string;
   featured: boolean;
+  keywords: string[];
+}
+
+interface Category {
+  id: string;
+  name: string;
 }
 
 interface ArticleFormProps {
-  formData: ArticleFormData;
-  onFormDataChange: (data: ArticleFormData) => void;
-  categories: any[];
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (articleData: {
+    title: string;
+    excerpt: string;
+    content: string;
+    category_id: string;
+    status: string;
+    featured: boolean;
+    keywords: string[];
+  }) => Promise<boolean>;
+  categories: Category[];
+  initialData?: Article;
+  isEditing?: boolean;
 }
 
-const ArticleForm = ({ formData, onFormDataChange, categories }: ArticleFormProps) => {
-  const [newKeyword, setNewKeyword] = useState("");
+const ArticleForm = ({ isOpen, onClose, onSubmit, categories, initialData, isEditing = false }: ArticleFormProps) => {
+  const [title, setTitle] = useState('');
+  const [excerpt, setExcerpt] = useState('');
+  const [content, setContent] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [status, setStatus] = useState('Concept');
+  const [featured, setFeatured] = useState(false);
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const updateFormData = (field: keyof ArticleFormData, value: any) => {
-    onFormDataChange({ ...formData, [field]: value });
-  };
+  useEffect(() => {
+    if (initialData) {
+      console.log('Populating form with initial data:', initialData);
+      setTitle(initialData.title || '');
+      setExcerpt(initialData.excerpt || '');
+      setContent(initialData.content || '');
+      setCategoryId(initialData.category_id || '');
+      setStatus(initialData.status || 'Concept');
+      setFeatured(initialData.featured || false);
+      setKeywords(initialData.keywords || []);
+    } else {
+      // Reset form when not editing
+      setTitle('');
+      setExcerpt('');
+      setContent('');
+      setCategoryId('');
+      setStatus('Concept');
+      setFeatured(false);
+      setKeywords([]);
+    }
+  }, [initialData, isOpen]);
 
-  const addKeyword = () => {
-    if (newKeyword.trim() && !formData.keywords.includes(newKeyword.trim())) {
-      updateFormData("keywords", [...formData.keywords, newKeyword.trim()]);
-      setNewKeyword("");
+  const handleAddKeyword = () => {
+    const trimmedKeyword = keywordInput.trim();
+    if (trimmedKeyword && !keywords.includes(trimmedKeyword)) {
+      setKeywords([...keywords, trimmedKeyword]);
+      setKeywordInput('');
     }
   };
 
-  const removeKeyword = (keyword: string) => {
-    updateFormData("keywords", formData.keywords.filter(k => k !== keyword));
+  const handleRemoveKeyword = (keywordToRemove: string) => {
+    setKeywords(keywords.filter(keyword => keyword !== keywordToRemove));
   };
 
-  const handleKeywordKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+  const handleKeywordInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      addKeyword();
+      handleAddKeyword();
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!title.trim() || !content.trim() || !categoryId) {
+      console.log('Form validation failed - missing required fields');
+      return;
+    }
+
+    console.log('Submitting article form:', {
+      title: title.trim(),
+      excerpt: excerpt.trim(),
+      content: content.trim(),
+      category_id: categoryId,
+      status,
+      featured,
+      keywords
+    });
+
+    setIsSubmitting(true);
+
+    try {
+      const success = await onSubmit({
+        title: title.trim(),
+        excerpt: excerpt.trim(),
+        content: content.trim(),
+        category_id: categoryId,
+        status,
+        featured,
+        keywords
+      });
+
+      if (success) {
+        console.log('Article submitted successfully');
+        onClose();
+        // Reset form
+        setTitle('');
+        setExcerpt('');
+        setContent('');
+        setCategoryId('');
+        setStatus('Concept');
+        setFeatured(false);
+        setKeywords([]);
+        setKeywordInput('');
+      }
+    } catch (error) {
+      console.error('Error submitting article:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {isEditing ? 'Artikel bewerken' : 'Nieuw artikel'}
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="title">Titel *</Label>
             <Input
               id="title"
-              value={formData.title}
-              onChange={(e) => updateFormData("title", e.target.value)}
-              placeholder="Voer de titel van het artikel in"
-              className="text-lg font-medium"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Artikel titel"
+              required
             />
           </div>
 
@@ -75,10 +176,10 @@ const ArticleForm = ({ formData, onFormDataChange, categories }: ArticleFormProp
             <Label htmlFor="excerpt">Samenvatting</Label>
             <Textarea
               id="excerpt"
-              value={formData.excerpt}
-              onChange={(e) => updateFormData("excerpt", e.target.value)}
-              placeholder="Korte beschrijving van het artikel"
-              className="min-h-[80px]"
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              placeholder="Korte samenvatting van het artikel"
+              rows={3}
             />
           </div>
 
@@ -86,39 +187,19 @@ const ArticleForm = ({ formData, onFormDataChange, categories }: ArticleFormProp
             <Label htmlFor="content">Inhoud *</Label>
             <Textarea
               id="content"
-              value={formData.content}
-              onChange={(e) => updateFormData("content", e.target.value)}
-              placeholder="Schrijf de volledige inhoud van het artikel..."
-              className="min-h-[400px] resize-y"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Artikel inhoud"
+              rows={8}
+              required
             />
           </div>
-        </div>
-
-        <div className="space-y-6">
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value: "Concept" | "Gepubliceerd") => updateFormData("status", value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Concept">Concept</SelectItem>
-                <SelectItem value="Gepubliceerd">Gepubliceerd</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           <div>
-            <Label htmlFor="category">Categorie</Label>
-            <Select
-              value={formData.category_id}
-              onValueChange={(value) => updateFormData("category_id", value)}
-            >
+            <Label htmlFor="category">Categorie *</Label>
+            <Select value={categoryId} onValueChange={setCategoryId} required>
               <SelectTrigger>
-                <SelectValue placeholder="Selecteer categorie" />
+                <SelectValue placeholder="Selecteer een categorie" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
@@ -130,53 +211,72 @@ const ArticleForm = ({ formData, onFormDataChange, categories }: ArticleFormProp
             </Select>
           </div>
 
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Concept">Concept</SelectItem>
+                <SelectItem value="Review">Review</SelectItem>
+                <SelectItem value="Gepubliceerd">Gepubliceerd</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex items-center space-x-2">
-            <Switch
+            <Checkbox
               id="featured"
-              checked={formData.featured}
-              onCheckedChange={(checked) => updateFormData("featured", checked)}
+              checked={featured}
+              onCheckedChange={(checked) => setFeatured(checked as boolean)}
             />
             <Label htmlFor="featured">Uitgelicht artikel</Label>
           </div>
 
           <div>
-            <Label>Keywords</Label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={newKeyword}
-                onChange={(e) => setNewKeyword(e.target.value)}
-                onKeyPress={handleKeywordKeyPress}
-                placeholder="Voeg keyword toe"
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addKeyword}
-                disabled={!newKeyword.trim()}
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {formData.keywords.map((keyword) => (
-                <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
-                  {keyword}
-                  <button
-                    type="button"
-                    onClick={() => removeKeyword(keyword)}
-                    className="hover:text-red-500"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
+            <Label htmlFor="keywords">Trefwoorden</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="keywords"
+                  value={keywordInput}
+                  onChange={(e) => setKeywordInput(e.target.value)}
+                  onKeyPress={handleKeywordInputKeyPress}
+                  placeholder="Voeg trefwoord toe en druk Enter"
+                />
+                <Button type="button" onClick={handleAddKeyword} variant="outline">
+                  Toevoegen
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {keywords.map((keyword) => (
+                  <Badge key={keyword} variant="secondary">
+                    {keyword}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveKeyword(keyword)}
+                      className="ml-1 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Annuleren
+            </Button>
+            <Button type="submit" disabled={isSubmitting || !title.trim() || !content.trim() || !categoryId}>
+              {isSubmitting ? (isEditing ? 'Bijwerken...' : 'Aanmaken...') : (isEditing ? 'Artikel bijwerken' : 'Artikel aanmaken')}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
