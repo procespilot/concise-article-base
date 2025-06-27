@@ -13,24 +13,24 @@ const ArticlesList = () => {
   const [selectedCategory, setSelectedCategory] = useState("Alle categorieën");
 
   // Enhanced search function that includes keywords
-  const searchArticles = (articles: typeof articles, term: string) => {
-    if (!term) return articles;
+  const searchArticles = (articleList: any[], term: string) => {
+    if (!term) return articleList;
     
     const searchLower = term.toLowerCase();
-    return articles.filter(article => 
+    return articleList.filter(article => 
       article.title.toLowerCase().includes(searchLower) ||
       article.excerpt.toLowerCase().includes(searchLower) ||
       article.content.toLowerCase().includes(searchLower) ||
-      article.keywords.some(keyword => keyword.toLowerCase().includes(searchLower)) ||
+      article.keywords.some((keyword: string) => keyword.toLowerCase().includes(searchLower)) ||
       article.category.toLowerCase().includes(searchLower) ||
       article.author.toLowerCase().includes(searchLower)
     );
   };
 
   // Filter by category
-  const filterByCategory = (articles: typeof articles, category: string) => {
-    if (category === "Alle categorieën") return articles;
-    return articles.filter(article => article.category === category);
+  const filterByCategory = (articleList: any[], category: string) => {
+    if (category === "Alle categorieën") return articleList;
+    return articleList.filter(article => article.category === category);
   };
 
   // Apply both search and category filters
@@ -142,7 +142,7 @@ const ArticlesList = () => {
                   </h3>
                   {/* Keywords display */}
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {article.keywords.slice(0, 3).map((keyword) => (
+                    {article.keywords.slice(0, 3).map((keyword: string) => (
                       <Badge key={keyword} variant="outline" className="text-xs bg-gray-50">
                         {keyword}
                       </Badge>
