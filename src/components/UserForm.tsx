@@ -54,9 +54,11 @@ const UserForm = ({ isOpen, onClose, onUserAdded }: UserFormProps) => {
 
       if (error) throw error;
 
-      // Check if the function returned an error
-      if (data && data.error) {
-        throw new Error(data.error);
+      // Type-safe check for the function response
+      const result = data as { error?: string; success?: boolean; user_id?: string };
+      
+      if (result && result.error) {
+        throw new Error(result.error);
       }
 
       toast({
