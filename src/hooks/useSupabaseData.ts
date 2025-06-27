@@ -140,7 +140,7 @@ export const useSupabaseData = () => {
     title: string;
     excerpt: string;
     content: string;
-    category_id: string;
+    category_id: string | null;
     status: string;
     featured: boolean;
     keywords: string[];
@@ -156,10 +156,16 @@ export const useSupabaseData = () => {
 
       console.log('Current user:', userData.user.id);
 
+      // Clean the data to ensure proper handling of category_id
+      const cleanedData = {
+        ...articleData,
+        category_id: articleData.category_id && articleData.category_id.trim() !== '' ? articleData.category_id : null
+      };
+
       const { data, error } = await supabase
         .from('articles')
         .insert([{
-          ...articleData,
+          ...cleanedData,
           author_id: userData.user.id
         }])
         .select()
@@ -192,7 +198,7 @@ export const useSupabaseData = () => {
     title: string;
     excerpt: string;
     content: string;
-    category_id: string;
+    category_id: string | null;
     status: string;
     featured: boolean;
     keywords: string[];
@@ -200,9 +206,15 @@ export const useSupabaseData = () => {
     try {
       console.log('Updating article:', id, articleData);
       
+      // Clean the data to ensure proper handling of category_id
+      const cleanedData = {
+        ...articleData,
+        category_id: articleData.category_id && articleData.category_id.trim() !== '' ? articleData.category_id : null
+      };
+
       const { error } = await supabase
         .from('articles')
-        .update(articleData)
+        .update(cleanedData)
         .eq('id', id);
 
       if (error) {

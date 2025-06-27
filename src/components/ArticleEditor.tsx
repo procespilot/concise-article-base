@@ -54,8 +54,23 @@ const ArticleEditor = ({ articleId, onBack, onSave, articles, categories }: Arti
       return;
     }
 
+    if (!formData.category_id.trim()) {
+      toast({
+        title: "Validatie fout",
+        description: "Selecteer een categorie",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      await onSave(formData);
+      // Clean the form data to ensure category_id is properly handled
+      const cleanedData = {
+        ...formData,
+        category_id: formData.category_id.trim() || null
+      };
+      
+      await onSave(cleanedData);
     } catch (error) {
       console.error('Error saving article:', error);
     }
