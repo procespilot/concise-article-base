@@ -32,7 +32,6 @@ interface UserProfile {
   first_name: string | null;
   last_name: string | null;
   email: string | null;
-  phone: string | null;
   created_at: string;
   user_roles: { role: string }[];
 }
@@ -88,10 +87,10 @@ export const useSupabaseData = () => {
 
   const fetchUsers = async () => {
     try {
-      // Get profiles with additional fields
+      // Get profiles with basic fields only (removing phone and other non-existent fields)
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, email, phone, created_at, updated_at')
+        .select('id, first_name, last_name, email, created_at')
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;

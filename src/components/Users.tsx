@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, User, Plus, Phone, Mail } from "lucide-react";
+import { RefreshCw, User, Plus, Mail } from "lucide-react";
 import UserForm from './UserForm';
 
 interface UsersProps {
@@ -58,12 +58,6 @@ const Users = ({ users, onRefresh }: UsersProps) => {
                         <div className="flex items-center text-gray-600 text-sm">
                           <Mail className="w-4 h-4 mr-2" />
                           {user.email}
-                        </div>
-                      )}
-                      {user.phone && (
-                        <div className="flex items-center text-gray-600 text-sm">
-                          <Phone className="w-4 h-4 mr-2" />
-                          {user.phone}
                         </div>
                       )}
                     </div>
