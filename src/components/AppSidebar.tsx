@@ -93,11 +93,13 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
           <SidebarGroup className="mb-8">
             <SidebarGroupContent>
               <Button 
-                className="w-full mb-6 bg-blue-500 hover:bg-blue-600 text-black border-0" 
+                className={`mb-6 bg-blue-500 hover:bg-blue-600 text-black border-0 ${
+                  state === "collapsed" ? "w-10 h-10 p-0" : "w-full"
+                }`}
                 onClick={handleCreateArticle}
               >
-                <Plus className="w-4 h-4 mr-2" />
-                {state === "expanded" && "Nieuw artikel"}
+                <Plus className="w-4 h-4" />
+                {state === "expanded" && <span className="ml-2">Nieuw artikel</span>}
               </Button>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -129,7 +131,7 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                       activeSection === item.id 
                         ? 'bg-gray-100 text-black border-r-2 border-blue-500' 
                         : ''
-                    }`}
+                    } ${state === "collapsed" ? "justify-center" : ""}`}
                   >
                     <item.icon className="w-4 h-4" />
                     {state === "expanded" && (
