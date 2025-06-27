@@ -145,14 +145,14 @@ const ArticlesList = ({
   }
 
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="animate-fade-in space-y-6 bg-white">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-3xl font-bold text-black">
             {isManager ? "Artikel beheer" : "Knowledge Base"}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 mt-1">
             {isManager 
               ? "Beheer en organiseer je knowledge base artikelen" 
               : "Vind antwoorden op je vragen in onze knowledge base"
@@ -161,7 +161,6 @@ const ArticlesList = ({
         </div>
         {isManager && (
           <Button 
-            className="bg-clearbase-600 hover:bg-clearbase-700"
             onClick={handleCreateClick}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -181,7 +180,7 @@ const ArticlesList = ({
                 placeholder="Zoek artikelen op titel, inhoud, keywords of auteur... (Ctrl+K)"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                className="pl-10 bg-white border-gray-200 text-black"
               />
             </div>
           </div>
@@ -189,12 +188,12 @@ const ArticlesList = ({
 
         <div className="flex flex-wrap gap-2">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-48 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <SelectTrigger className="w-48 bg-white border-gray-200 text-black">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <SelectContent className="bg-white border border-gray-200">
               {allCategories.map((category) => (
-                <SelectItem key={category} value={category} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                <SelectItem key={category} value={category} className="hover:bg-gray-100 text-black">
                   {category}
                 </SelectItem>
               ))}
@@ -202,12 +201,12 @@ const ArticlesList = ({
           </Select>
 
           <Select value={authorFilter} onValueChange={setAuthorFilter}>
-            <SelectTrigger className="w-48 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <SelectTrigger className="w-48 bg-white border-gray-200 text-black">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <SelectContent className="bg-white border border-gray-200">
               {authors.map((author) => (
-                <SelectItem key={author} value={author} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                <SelectItem key={author} value={author} className="hover:bg-gray-100 text-black">
                   {author}
                 </SelectItem>
               ))}
@@ -215,13 +214,13 @@ const ArticlesList = ({
           </Select>
 
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-48 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <SelectTrigger className="w-48 bg-white border-gray-200 text-black">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-              <SelectItem value="updated" className="hover:bg-gray-100 dark:hover:bg-gray-700">Laatst bijgewerkt</SelectItem>
-              <SelectItem value="title" className="hover:bg-gray-100 dark:hover:bg-gray-700">Alfabetisch</SelectItem>
-              <SelectItem value="views" className="hover:bg-gray-100 dark:hover:bg-gray-700">Meest bekeken</SelectItem>
+            <SelectContent className="bg-white border border-gray-200">
+              <SelectItem value="updated" className="hover:bg-gray-100 text-black">Laatst bijgewerkt</SelectItem>
+              <SelectItem value="title" className="hover:bg-gray-100 text-black">Alfabetisch</SelectItem>
+              <SelectItem value="views" className="hover:bg-gray-100 text-black">Meest bekeken</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -229,7 +228,7 @@ const ArticlesList = ({
 
       {/* Search Results Info */}
       {(searchTerm || selectedCategory !== "Alle categorieën" || authorFilter !== "Alle auteurs") && (
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-sm text-gray-600">
           {filteredArticles.length} artikel{filteredArticles.length !== 1 ? 'en' : ''} gevonden
           {searchTerm && ` voor "${searchTerm}"`}
           {selectedCategory !== "Alle categorieën" && ` in categorie "${selectedCategory}"`}
@@ -242,7 +241,7 @@ const ArticlesList = ({
         {paginatedData.map((article) => (
           <Card 
             key={article.id} 
-            className="hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.01] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+            className="hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.01] bg-white border-gray-200"
             onClick={() => handleArticleClick(article.id)}
           >
             <CardHeader className="pb-3">
@@ -252,7 +251,7 @@ const ArticlesList = ({
                     {article.featured && (
                       <Star className="w-4 h-4 text-yellow-500 fill-current" />
                     )}
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs bg-gray-100 text-black border-gray-200">
                       {article.categories ? article.categories.name : 'Geen categorie'}
                     </Badge>
                     {isManager && (
@@ -264,17 +263,17 @@ const ArticlesList = ({
                       </Badge>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-clearbase-600 dark:hover:text-clearbase-400 transition-colors">
+                  <h3 className="text-lg font-semibold text-black hover:text-blue-500 transition-colors">
                     <SearchHighlight text={article.title} searchTerm={searchTerm} />
                   </h3>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {article.keywords.slice(0, 3).map((keyword: string) => (
-                      <Badge key={keyword} variant="outline" className="text-xs bg-gray-50 dark:bg-gray-700">
+                      <Badge key={keyword} variant="outline" className="text-xs bg-gray-50 text-black border-gray-200">
                         <SearchHighlight text={keyword} searchTerm={searchTerm} />
                       </Badge>
                     ))}
                     {article.keywords.length > 3 && (
-                      <Badge variant="outline" className="text-xs bg-gray-50 dark:bg-gray-700">
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-black border-gray-200">
                         +{article.keywords.length - 3} meer
                       </Badge>
                     )}
@@ -283,10 +282,10 @@ const ArticlesList = ({
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                 <SearchHighlight text={article.excerpt || ''} searchTerm={searchTerm} />
               </p>
-              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
                     <UserIcon className="w-3 h-3" />
@@ -326,10 +325,10 @@ const ArticlesList = ({
       )}
 
       {filteredArticles.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-12 bg-white">
           <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Geen artikelen gevonden</h3>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h3 className="text-lg font-medium text-black mb-2">Geen artikelen gevonden</h3>
+          <p className="text-gray-600">
             {searchTerm || selectedCategory !== "Alle categorieën" || authorFilter !== "Alle auteurs"
               ? "Probeer een andere zoekterm of pas je filters aan."
               : "Er zijn nog geen artikelen beschikbaar."

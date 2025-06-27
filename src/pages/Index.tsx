@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -16,6 +17,7 @@ import AuthPage from "@/components/AuthPage";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useCommonShortcuts } from "@/hooks/useKeyboardShortcuts";
+
 const Index = () => {
   const {
     isAuthenticated,
@@ -47,14 +49,17 @@ const Index = () => {
       }
     }
   });
+
   if (authLoading || supabaseData.loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+    return <div className="min-h-screen flex items-center justify-center bg-white">
         <LoadingSpinner size="lg" text="Applicatie laden..." />
       </div>;
   }
+
   if (!isAuthenticated) {
     return <AuthPage />;
   }
+
   const handleArticleClick = (articleId: string) => {
     console.log("Article clicked:", articleId);
     setSelectedArticleId(articleId);
@@ -62,12 +67,14 @@ const Index = () => {
     setIsCreatingArticle(false);
     supabaseData.incrementViews(articleId);
   };
+
   const handleBackToList = () => {
     console.log("Back to list");
     setSelectedArticleId(null);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
   };
+
   const handleCreateArticle = () => {
     console.log("Handle create article");
     setIsCreatingArticle(true);
@@ -75,12 +82,14 @@ const Index = () => {
     setEditingArticleId(null);
     setActiveSection("articles");
   };
+
   const handleEditArticle = (articleId: string) => {
     console.log("Edit article:", articleId);
     setEditingArticleId(articleId);
     setSelectedArticleId(null);
     setIsCreatingArticle(false);
   };
+
   const handleSaveArticle = async (articleData: any) => {
     console.log("Save article", articleData);
     let success = false;
@@ -93,6 +102,7 @@ const Index = () => {
       handleBackToList();
     }
   };
+
   const handleSectionChange = (section: string) => {
     console.log("Section change:", section);
     setActiveSection(section);
@@ -147,6 +157,7 @@ const Index = () => {
     }
     return breadcrumbs;
   };
+
   const renderContent = () => {
     // If creating or editing an article
     if (isCreatingArticle || editingArticleId) {
@@ -157,12 +168,13 @@ const Index = () => {
     if (selectedArticleId) {
       const article = supabaseData.articles.find(a => a.id === selectedArticleId);
       if (!article) {
-        return <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">Artikel niet gevonden</p>
+        return <div className="text-center py-12 bg-white">
+            <p className="text-gray-600">Artikel niet gevonden</p>
           </div>;
       }
       return <ArticleDetail article={article} onBack={handleBackToList} onEdit={isManager ? () => handleEditArticle(selectedArticleId) : undefined} />;
     }
+
     switch (activeSection) {
       case "dashboard":
         return isManager ? <Dashboard articles={supabaseData.articles} categories={supabaseData.categories} users={supabaseData.users} /> : <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
@@ -180,12 +192,13 @@ const Index = () => {
         return isManager ? <Dashboard articles={supabaseData.articles} categories={supabaseData.categories} users={supabaseData.users} /> : <ArticlesList articles={supabaseData.articles} categories={supabaseData.categories} onArticleClick={handleArticleClick} onCreateArticle={handleCreateArticle} isManager={isManager} searchInputRef={searchInputRef} />;
     }
   };
-  return <div className="min-h-screen bg-white dark:bg-gray-900">
+
+  return <div className="min-h-screen bg-white">
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
+        <div className="min-h-screen flex w-full bg-white">
           <AppSidebar activeSection={activeSection} onSectionChange={handleSectionChange} onCreateArticle={handleCreateArticle} />
           <SidebarInset className="flex-1">
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 px-4 bg-white dark:bg-gray-800">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 px-4 bg-white">
               <SidebarTrigger className="-ml-1" />
               <div className="flex-1">
                 <Header />
@@ -200,4 +213,5 @@ const Index = () => {
       </SidebarProvider>
     </div>;
 };
+
 export default Index;
