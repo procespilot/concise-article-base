@@ -88,16 +88,30 @@ export const useSupabaseData = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
+      // First get profiles
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          user_roles(role)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setUsers(data || []);
+      if (profilesError) throw profilesError;
+
+      // Then get user roles for each profile
+      const usersWithRoles = await Promise.all(
+        (profilesData || []).map(async (profile) => {
+          const { data: rolesData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profile.id);
+
+          return {
+            ...profile,
+            user_roles: rolesData || []
+          };
+        })
+      );
+
+      setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -209,19 +223,13 @@ export const useSupabaseData = () => {
 
   const incrementViews = async (id: string) => {
     try {
-      const { error } = await supabase.rpc('increment_article_views', {
-        article_id: id
-      });
-
-      if (error) {
-        // Fallback if function doesn't exist
-        const article = articles.find(a => a.id === id);
-        if (article) {
-          await supabase
-            .from('articles')
-            .update({ views: article.views + 1 })
-            .eq('id', id);
-        }
+      // Simple update for views
+      const article = articles.find(a => a.id === id);
+      if (article) {
+        await supabase
+          .from('articles')
+          .update({ views: article.views + 1 })
+          .eq('id', id);
       }
     } catch (error) {
       console.error('Error incrementing views:', error);

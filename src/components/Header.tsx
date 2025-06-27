@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
-  const { user, logout, isManager } = useAuth();
+  const { user, signOut, isManager } = useAuth();
 
   return (
     <div className="flex items-center justify-between w-full">
@@ -18,7 +18,7 @@ const Header = () => {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <User className="w-4 h-4" />
-          <span>{user?.name}</span>
+          <span>{user?.email}</span>
           <span className="text-xs bg-gray-100 px-2 py-1 rounded">
             {isManager ? 'Manager' : 'Gebruiker'}
           </span>
@@ -26,7 +26,7 @@ const Header = () => {
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={logout}
+          onClick={signOut}
           className="flex items-center gap-2"
         >
           <LogOut className="w-4 h-4" />

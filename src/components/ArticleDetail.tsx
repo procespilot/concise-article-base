@@ -1,22 +1,19 @@
+
 import { useState } from "react";
 import { ArrowLeft, Clock, Eye, Star, User, Tag, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useUser } from "@/contexts/UserContext";
 
 interface ArticleDetailProps {
-  articleId: number;
+  article: any;
   onBack: () => void;
   onEdit?: () => void;
 }
 
-const ArticleDetail = ({ articleId, onBack, onEdit }: ArticleDetailProps) => {
-  const { articles } = useUser();
+const ArticleDetail = ({ article, onBack, onEdit }: ArticleDetailProps) => {
   const [rating, setRating] = useState(0);
-  
-  const article = articles.find(a => a.id === articleId);
 
   if (!article) {
     return (
@@ -35,7 +32,7 @@ const ArticleDetail = ({ articleId, onBack, onEdit }: ArticleDetailProps) => {
 
   const handleRating = (score: number) => {
     setRating(score);
-    console.log(`Artikel ${articleId} beoordeeld met ${score} sterren`);
+    console.log(`Artikel ${article.id} beoordeeld met ${score} sterren`);
   };
 
   return (
@@ -60,7 +57,9 @@ const ArticleDetail = ({ articleId, onBack, onEdit }: ArticleDetailProps) => {
             {article.featured && (
               <Star className="w-5 h-5 text-yellow-500 fill-current" />
             )}
-            <Badge variant="secondary">{article.category}</Badge>
+            <Badge variant="secondary">
+              {article.categories ? article.categories.name : 'Geen categorie'}
+            </Badge>
             <Badge variant={article.status === "Gepubliceerd" ? "default" : "outline"}>
               {article.status}
             </Badge>
@@ -71,11 +70,16 @@ const ArticleDetail = ({ articleId, onBack, onEdit }: ArticleDetailProps) => {
           <div className="flex items-center gap-6 text-sm text-gray-600">
             <div className="flex items-center gap-1">
               <User className="w-4 h-4" />
-              <span>{article.author}</span>
+              <span>
+                {article.profiles 
+                  ? `${article.profiles.first_name || ''} ${article.profiles.last_name || ''}`.trim() || 'Onbekend'
+                  : 'Onbekend'
+                }
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              <span>Laatst bijgewerkt: {new Date(article.updatedAt).toLocaleDateString('nl-NL')}</span>
+              <span>Laatst bijgewerkt: {new Date(article.updated_at).toLocaleDateString('nl-NL')}</span>
             </div>
             <div className="flex items-center gap-1">
               <Eye className="w-4 h-4" />
@@ -85,7 +89,7 @@ const ArticleDetail = ({ articleId, onBack, onEdit }: ArticleDetailProps) => {
 
           <div className="flex flex-wrap gap-2">
             <Tag className="w-4 h-4 text-gray-500" />
-            {article.keywords.map((keyword) => (
+            {article.keywords.map((keyword: string) => (
               <Badge key={keyword} variant="outline" className="text-xs">
                 {keyword}
               </Badge>
@@ -98,19 +102,11 @@ const ArticleDetail = ({ articleId, onBack, onEdit }: ArticleDetailProps) => {
         <Card>
           <CardContent className="pt-6">
             <div className="prose max-w-none">
-              <p className="text-lg text-gray-700 mb-6">{article.excerpt}</p>
+              {article.excerpt && (
+                <p className="text-lg text-gray-700 mb-6">{article.excerpt}</p>
+              )}
               <div className="space-y-4 text-gray-800">
-                <p>{article.content}</p>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
-                  incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis 
-                  nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                </p>
-                <p>
-                  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore 
-                  eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, 
-                  sunt in culpa qui officia deserunt mollit anim id est laborum.
-                </p>
+                <div className="whitespace-pre-wrap">{article.content}</div>
               </div>
             </div>
           </CardContent>

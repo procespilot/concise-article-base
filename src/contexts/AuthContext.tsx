@@ -8,6 +8,7 @@ interface AuthContextType {
   userRole: string;
   loading: boolean;
   signOut: () => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   isAuthenticated: boolean;
   isManager: boolean;
   isAdmin: boolean;

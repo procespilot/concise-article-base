@@ -1,12 +1,14 @@
 
 import React, { createContext, useContext } from 'react';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UserContextType {
   articles: any[];
   categories: any[];
   users: any[];
   loading: boolean;
+  isManager: boolean;
   createArticle: (data: any) => Promise<boolean>;
   updateArticle: (id: string, data: any) => Promise<boolean>;
   deleteArticle: (id: string) => Promise<boolean>;
@@ -27,9 +29,15 @@ export const useUser = () => {
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const supabaseData = useSupabaseData();
+  const { isManager } = useAuth();
+
+  const contextValue = {
+    ...supabaseData,
+    isManager
+  };
 
   return (
-    <UserContext.Provider value={supabaseData}>
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );

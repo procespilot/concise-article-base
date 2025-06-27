@@ -75,6 +75,25 @@ export const useAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error('Login error:', error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
+  };
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut({ scope: 'global' });
@@ -94,6 +113,7 @@ export const useAuth = () => {
     profile,
     userRole,
     loading,
+    login,
     signOut,
     isAuthenticated: !!user,
     isManager: userRole === 'manager' || userRole === 'admin',

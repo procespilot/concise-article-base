@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Search, Plus, Filter, BookOpen, Clock, Eye, Star, Calendar, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,19 +16,26 @@ import { useUser } from "@/contexts/UserContext";
 import SearchHighlight from "./SearchHighlight";
 
 interface ArticlesListProps {
-  onArticleClick?: (articleId: number) => void;
+  articles: any[];
+  categories: any[];
+  onArticleClick?: (articleId: string) => void;
   onCreateArticle?: () => void;
 }
 
-const ArticlesList = ({ onArticleClick, onCreateArticle }: ArticlesListProps) => {
-  const { isManager, articles, categories } = useUser();
+const ArticlesList = ({ articles, categories, onArticleClick, onCreateArticle }: ArticlesListProps) => {
+  const { isManager } = useUser();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Alle categorieën");
   const [authorFilter, setAuthorFilter] = useState("Alle auteurs");
   const [sortBy, setSortBy] = useState("updated");
 
-  // Get unique authors
-  const authors = ["Alle auteurs", ...Array.from(new Set(articles.map(a => a.author)))];
+  // Get unique authors from articles
+  const authors = ["Alle auteurs", ...Array.from(new Set(
+    articles
+      .filter(a => a.profiles)
+      .map(a => `${a.profiles.first_name || ''} ${a.profiles.last_name || ''}`.trim())
+      .filter(name => name.length > 0)
+  ))];
 
   // Enhanced search function
   const searchArticles = (articleList: any[], term: string) => {
@@ -36,23 +44,26 @@ const ArticlesList = ({ onArticleClick, onCreateArticle }: ArticlesListProps) =>
     const searchLower = term.toLowerCase();
     return articleList.filter(article => 
       article.title.toLowerCase().includes(searchLower) ||
-      article.excerpt.toLowerCase().includes(searchLower) ||
+      (article.excerpt && article.excerpt.toLowerCase().includes(searchLower)) ||
       article.content.toLowerCase().includes(searchLower) ||
       article.keywords.some((keyword: string) => keyword.toLowerCase().includes(searchLower)) ||
-      article.category.toLowerCase().includes(searchLower) ||
-      article.author.toLowerCase().includes(searchLower)
+      (article.categories && article.categories.name.toLowerCase().includes(searchLower))
     );
   };
 
   // Filter functions
   const filterByCategory = (articleList: any[], category: string) => {
     if (category === "Alle categorieën") return articleList;
-    return articleList.filter(article => article.category === category);
+    return articleList.filter(article => article.categories && article.categories.name === category);
   };
 
   const filterByAuthor = (articleList: any[], author: string) => {
     if (author === "Alle auteurs") return articleList;
-    return articleList.filter(article => article.author === author);
+    return articleList.filter(article => {
+      if (!article.profiles) return false;
+      const fullName = `${article.profiles.first_name || ''} ${article.profiles.last_name || ''}`.trim();
+      return fullName === author;
+    });
   };
 
   // Sort function
@@ -64,7 +75,7 @@ const ArticlesList = ({ onArticleClick, onCreateArticle }: ArticlesListProps) =>
       case "views":
         return sorted.sort((a, b) => b.views - a.views);
       case "updated":
-        return sorted.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        return sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
       default:
         return sorted;
     }
@@ -82,9 +93,9 @@ const ArticlesList = ({ onArticleClick, onCreateArticle }: ArticlesListProps) =>
     sortBy
   );
 
-  const allCategories = ["Alle categorieën", ...categories];
+  const allCategories = ["Alle categorieën", ...categories.map(c => c.name)];
 
-  const handleArticleClick = (articleId: number) => {
+  const handleArticleClick = (articleId: string) => {
     if (onArticleClick) {
       onArticleClick(articleId);
     }
@@ -204,7 +215,7 @@ const ArticlesList = ({ onArticleClick, onCreateArticle }: ArticlesListProps) =>
                       <Star className="w-4 h-4 text-yellow-500 fill-current" />
                     )}
                     <Badge variant="secondary" className="text-xs">
-                      {article.category}
+                      {article.categories ? article.categories.name : 'Geen categorie'}
                     </Badge>
                     {isManager && (
                       <Badge 
@@ -235,17 +246,22 @@ const ArticlesList = ({ onArticleClick, onCreateArticle }: ArticlesListProps) =>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                <SearchHighlight text={article.excerpt} searchTerm={searchTerm} />
+                <SearchHighlight text={article.excerpt || ''} searchTerm={searchTerm} />
               </p>
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
                     <UserIcon className="w-3 h-3" />
-                    <SearchHighlight text={article.author} searchTerm={searchTerm} />
+                    <span>
+                      {article.profiles 
+                        ? `${article.profiles.first_name || ''} ${article.profiles.last_name || ''}`.trim() || 'Onbekend'
+                        : 'Onbekend'
+                      }
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    <span>{new Date(article.updatedAt).toLocaleDateString('nl-NL')}</span>
+                    <span>{new Date(article.updated_at).toLocaleDateString('nl-NL')}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
