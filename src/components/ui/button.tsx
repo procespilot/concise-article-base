@@ -6,16 +6,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spacegray-400 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-spacegray-600 text-white border border-spacegray-600 hover:bg-spacegray-700 hover:border-spacegray-700",
-        destructive: "bg-spacegray-600 text-white border border-spacegray-600 hover:bg-spacegray-700",
-        outline: "border border-spacegray-300 bg-white text-spacegray-700 hover:bg-spacegray-50 hover:text-black",
-        secondary: "bg-spacegray-100 text-spacegray-700 border border-spacegray-200 hover:bg-spacegray-200",
-        ghost: "text-spacegray-700 hover:bg-spacegray-50 hover:text-black",
-        link: "text-spacegray-600 underline-offset-4 hover:underline hover:text-black",
+        default: "bg-blue-500 text-black border border-blue-500 hover:bg-blue-600 hover:border-blue-600",
+        destructive: "bg-blue-500 text-black border border-blue-500 hover:bg-blue-600",
+        outline: "border border-gray-200 bg-white text-black hover:bg-gray-50",
+        secondary: "bg-gray-100 text-black border border-gray-200 hover:bg-gray-200",
+        ghost: "text-black hover:bg-gray-50",
+        link: "text-blue-500 underline-offset-4 hover:underline hover:text-blue-600",
       },
       size: {
         default: "h-10 px-4 py-2",

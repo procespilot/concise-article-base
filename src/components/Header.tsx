@@ -40,13 +40,13 @@ const Header = () => {
   };
 
   return (
-    <header className="flex items-center justify-between w-full bg-white border-b border-spacegray-300 px-8 py-6">
+    <header className="flex items-center justify-between w-full bg-white border-b border-gray-200 px-8 py-6">
       <div className="flex items-center flex-1 max-w-md">
         <div className="relative w-full">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-spacegray-400 w-4 h-4" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             placeholder="Globaal zoeken... (Ctrl+K)"
-            className="pl-12 input-minimal h-12 text-base"
+            className="pl-12 border border-gray-200 bg-white focus:border-blue-500 focus:ring-0 focus:outline-none h-12 text-base text-black"
           />
         </div>
       </div>
@@ -55,9 +55,9 @@ const Header = () => {
         <KeyboardShortcutsHelp />
         <ThemeToggle />
         
-        <Button variant="outline" size="icon" className="relative">
+        <Button variant="outline" size="icon" className="relative bg-white border-gray-200 text-black hover:bg-gray-50">
           <Bell className="h-4 w-4" />
-          <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-spacegray-600 text-white border-0">
+          <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-blue-500 text-black border-0">
             3
           </Badge>
         </Button>
@@ -65,14 +65,14 @@ const Header = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-12 w-12 rounded-full">
-              <Avatar className="h-12 w-12 border border-spacegray-300">
-                <AvatarFallback className="bg-spacegray-500 text-white font-medium">
+              <Avatar className="h-12 w-12 border border-gray-200">
+                <AvatarFallback className="bg-blue-500 text-black font-medium">
                   {user?.email?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-white border-spacegray-300">
+          <DropdownMenuContent align="end" className="w-56 bg-white border-gray-200">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-2">
                 <p className="text-sm font-medium leading-none text-black">
@@ -80,22 +80,22 @@ const Header = () => {
                 </p>
                 <div className="flex items-center gap-2">
                   {isManager && (
-                    <Badge className="text-xs bg-spacegray-100 text-spacegray-700 border-spacegray-300">
+                    <Badge className="text-xs bg-blue-500 text-black border-blue-500">
                       Manager
                     </Badge>
                   )}
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-spacegray-300" />
-            <DropdownMenuItem className="hover:bg-spacegray-50 cursor-pointer text-spacegray-700 focus:bg-spacegray-50 focus:text-black">
+            <DropdownMenuSeparator className="bg-gray-200" />
+            <DropdownMenuItem className="hover:bg-gray-50 cursor-pointer text-black focus:bg-gray-50 focus:text-black">
               <User className="mr-2 h-4 w-4" />
               Profiel
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-spacegray-300" />
+            <DropdownMenuSeparator className="bg-gray-200" />
             <DropdownMenuItem 
               onClick={handleSignOut}
-              className="hover:bg-spacegray-50 text-spacegray-700 cursor-pointer focus:bg-spacegray-50 focus:text-black"
+              className="hover:bg-gray-50 text-black cursor-pointer focus:bg-gray-50 focus:text-black"
             >
               Uitloggen
             </DropdownMenuItem>

@@ -130,14 +130,14 @@ const Users = ({ users, onRefresh }: UsersProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gebruikers</h1>
+          <h1 className="text-3xl font-bold text-black">Gebruikers</h1>
           <p className="text-gray-600">Beheer gebruikers en hun rollen</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setIsFormOpen(true)} className="bg-clearbase-600 hover:bg-clearbase-700">
+          <Button onClick={() => setIsFormOpen(true)} className="bg-blue-500 text-black hover:bg-blue-600">
             <Plus className="w-4 h-4 mr-2" />
             Gebruiker toevoegen
           </Button>
@@ -150,16 +150,16 @@ const Users = ({ users, onRefresh }: UsersProps) => {
 
       <div className="grid grid-cols-1 gap-4">
         {users.map((user) => (
-          <Card key={user.id} className={!user.is_active ? 'opacity-60 border-red-200' : ''}>
+          <Card key={user.id} className={`border border-gray-200 bg-white ${!user.is_active ? 'opacity-60 border-red-200' : ''}`}>
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-clearbase-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-clearbase-600" />
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <User className="w-6 h-6 text-blue-600" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg text-black">
                         {user.first_name || user.last_name 
                           ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
                           : 'Geen naam'
@@ -197,12 +197,13 @@ const Users = ({ users, onRefresh }: UsersProps) => {
                         <Badge 
                           key={index} 
                           variant={getRoleBadgeVariant(roleObj.role)}
+                          className="bg-blue-500 text-black border-blue-500"
                         >
                           {getRoleDisplayName(roleObj.role)}
                         </Badge>
                       ))}
                     </div>
-                    <Badge variant={user.is_active ? "default" : "destructive"}>
+                    <Badge variant={user.is_active ? "default" : "destructive"} className="bg-blue-500 text-black border-blue-500">
                       {user.is_active ? "Actief" : "Inactief"}
                     </Badge>
                   </div>
@@ -241,11 +242,11 @@ const Users = ({ users, onRefresh }: UsersProps) => {
       </div>
 
       {users.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-12 bg-white">
           <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Geen gebruikers gevonden</h3>
+          <h3 className="text-lg font-medium text-black mb-2">Geen gebruikers gevonden</h3>
           <p className="text-gray-600 mb-4">Begin met het toevoegen van je eerste gebruiker.</p>
-          <Button onClick={() => setIsFormOpen(true)} className="bg-clearbase-600 hover:bg-clearbase-700">
+          <Button onClick={() => setIsFormOpen(true)} className="bg-blue-500 text-black hover:bg-blue-600">
             <Plus className="w-4 h-4 mr-2" />
             Eerste gebruiker toevoegen
           </Button>

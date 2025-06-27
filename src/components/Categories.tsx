@@ -12,10 +12,10 @@ interface CategoriesProps {
 
 const Categories = ({ categories, articles, onRefresh }: CategoriesProps) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Categorieën</h1>
+          <h1 className="text-3xl font-bold text-black">Categorieën</h1>
           <p className="text-gray-600">Beheer je artikel categorieën</p>
         </div>
         <Button onClick={onRefresh} variant="outline">
@@ -29,9 +29,9 @@ const Categories = ({ categories, articles, onRefresh }: CategoriesProps) => {
           const articleCount = articles.filter(a => a.category_id === category.id).length;
           
           return (
-            <Card key={category.id}>
+            <Card key={category.id} className="border border-gray-200 bg-white">
               <CardHeader>
-                <CardTitle>{category.name}</CardTitle>
+                <CardTitle className="text-black">{category.name}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">{category.description}</p>
