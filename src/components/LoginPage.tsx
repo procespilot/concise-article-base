@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { sanitizeInput, validateEmail } from "@/utils/sanitization";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -21,15 +22,47 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const success = await login(email, password);
+      // Client-side validation
+      const sanitizedEmail = sanitizeInput(email);
+      const sanitizedPassword = sanitizeInput(password);
+
+      if (!sanitizedEmail || !sanitizedPassword) {
+        setError("Email en wachtwoord zijn verplicht");
+        return;
+      }
+
+      if (!validateEmail(sanitizedEmail)) {
+        setError("Ongeldig email formaat");
+        return;
+      }
+
+      if (sanitizedPassword.length < 6) {
+        setError("Wachtwoord moet minimaal 6 karakters lang zijn");
+        return;
+      }
+
+      const success = await login(sanitizedEmail, sanitizedPassword);
       if (!success) {
         setError("Ongeldige inloggegevens");
       }
     } catch (err) {
-      setError("Er is een fout opgetreden");
+      console.error('Login form error:', err);
+      setError("Er is een onverwachte fout opgetreden");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = sanitizeInput(e.target.value);
+    setEmail(sanitized);
+    if (error) setError(""); // Clear error on input change
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = sanitizeInput(e.target.value);
+    setPassword(sanitized);
+    if (error) setError(""); // Clear error on input change
   };
 
   return (
@@ -56,10 +89,12 @@ const LoginPage = () => {
                     id="email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     required
                     placeholder="je@email.com"
                     className="border border-gray-200 bg-white focus:border-blue-500 focus:ring-0 focus:outline-none h-12 text-base text-black"
+                    maxLength={254} // RFC standard email max length
+                    autoComplete="email"
                   />
                 </div>
                 <div className="space-y-3">
@@ -68,10 +103,13 @@ const LoginPage = () => {
                     id="password"
                     type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     required
                     placeholder="••••••••"
                     className="border border-gray-200 bg-white focus:border-blue-500 focus:ring-0 focus:outline-none h-12 text-base text-black"
+                    minLength={6}
+                    maxLength={128}
+                    autoComplete="current-password"
                   />
                 </div>
               </div>
@@ -85,7 +123,7 @@ const LoginPage = () => {
               <Button 
                 type="submit" 
                 className="w-full h-12 text-base font-normal bg-blue-500 text-black hover:bg-blue-600"
-                disabled={loading}
+                disabled={loading || !email || !password}
               >
                 {loading ? (
                   <div className="flex items-center gap-2">
