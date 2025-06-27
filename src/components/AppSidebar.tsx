@@ -93,27 +93,29 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
           <SidebarGroup className="mb-8">
             <SidebarGroupContent>
               <Button 
-                className="w-full mb-6" 
+                className="w-full mb-6 bg-blue-500 hover:bg-blue-600 text-black border-0" 
                 onClick={handleCreateArticle}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                {state === "expanded" ? "Nieuw artikel" : ""}
+                {state === "expanded" && "Nieuw artikel"}
               </Button>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
 
-        <SidebarGroup className="mb-8">
-          <SidebarGroupContent>
-            <div className="relative mb-6">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input 
-                placeholder={state === "expanded" ? "Zoek artikelen..." : ""} 
-                className="pl-12 bg-white border-gray-200 text-black text-sm"
-              />
-            </div>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {state === "expanded" && (
+          <SidebarGroup className="mb-8">
+            <SidebarGroupContent>
+              <div className="relative mb-6">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input 
+                  placeholder="Zoek artikelen..." 
+                  className="pl-12 bg-white border-gray-200 text-black text-sm"
+                />
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <SidebarGroup className="mb-8">
           <SidebarGroupContent>
@@ -130,7 +132,9 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                     }`}
                   >
                     <item.icon className="w-4 h-4" />
-                    <span className="text-sm font-normal">{item.label}</span>
+                    {state === "expanded" && (
+                      <span className="text-sm font-normal">{item.label}</span>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
