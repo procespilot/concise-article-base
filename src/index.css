@@ -35,14 +35,14 @@
     --input: 229 231 235;
     --ring: 107 114 128;
 
-    --radius: 0.5rem;
+    --radius: 0rem;
 
     --sidebar-background: 255 255 255;
     --sidebar-foreground: 107 114 128;
     --sidebar-primary: 107 114 128;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 243 244 246;
-    --sidebar-accent-foreground: 75 85 99;
+    --sidebar-accent: 255 255 255;
+    --sidebar-accent-foreground: 0 0 0;
     --sidebar-border: 229 231 235;
     --sidebar-ring: 107 114 128;
   }
@@ -55,44 +55,33 @@
 
   body {
     @apply bg-white text-black font-sans antialiased;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   }
   
   .prose {
     @apply max-w-none;
   }
-  
-  .gradient-bg {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-  }
-
-  .button-gradient {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-  }
-
-  .button-gradient:hover {
-    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-  }
 }
 
 @layer components {
   .centered-container {
-    @apply flex flex-col items-center justify-center max-w-4xl mx-auto px-4;
+    @apply flex flex-col items-center justify-center max-w-6xl mx-auto px-8;
   }
 
   .button-group {
-    @apply flex flex-wrap items-center justify-center gap-3;
+    @apply flex flex-wrap items-center justify-center gap-6;
   }
 
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border border-gray-200;
+  .card-minimal {
+    @apply transition-colors duration-200 border border-spacegray-300 bg-white;
   }
 
-  .input-focus {
-    @apply transition-all duration-200 focus:ring-2 focus:ring-gray-400 focus:border-gray-400;
+  .card-minimal:hover {
+    @apply bg-spacegray-50;
   }
 
-  .glass-effect {
-    @apply bg-white/95 backdrop-blur-sm border border-gray-200;
+  .input-minimal {
+    @apply border border-spacegray-300 bg-white focus:border-spacegray-500 focus:ring-0 focus:outline-none;
   }
 }
 

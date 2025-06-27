@@ -9,8 +9,7 @@ import {
   Users,
   TrendingUp,
   Search,
-  ChevronDown,
-  Menu
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +24,6 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
@@ -71,15 +69,15 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r bg-white border-gray-200">
-      <SidebarHeader className="border-b bg-white border-gray-200">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="w-8 h-8 bg-spacegray-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">CB</span>
+    <Sidebar collapsible="icon" className="border-r bg-white border-spacegray-300">
+      <SidebarHeader className="border-b bg-white border-spacegray-300 p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-spacegray-600 flex items-center justify-center">
+            <span className="text-white font-medium text-sm">CB</span>
           </div>
           {state === "expanded" && (
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-black">ClearBase</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-light text-black">ClearBase</h1>
               {isManager && (
                 <Badge className="text-xs bg-spacegray-100 text-spacegray-700 border-spacegray-300">
                   Manager
@@ -90,54 +88,49 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="bg-white">
+      <SidebarContent className="bg-white p-6">
         {isManager && (
-          <SidebarGroup>
+          <SidebarGroup className="mb-8">
             <SidebarGroupContent>
-              <div className="px-2 py-2">
-                <Button 
-                  className="w-full bg-spacegray-600 hover:bg-spacegray-700 text-white" 
-                  size="sm"
-                  onClick={handleCreateArticle}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  {state === "expanded" ? "Nieuw artikel" : ""}
-                </Button>
-              </div>
+              <Button 
+                className="w-full mb-6" 
+                onClick={handleCreateArticle}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {state === "expanded" ? "Nieuw artikel" : ""}
+              </Button>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
 
-        <SidebarGroup>
+        <SidebarGroup className="mb-8">
           <SidebarGroupContent>
-            <div className="px-2 py-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-spacegray-400 w-4 h-4" />
-                <Input 
-                  placeholder={state === "expanded" ? "Zoek artikelen..." : ""} 
-                  className="pl-10 text-sm bg-gray-50 focus:bg-white border-gray-200 focus:border-spacegray-500 focus:ring-spacegray-500"
-                />
-              </div>
+            <div className="relative mb-6">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-spacegray-400 w-4 h-4" />
+              <Input 
+                placeholder={state === "expanded" ? "Zoek artikelen..." : ""} 
+                className="pl-12 input-minimal text-sm"
+              />
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup className="mb-8">
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
                     onClick={() => onSectionChange(item.id)}
                     isActive={activeSection === item.id}
-                    className={`w-full bg-white text-spacegray-700 hover:bg-gray-100 hover:text-black ${
+                    className={`w-full bg-white text-spacegray-700 hover:bg-spacegray-50 hover:text-black py-3 ${
                       activeSection === item.id 
-                        ? 'bg-spacegray-100 text-spacegray-700 border-r-2 border-spacegray-600' 
+                        ? 'bg-spacegray-100 text-black border-r-2 border-spacegray-600' 
                         : ''
                     }`}
                   >
                     <item.icon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className="text-sm font-normal">{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -149,15 +142,15 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
           <SidebarGroup>
             <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
               <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="flex items-center justify-between w-full group/collapsible bg-white text-spacegray-700 hover:bg-gray-50">
-                  <span className="font-medium">Snelle statistieken</span>
+                <CollapsibleTrigger className="flex items-center justify-between w-full group/collapsible bg-white text-spacegray-700 hover:bg-spacegray-50 py-2">
+                  <span className="font-normal text-sm uppercase tracking-wide">Snelle statistieken</span>
                   <ChevronDown className="w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
               <CollapsibleContent>
                 <SidebarGroupContent>
-                  <div className="bg-gray-50 rounded-lg p-4 mx-2 border border-gray-200">
-                    <div className="space-y-2 text-sm text-spacegray-600">
+                  <div className="bg-white border border-spacegray-300 p-6 mt-4">
+                    <div className="space-y-4 text-sm text-spacegray-600">
                       <div className="flex justify-between">
                         <span>Totaal artikelen</span>
                         <span className="font-medium text-black">127</span>
