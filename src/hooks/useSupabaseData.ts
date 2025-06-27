@@ -276,16 +276,16 @@ export const useSupabaseData = () => {
     try {
       console.log('Incrementing views for article:', id);
       
-      const { error } = await supabase
-        .from('articles')
-        .update({ views: 1 })
-        .eq('id', id)
-        .select();
+      const { error } = await supabase.rpc('increment_article_views', {
+        article_id: id
+      });
 
       if (error) {
         console.error('Error incrementing views:', error);
       } else {
         console.log('Views incremented successfully');
+        // Refresh articles to show updated view count
+        await fetchArticles();
       }
     } catch (error) {
       console.error('Error incrementing views:', error);
