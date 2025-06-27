@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserContextType {
   articles: any[];
@@ -12,9 +12,9 @@ interface UserContextType {
   createArticle: (data: any) => Promise<boolean>;
   updateArticle: (id: string, data: any) => Promise<boolean>;
   deleteArticle: (id: string) => Promise<boolean>;
-  refetchArticles: () => Promise<void>;
-  refetchCategories: () => Promise<void>;
-  refetchUsers: () => Promise<void>;
+  refetchArticles: () => Promise<any[]>;
+  refetchCategories: () => Promise<any[]>;
+  refetchUsers: () => Promise<any[]>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);

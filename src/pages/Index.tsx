@@ -1,7 +1,6 @@
-
 import { useState, useRef } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import AppSidebar from "@/components/AppSidebar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import Header from "@/components/Header";

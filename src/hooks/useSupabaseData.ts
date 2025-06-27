@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -335,6 +334,21 @@ export const useSupabaseData = () => {
     console.log('All data refreshed');
   };
 
+  const refetchArticles = async () => {
+    const data = await fetchArticles();
+    return data;
+  };
+
+  const refetchCategories = async () => {
+    const data = await fetchCategories();
+    return data;
+  };
+
+  const refetchUsers = async () => {
+    const data = await fetchUsers();
+    return data;
+  };
+
   useEffect(() => {
     refreshAllData();
   }, []);
@@ -348,9 +362,9 @@ export const useSupabaseData = () => {
     updateArticle,
     deleteArticle,
     incrementViews,
-    refetchArticles: fetchArticles,
-    refetchCategories: fetchCategories,
-    refetchUsers: fetchUsers,
+    refetchArticles,
+    refetchCategories,
+    refetchUsers,
     refreshAllData
   };
 };
