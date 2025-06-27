@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -33,6 +32,7 @@ interface UserProfile {
   first_name: string | null;
   last_name: string | null;
   email: string | null;
+  phone: string | null;
   created_at: string;
   user_roles: { role: string }[];
 }
@@ -88,15 +88,15 @@ export const useSupabaseData = () => {
 
   const fetchUsers = async () => {
     try {
-      // First get profiles
+      // Get profiles with additional fields
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, first_name, last_name, email, phone, created_at, updated_at')
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
 
-      // Then get user roles for each profile
+      // Get user roles for each profile
       const usersWithRoles = await Promise.all(
         (profilesData || []).map(async (profile) => {
           const { data: rolesData } = await supabase
