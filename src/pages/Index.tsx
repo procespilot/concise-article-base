@@ -1,7 +1,9 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import Header from "@/components/Header";
 import Dashboard from "@/components/Dashboard";
 import ArticlesList from "@/components/ArticlesList";
@@ -14,6 +16,7 @@ import Settings from "@/components/Settings";
 import AuthPage from "@/components/AuthPage";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { useCommonShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 const Index = () => {
   const { isAuthenticated, isManager, loading: authLoading } = useAuth();
@@ -23,14 +26,32 @@ const Index = () => {
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
+  
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcuts
+  useCommonShortcuts({
+    onSearch: () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    },
+    onNew: () => {
+      if (isManager) {
+        handleCreateArticle();
+      }
+    },
+    onEscape: () => {
+      if (selectedArticleId || editingArticleId || isCreatingArticle) {
+        handleBackToList();
+      }
+    }
+  });
 
   if (authLoading || supabaseData.loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-clearbase-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Laden...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <LoadingSpinner size="lg" text="Applicatie laden..." />
       </div>
     );
   }
@@ -92,6 +113,50 @@ const Index = () => {
     setIsCreatingArticle(false);
   };
 
+  // Breadcrumb logic
+  const getBreadcrumbs = () => {
+    const breadcrumbs = [];
+    
+    if (activeSection === "dashboard") {
+      breadcrumbs.push({ label: "Dashboard", isActive: true });
+    } else if (activeSection === "articles") {
+      breadcrumbs.push({ 
+        label: "Artikelen", 
+        onClick: () => handleBackToList(),
+        isActive: !selectedArticleId && !editingArticleId && !isCreatingArticle
+      });
+      
+      if (selectedArticleId) {
+        const article = supabaseData.articles.find(a => a.id === selectedArticleId);
+        breadcrumbs.push({ 
+          label: article?.title || "Artikel", 
+          isActive: true 
+        });
+      } else if (editingArticleId) {
+        const article = supabaseData.articles.find(a => a.id === editingArticleId);
+        breadcrumbs.push({ 
+          label: `${article?.title || "Artikel"} bewerken`, 
+          isActive: true 
+        });
+      } else if (isCreatingArticle) {
+        breadcrumbs.push({ 
+          label: "Nieuw artikel", 
+          isActive: true 
+        });
+      }
+    } else {
+      const sectionNames: Record<string, string> = {
+        analytics: "Analytics",
+        categories: "Categorieën",
+        users: "Gebruikers",
+        settings: "Instellingen"
+      };
+      breadcrumbs.push({ label: sectionNames[activeSection] || activeSection, isActive: true });
+    }
+    
+    return breadcrumbs;
+  };
+
   const renderContent = () => {
     // If creating or editing an article
     if (isCreatingArticle || editingArticleId) {
@@ -112,7 +177,7 @@ const Index = () => {
       if (!article) {
         return (
           <div className="text-center py-12">
-            <p className="text-gray-600">Artikel niet gevonden</p>
+            <p className="text-gray-600 dark:text-gray-400">Artikel niet gevonden</p>
           </div>
         );
       }
@@ -141,6 +206,7 @@ const Index = () => {
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
             isManager={isManager}
+            searchInputRef={searchInputRef}
           />
         );
       case "articles":
@@ -151,6 +217,7 @@ const Index = () => {
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
             isManager={isManager}
+            searchInputRef={searchInputRef}
           />
         );
       case "analytics":
@@ -166,6 +233,7 @@ const Index = () => {
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
             isManager={isManager}
+            searchInputRef={searchInputRef}
           />
         );
       case "categories":
@@ -199,32 +267,36 @@ const Index = () => {
             onArticleClick={handleArticleClick}
             onCreateArticle={handleCreateArticle}
             isManager={isManager}
+            searchInputRef={searchInputRef}
           />
         );
     }
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar 
-          activeSection={activeSection} 
-          onSectionChange={handleSectionChange}
-          onCreateArticle={handleCreateArticle}
-        />
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex-1">
-              <Header />
-            </div>
-          </header>
-          <main className="flex-1 p-8 overflow-y-auto">
-            {renderContent()}
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <AppSidebar 
+            activeSection={activeSection} 
+            onSectionChange={handleSectionChange}
+            onCreateArticle={handleCreateArticle}
+          />
+          <SidebarInset className="flex-1">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 px-4 bg-white dark:bg-gray-800">
+              <SidebarTrigger className="-ml-1" />
+              <div className="flex-1">
+                <Header />
+              </div>
+            </header>
+            <main className="flex-1 p-8 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+              <Breadcrumbs items={getBreadcrumbs()} />
+              {renderContent()}
+            </main>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </div>
   );
 };
 
