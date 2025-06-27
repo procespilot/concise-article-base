@@ -1,7 +1,8 @@
 
 import { useState } from "react";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
 import Dashboard from "@/components/Dashboard";
 import ArticlesList from "@/components/ArticlesList";
 import Analytics from "@/components/Analytics";
@@ -58,18 +59,22 @@ const IndexContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
-        <Sidebar 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection} 
-        />
-        <main className="flex-1 p-8 overflow-y-auto">
-          {renderContent()}
-        </main>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+            <div className="flex-1">
+              <Header />
+            </div>
+          </header>
+          <main className="flex-1 p-8 overflow-y-auto">
+            {renderContent()}
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

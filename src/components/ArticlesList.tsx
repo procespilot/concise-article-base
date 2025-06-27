@@ -8,51 +8,38 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useUser } from "@/contexts/UserContext";
 
 const ArticlesList = () => {
-  const { isManager } = useUser();
+  const { isManager, articles, categories } = useUser();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Alle categorieën");
 
-  const articles = [
-    {
-      id: 1,
-      title: "Hoe maak ik een account aan?",
-      excerpt: "Stap-voor-stap uitleg over het aanmaken van een nieuw account in ClearBase...",
-      category: "Aan de slag",
-      author: "Sarah van Dam",
-      updatedAt: "2024-01-15",
-      views: 245,
-      status: "Gepubliceerd",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Wachtwoord vergeten - wat nu?",
-      excerpt: "Instructies voor het resetten van je wachtwoord wanneer je deze bent vergeten...",
-      category: "Account beheer",
-      author: "Mike de Jong",
-      updatedAt: "2024-01-14",
-      views: 189,
-      status: "Gepubliceerd",
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Factuurgegevens wijzigen",
-      excerpt: "Leer hoe je je factuurgegevens kunt aanpassen in je accountinstellingen...",
-      category: "Facturering",
-      author: "Lisa Bakker",
-      updatedAt: "2024-01-12",
-      views: 92,
-      status: "Concept",
-      featured: false
-    },
-  ];
+  // Enhanced search function that includes keywords
+  const searchArticles = (articles: typeof articles, term: string) => {
+    if (!term) return articles;
+    
+    const searchLower = term.toLowerCase();
+    return articles.filter(article => 
+      article.title.toLowerCase().includes(searchLower) ||
+      article.excerpt.toLowerCase().includes(searchLower) ||
+      article.content.toLowerCase().includes(searchLower) ||
+      article.keywords.some(keyword => keyword.toLowerCase().includes(searchLower)) ||
+      article.category.toLowerCase().includes(searchLower) ||
+      article.author.toLowerCase().includes(searchLower)
+    );
+  };
 
-  const categories = ["Alle categorieën", "Aan de slag", "Account beheer", "Facturering", "Technische ondersteuning"];
+  // Filter by category
+  const filterByCategory = (articles: typeof articles, category: string) => {
+    if (category === "Alle categorieën") return articles;
+    return articles.filter(article => article.category === category);
+  };
 
-  const filteredArticles = articles.filter(article => 
-    article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+  // Apply both search and category filters
+  const filteredArticles = filterByCategory(
+    searchArticles(articles, searchTerm),
+    selectedCategory
   );
+
+  const allCategories = ["Alle categorieën", ...categories];
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -83,7 +70,7 @@ const ArticlesList = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Zoek artikelen..."
+              placeholder="Zoek artikelen op titel, inhoud, keywords of auteur..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -103,19 +90,27 @@ const ArticlesList = () => {
         </div>
       </div>
 
-      {/* Categories (for users) */}
-      {!isManager && (
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant="outline"
-              size="sm"
-              className="text-sm"
-            >
-              {category}
-            </Button>
-          ))}
+      {/* Categories */}
+      <div className="flex flex-wrap gap-2">
+        {allCategories.map((category) => (
+          <Button
+            key={category}
+            variant={selectedCategory === category ? "default" : "outline"}
+            size="sm"
+            className="text-sm"
+            onClick={() => setSelectedCategory(category)}
+          >
+            {category}
+          </Button>
+        ))}
+      </div>
+
+      {/* Search Results Info */}
+      {(searchTerm || selectedCategory !== "Alle categorieën") && (
+        <div className="text-sm text-gray-600">
+          {filteredArticles.length} artikel{filteredArticles.length !== 1 ? 'en' : ''} gevonden
+          {searchTerm && ` voor "${searchTerm}"`}
+          {selectedCategory !== "Alle categorieën" && ` in categorie "${selectedCategory}"`}
         </div>
       )}
 
@@ -145,6 +140,19 @@ const ArticlesList = () => {
                   <h3 className="text-lg font-semibold text-gray-900 hover:text-clearbase-600 transition-colors">
                     {article.title}
                   </h3>
+                  {/* Keywords display */}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {article.keywords.slice(0, 3).map((keyword) => (
+                      <Badge key={keyword} variant="outline" className="text-xs bg-gray-50">
+                        {keyword}
+                      </Badge>
+                    ))}
+                    {article.keywords.length > 3 && (
+                      <Badge variant="outline" className="text-xs bg-gray-50">
+                        +{article.keywords.length - 3} meer
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -178,7 +186,10 @@ const ArticlesList = () => {
           <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Geen artikelen gevonden</h3>
           <p className="text-gray-600">
-            Probeer een andere zoekterm of pas je filters aan.
+            {searchTerm || selectedCategory !== "Alle categorieën" 
+              ? "Probeer een andere zoekterm of pas je filters aan."
+              : "Er zijn nog geen artikelen beschikbaar."
+            }
           </p>
         </div>
       )}

@@ -18,81 +18,72 @@ const Header = () => {
   const { user, isManager } = useUser();
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-clearbase-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CB</span>
-            </div>
-            <h1 className="text-xl font-bold text-gray-900">ClearBase</h1>
-            {isManager && (
-              <Badge variant="secondary" className="text-xs">
-                Manager
-              </Badge>
-            )}
-          </div>
+    <div className="flex items-center justify-between w-full">
+      <div className="flex-1 max-w-md">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input 
+            placeholder="Zoek in knowledge base..." 
+            className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+          />
         </div>
-        
-        <div className="flex-1 max-w-md mx-8">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input 
-              placeholder="Zoek in knowledge base..." 
-              className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
-            />
-          </div>
-        </div>
+      </div>
 
-        <div className="flex items-center space-x-4">
-          {isManager && (
-            <Button variant="ghost" size="sm">
-              <Bell className="w-4 h-4" />
+      <div className="flex items-center space-x-4">
+        {isManager && (
+          <Button variant="ghost" size="sm">
+            <Bell className="w-4 h-4" />
+          </Button>
+        )}
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="/placeholder.svg" alt="@username" />
+                <AvatarFallback>
+                  {user?.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </Button>
-          )}
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder.svg" alt="@username" />
-                  <AvatarFallback>
-                    {user?.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{user?.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email}
+                </p>
+                <div className="flex items-center gap-2">
                   <p className="text-xs leading-none text-muted-foreground capitalize">
                     {user?.role}
                   </p>
+                  {isManager && (
+                    <Badge variant="secondary" className="text-xs">
+                      Manager
+                    </Badge>
+                  )}
                 </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profiel</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Instellingen</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                Uitloggen
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profiel</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Instellingen</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <LogOut className="mr-2 h-4 w-4" />
+              Uitloggen
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </header>
+    </div>
   );
 };
 
