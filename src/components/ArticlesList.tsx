@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Search, Plus, Filter, BookOpen, Clock, Eye, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useUser } from "@/contexts/UserContext";
 
-const ArticlesList = () => {
+interface ArticlesListProps {
+  onArticleClick?: (articleId: number) => void;
+  onCreateArticle?: () => void;
+}
+
+const ArticlesList = ({ onArticleClick, onCreateArticle }: ArticlesListProps) => {
   const { isManager, articles, categories } = useUser();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Alle categorieën");
@@ -41,6 +45,18 @@ const ArticlesList = () => {
 
   const allCategories = ["Alle categorieën", ...categories];
 
+  const handleArticleClick = (articleId: number) => {
+    if (onArticleClick) {
+      onArticleClick(articleId);
+    }
+  };
+
+  const handleCreateClick = () => {
+    if (onCreateArticle) {
+      onCreateArticle();
+    }
+  };
+
   return (
     <div className="animate-fade-in space-y-6">
       {/* Header */}
@@ -57,7 +73,10 @@ const ArticlesList = () => {
           </p>
         </div>
         {isManager && (
-          <Button className="bg-clearbase-600 hover:bg-clearbase-700">
+          <Button 
+            className="bg-clearbase-600 hover:bg-clearbase-700"
+            onClick={handleCreateClick}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Nieuw artikel
           </Button>
@@ -117,7 +136,11 @@ const ArticlesList = () => {
       {/* Articles Grid */}
       <div className="grid gap-6">
         {filteredArticles.map((article) => (
-          <Card key={article.id} className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card 
+            key={article.id} 
+            className="hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => handleArticleClick(article.id)}
+          >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">

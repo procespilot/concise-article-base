@@ -5,21 +5,67 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Header from "@/components/Header";
 import Dashboard from "@/components/Dashboard";
 import ArticlesList from "@/components/ArticlesList";
+import ArticleDetail from "@/components/ArticleDetail";
 import Analytics from "@/components/Analytics";
-import { UserProvider, useUser } from "@/contexts/UserContext";
+import LoginPage from "@/components/LoginPage";
+import { UserProvider } from "@/contexts/UserContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
 const IndexContent = () => {
-  const { isManager } = useUser();
+  const { isAuthenticated, isManager } = useAuth();
   const [activeSection, setActiveSection] = useState(isManager ? "dashboard" : "articles");
+  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  const handleArticleClick = (articleId: number) => {
+    setSelectedArticleId(articleId);
+  };
+
+  const handleBackToList = () => {
+    setSelectedArticleId(null);
+  };
+
+  const handleCreateArticle = () => {
+    // TODO: Implement article creation
+    console.log("Create new article");
+  };
 
   const renderContent = () => {
+    // If viewing an article detail
+    if (selectedArticleId) {
+      return (
+        <ArticleDetail 
+          articleId={selectedArticleId} 
+          onBack={handleBackToList}
+        />
+      );
+    }
+
     switch (activeSection) {
       case "dashboard":
-        return isManager ? <Dashboard /> : <ArticlesList />;
+        return isManager ? <Dashboard /> : (
+          <ArticlesList 
+            onArticleClick={handleArticleClick}
+            onCreateArticle={handleCreateArticle}
+          />
+        );
       case "articles":
-        return <ArticlesList />;
+        return (
+          <ArticlesList 
+            onArticleClick={handleArticleClick}
+            onCreateArticle={handleCreateArticle}
+          />
+        );
       case "analytics":
-        return isManager ? <Analytics /> : <ArticlesList />;
+        return isManager ? <Analytics /> : (
+          <ArticlesList 
+            onArticleClick={handleArticleClick}
+            onCreateArticle={handleCreateArticle}
+          />
+        );
       case "categories":
         return (
           <div className="animate-fade-in">
@@ -39,7 +85,10 @@ const IndexContent = () => {
             <p className="text-gray-600">Beheer gebruikerstoegang en rollen</p>
           </div>
         ) : (
-          <ArticlesList />
+          <ArticlesList 
+            onArticleClick={handleArticleClick}
+            onCreateArticle={handleCreateArticle}
+          />
         );
       case "settings":
         return (
@@ -54,7 +103,12 @@ const IndexContent = () => {
           </div>
         );
       default:
-        return isManager ? <Dashboard /> : <ArticlesList />;
+        return isManager ? <Dashboard /> : (
+          <ArticlesList 
+            onArticleClick={handleArticleClick}
+            onCreateArticle={handleCreateArticle}
+          />
+        );
     }
   };
 
@@ -80,9 +134,11 @@ const IndexContent = () => {
 
 const Index = () => {
   return (
-    <UserProvider>
-      <IndexContent />
-    </UserProvider>
+    <AuthProvider>
+      <UserProvider>
+        <IndexContent />
+      </UserProvider>
+    </AuthProvider>
   );
 };
 
