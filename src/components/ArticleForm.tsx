@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { X, AlertCircle } from "lucide-react";
+import { sanitizeInput, sanitizeHtml } from "@/utils/sanitization";
+import { validateArticleData, ValidationResult } from "@/utils/validation";
 
 interface Article {
   id?: string;
@@ -59,8 +61,8 @@ const ArticleForm = ({
   const [keywords, setKeywords] = useState<string[]>([]);
   const [keywordInput, setKeywordInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Use formData if provided (for ArticleEditor), otherwise use individual state
   const isControlled = formData && onFormDataChange;
 
   useEffect(() => {
@@ -95,6 +97,16 @@ const ArticleForm = ({
     }
   }, [formData, initialData, isControlled]);
 
+  const validateForm = (): ValidationResult => {
+    return validateArticleData({
+      title: title.trim(),
+      content: content.trim(),
+      category_id: categoryId.trim(),
+      excerpt: excerpt.trim(),
+      keywords
+    });
+  };
+
   const updateFormData = (updates: any) => {
     if (isControlled && onFormDataChange) {
       onFormDataChange({ ...formData, ...updates });
@@ -102,23 +114,29 @@ const ArticleForm = ({
   };
 
   const handleTitleChange = (value: string) => {
-    setTitle(value);
-    updateFormData({ title: value });
+    const sanitizedValue = sanitizeInput(value);
+    setTitle(sanitizedValue);
+    updateFormData({ title: sanitizedValue });
+    setValidationErrors([]);
   };
 
   const handleExcerptChange = (value: string) => {
-    setExcerpt(value);
-    updateFormData({ excerpt: value });
+    const sanitizedValue = sanitizeInput(value);
+    setExcerpt(sanitizedValue);
+    updateFormData({ excerpt: sanitizedValue });
   };
 
   const handleContentChange = (value: string) => {
-    setContent(value);
-    updateFormData({ content: value });
+    const sanitizedValue = sanitizeHtml(value);
+    setContent(sanitizedValue);
+    updateFormData({ content: sanitizedValue });
+    setValidationErrors([]);
   };
 
   const handleCategoryChange = (value: string) => {
     setCategoryId(value);
     updateFormData({ category_id: value });
+    setValidationErrors([]);
   };
 
   const handleStatusChange = (value: string) => {
@@ -137,8 +155,8 @@ const ArticleForm = ({
   };
 
   const handleAddKeyword = () => {
-    const trimmedKeyword = keywordInput.trim();
-    if (trimmedKeyword && !keywords.includes(trimmedKeyword)) {
+    const trimmedKeyword = sanitizeInput(keywordInput.trim());
+    if (trimmedKeyword && !keywords.includes(trimmedKeyword) && keywords.length < 10) {
       const newKeywords = [...keywords, trimmedKeyword];
       handleKeywordsChange(newKeywords);
       setKeywordInput('');
@@ -160,8 +178,9 @@ const ArticleForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || !content.trim() || !categoryId) {
-      console.log('Form validation failed - missing required fields');
+    const validation = validateForm();
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
       return;
     }
 
@@ -170,17 +189,8 @@ const ArticleForm = ({
       return;
     }
 
-    console.log('Submitting article form:', {
-      title: title.trim(),
-      excerpt: excerpt.trim(),
-      content: content.trim(),
-      category_id: categoryId,
-      status,
-      featured,
-      keywords
-    });
-
     setIsSubmitting(true);
+    setValidationErrors([]);
 
     try {
       const success = await onSubmit({
@@ -193,19 +203,16 @@ const ArticleForm = ({
         keywords
       });
 
-      if (success) {
-        console.log('Article submitted successfully');
-        // Reset form if not controlled
-        if (!isControlled) {
-          setTitle('');
-          setExcerpt('');
-          setContent('');
-          setCategoryId('');
-          setStatus('Concept');
-          setFeatured(false);
-          setKeywords([]);
-          setKeywordInput('');
-        }
+      if (success && !isControlled) {
+        // Reset form
+        setTitle('');
+        setExcerpt('');
+        setContent('');
+        setCategoryId('');
+        setStatus('Concept');
+        setFeatured(false);
+        setKeywords([]);
+        setKeywordInput('');
       }
     } catch (error) {
       console.error('Error submitting article:', error);
@@ -216,6 +223,19 @@ const ArticleForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {validationErrors.length > 0 && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <ul className="list-disc list-inside">
+              {validationErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div>
         <Label htmlFor="title">Titel *</Label>
         <Input
@@ -224,7 +244,9 @@ const ArticleForm = ({
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Artikel titel"
           required
+          maxLength={200}
         />
+        <p className="text-sm text-gray-500 mt-1">{title.length}/200 karakters</p>
       </div>
 
       <div>
@@ -235,7 +257,9 @@ const ArticleForm = ({
           onChange={(e) => handleExcerptChange(e.target.value)}
           placeholder="Korte samenvatting van het artikel"
           rows={3}
+          maxLength={500}
         />
+        <p className="text-sm text-gray-500 mt-1">{excerpt.length}/500 karakters</p>
       </div>
 
       <div>
@@ -247,7 +271,9 @@ const ArticleForm = ({
           placeholder="Artikel inhoud"
           rows={8}
           required
+          maxLength={50000}
         />
+        <p className="text-sm text-gray-500 mt-1">{content.length}/50,000 karakters</p>
       </div>
 
       <div>
@@ -299,8 +325,14 @@ const ArticleForm = ({
               onChange={(e) => setKeywordInput(e.target.value)}
               onKeyPress={handleKeywordInputKeyPress}
               placeholder="Voeg trefwoord toe en druk Enter"
+              maxLength={50}
             />
-            <Button type="button" onClick={handleAddKeyword} variant="outline">
+            <Button 
+              type="button" 
+              onClick={handleAddKeyword} 
+              variant="outline"
+              disabled={keywords.length >= 10}
+            >
               Toevoegen
             </Button>
           </div>
@@ -318,12 +350,17 @@ const ArticleForm = ({
               </Badge>
             ))}
           </div>
+          <p className="text-sm text-gray-500">{keywords.length}/10 trefwoorden</p>
         </div>
       </div>
 
       {onSubmit && (
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting || !title.trim() || !content.trim() || !categoryId}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || validationErrors.length > 0}
+            className="bg-clearbase-600 hover:bg-clearbase-700"
+          >
             {isSubmitting ? (isEditing ? 'Bijwerken...' : 'Aanmaken...') : (isEditing ? 'Artikel bijwerken' : 'Artikel aanmaken')}
           </Button>
         </div>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { handleError, getSupabaseErrorMessage } from '@/utils/errorHandling';
+import { validateArticleData } from '@/utils/validation';
 
 interface Article {
   id: string;
@@ -66,11 +68,7 @@ export const useSupabaseData = () => {
       return data || [];
     } catch (error) {
       console.error('Error fetching articles:', error);
-      toast({
-        title: "Fout bij laden van artikelen",
-        description: "Probeer de pagina te verversen",
-        variant: "destructive"
-      });
+      handleError(getSupabaseErrorMessage(error), toast);
       return [];
     }
   };
@@ -93,11 +91,7 @@ export const useSupabaseData = () => {
       return data || [];
     } catch (error) {
       console.error('Error fetching categories:', error);
-      toast({
-        title: "Fout bij laden van categorieën",
-        description: "Probeer de pagina te verversen",
-        variant: "destructive"
-      });
+      handleError(getSupabaseErrorMessage(error), toast);
       return [];
     }
   };
@@ -130,11 +124,7 @@ export const useSupabaseData = () => {
       return transformedUsers;
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast({
-        title: "Fout bij laden van gebruikers",
-        description: "Probeer de pagina te verversen",
-        variant: "destructive"
-      });
+      handleError(getSupabaseErrorMessage(error), toast);
       return [];
     }
   };
@@ -150,6 +140,17 @@ export const useSupabaseData = () => {
   }) => {
     try {
       console.log('Creating article:', articleData);
+      
+      // Validate data
+      const validation = validateArticleData(articleData);
+      if (!validation.isValid) {
+        toast({
+          title: "Validatie fout",
+          description: validation.errors.join(', '),
+          variant: "destructive"
+        });
+        return false;
+      }
       
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData.user) {
@@ -184,7 +185,7 @@ export const useSupabaseData = () => {
       console.log('Article created successfully:', data);
       
       // Refresh articles immediately
-      const updatedArticles = await fetchArticles();
+      await fetchArticles();
       
       toast({
         title: "Artikel aangemaakt",
@@ -193,11 +194,7 @@ export const useSupabaseData = () => {
       return true;
     } catch (error) {
       console.error('Error creating article:', error);
-      toast({
-        title: "Fout bij aanmaken artikel",
-        description: error instanceof Error ? error.message : "Probeer het opnieuw",
-        variant: "destructive"
-      });
+      handleError(getSupabaseErrorMessage(error), toast);
       return false;
     }
   };
@@ -213,6 +210,17 @@ export const useSupabaseData = () => {
   }) => {
     try {
       console.log('Updating article:', id, articleData);
+      
+      // Validate data
+      const validation = validateArticleData(articleData);
+      if (!validation.isValid) {
+        toast({
+          title: "Validatie fout",
+          description: validation.errors.join(', '),
+          variant: "destructive"
+        });
+        return false;
+      }
       
       const cleanedData = {
         ...articleData,
@@ -241,11 +249,7 @@ export const useSupabaseData = () => {
       return true;
     } catch (error) {
       console.error('Error updating article:', error);
-      toast({
-        title: "Fout bij bijwerken artikel",
-        description: error instanceof Error ? error.message : "Probeer het opnieuw",
-        variant: "destructive"
-      });
+      handleError(getSupabaseErrorMessage(error), toast);
       return false;
     }
   };
