@@ -7,9 +7,19 @@ interface DashboardProps {
   articles: any[];
   categories: any[];
   users: any[];
+  onCreateArticle?: () => void;
+  onCreateCategory?: () => void;
+  onManageUsers?: () => void;
 }
 
-const Dashboard = ({ articles, categories, users }: DashboardProps) => {
+const Dashboard = ({ 
+  articles, 
+  categories, 
+  users, 
+  onCreateArticle,
+  onCreateCategory,
+  onManageUsers 
+}: DashboardProps) => {
   const totalViews = articles.reduce((sum, article) => sum + (article.views || 0), 0);
   const publishedArticles = articles.filter(article => article.status === 'Gepubliceerd');
   
@@ -37,6 +47,30 @@ const Dashboard = ({ articles, categories, users }: DashboardProps) => {
       value: totalViews.toLocaleString(),
       subtitle: "Artikel weergaven",
       icon: Eye,
+    }
+  ];
+
+  const quickActions = [
+    {
+      title: "Nieuw Artikel",
+      description: "Voeg een artikel toe",
+      icon: FileText,
+      onClick: onCreateArticle,
+      available: !!onCreateArticle
+    },
+    {
+      title: "Nieuwe Categorie",
+      description: "Organiseer je content",
+      icon: FolderOpen,
+      onClick: onCreateCategory,
+      available: !!onCreateCategory
+    },
+    {
+      title: "Gebruiker Toevoegen",
+      description: "Beheer toegang",
+      icon: Users,
+      onClick: onManageUsers,
+      available: !!onManageUsers
     }
   ];
   
@@ -77,21 +111,25 @@ const Dashboard = ({ articles, categories, users }: DashboardProps) => {
         <div className="text-center">
           <h2 className="text-3xl font-light mb-12 text-black">Snelle Acties</h2>
           <div className="button-group max-w-4xl">
-            <Card className="border border-gray-200 bg-white p-8 text-center cursor-pointer group min-w-64">
-              <FileText className="h-8 w-8 mx-auto mb-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
-              <h3 className="font-medium mb-2 text-black text-lg">Nieuw Artikel</h3>
-              <p className="text-sm text-gray-500">Voeg een artikel toe</p>
-            </Card>
-            <Card className="border border-gray-200 bg-white p-8 text-center cursor-pointer group min-w-64">
-              <FolderOpen className="h-8 w-8 mx-auto mb-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
-              <h3 className="font-medium mb-2 text-black text-lg">Nieuwe Categorie</h3>
-              <p className="text-sm text-gray-500">Organiseer je content</p>
-            </Card>
-            <Card className="border border-gray-200 bg-white p-8 text-center cursor-pointer group min-w-64">
-              <Users className="h-8 w-8 mx-auto mb-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
-              <h3 className="font-medium mb-2 text-black text-lg">Gebruiker Toevoegen</h3>
-              <p className="text-sm text-gray-500">Beheer toegang</p>
-            </Card>
+            {quickActions.map((action) => (
+              <Card 
+                key={action.title}
+                className={`border border-gray-200 bg-white p-8 text-center group min-w-64 transition-all duration-200 ${
+                  action.available 
+                    ? 'cursor-pointer hover:shadow-md hover:border-gray-300' 
+                    : 'opacity-50 cursor-not-allowed'
+                }`}
+                onClick={action.available ? action.onClick : undefined}
+              >
+                <action.icon className={`h-8 w-8 mx-auto mb-4 transition-colors ${
+                  action.available 
+                    ? 'text-gray-400 group-hover:text-gray-600' 
+                    : 'text-gray-300'
+                }`} />
+                <h3 className="font-medium mb-2 text-black text-lg">{action.title}</h3>
+                <p className="text-sm text-gray-500">{action.description}</p>
+              </Card>
+            ))}
           </div>
         </div>
       </div>

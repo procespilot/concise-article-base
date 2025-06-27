@@ -8,6 +8,8 @@ import Dashboard from "@/components/Dashboard";
 import ArticlesList from "@/components/ArticlesList";
 import Categories from "@/components/Categories";
 import AuthPage from "@/components/AuthPage";
+import UserForm from "@/components/UserForm";
+import CategoryForm from "@/components/CategoryForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useCommonShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -31,6 +33,8 @@ const Index = () => {
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useCommonShortcuts({
@@ -121,6 +125,18 @@ const Index = () => {
     await supabaseData.refetchUsers();
   };
 
+  const handleCreateCategory = () => {
+    setShowCategoryForm(true);
+  };
+
+  const handleManageUsers = () => {
+    setActiveSection("users");
+  };
+
+  const handleShowUserForm = () => {
+    setShowUserForm(true);
+  };
+
   const getBreadcrumbs = () => {
     const breadcrumbs = [];
     if (activeSection === "dashboard") {
@@ -206,7 +222,10 @@ const Index = () => {
           <Dashboard 
             articles={supabaseData.articles} 
             categories={supabaseData.categories} 
-            users={supabaseData.users} 
+            users={supabaseData.users}
+            onCreateArticle={handleCreateArticle}
+            onCreateCategory={handleCreateCategory}
+            onManageUsers={handleManageUsers}
           /> : 
           <ArticlesList 
             articles={supabaseData.articles} 
@@ -247,14 +266,16 @@ const Index = () => {
         return <Categories 
           categories={supabaseData.categories} 
           articles={supabaseData.articles} 
-          onRefresh={handleRefreshCategories} 
+          onRefresh={handleRefreshCategories}
+          onCreateCategory={handleCreateCategory}
         />;
       case "users":
         return (
           <Suspense fallback={<ComponentLoader />}>
             <LazyUsers 
               users={supabaseData.users} 
-              onRefresh={handleRefreshUsers} 
+              onRefresh={handleRefreshUsers}
+              onCreateUser={handleShowUserForm}
             />
           </Suspense>
         );
@@ -269,7 +290,10 @@ const Index = () => {
           <Dashboard 
             articles={supabaseData.articles} 
             categories={supabaseData.categories} 
-            users={supabaseData.users} 
+            users={supabaseData.users}
+            onCreateArticle={handleCreateArticle}
+            onCreateCategory={handleCreateCategory}
+            onManageUsers={handleManageUsers}
           /> : 
           <ArticlesList 
             articles={supabaseData.articles} 
@@ -282,7 +306,8 @@ const Index = () => {
     }
   };
 
-  return <div className="min-h-screen bg-white">
+  return (
+    <div className="min-h-screen bg-white">
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-white">
           <AppSidebar 
@@ -304,7 +329,21 @@ const Index = () => {
           </SidebarInset>
         </div>
       </SidebarProvider>
-    </div>;
+
+      {/* Modals */}
+      <UserForm
+        isOpen={showUserForm}
+        onClose={() => setShowUserForm(false)}
+        onUserAdded={handleRefreshUsers}
+      />
+      
+      <CategoryForm
+        isOpen={showCategoryForm}
+        onClose={() => setShowCategoryForm(false)}
+        onCategoryAdded={handleRefreshCategories}
+      />
+    </div>
+  );
 };
 
 export default Index;
