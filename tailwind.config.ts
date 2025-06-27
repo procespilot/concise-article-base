@@ -63,18 +63,27 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				clearbase: {
-					50: '#eff6ff',
-					100: '#dbeafe', 
-					200: '#bfdbfe',
-					300: '#93c5fd',
-					400: '#60a5fa',
-					500: '#3b82f6',
-					600: '#2563eb',
-					700: '#1d4ed8',
-					800: '#1e40af',
-					900: '#1e3a8a',
-					950: '#172554'
+				// Space Gray color palette
+				spacegray: {
+					50: '#f9fafb',
+					100: '#f3f4f6', 
+					200: '#e5e7eb',
+					300: '#d1d5db',
+					400: '#9ca3af',
+					500: '#6b7280',
+					600: '#4b5563',
+					700: '#374151',
+					800: '#1f2937',
+					900: '#111827',
+					950: '#030712'
+				},
+				// Apple Space Gray colors
+				apple: {
+					'space-gray-light': '#8e8e93',
+					'space-gray': '#636366',
+					'space-gray-dark': '#48484a',
+					'space-gray-darker': '#3a3a3c',
+					'space-gray-darkest': '#2c2c2e'
 				}
 			},
 			borderRadius: {
@@ -127,8 +136,8 @@ export default {
 				'scale-in': 'scale-in 0.3s ease-out'
 			},
 			boxShadow: {
-				'glow': '0 0 20px rgba(59, 130, 246, 0.3)',
-				'glow-lg': '0 0 40px rgba(59, 130, 246, 0.4)',
+				'glow': '0 0 20px rgba(107, 114, 128, 0.3)',
+				'glow-lg': '0 0 40px rgba(107, 114, 128, 0.4)',
 			}
 		}
 	},

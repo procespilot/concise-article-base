@@ -19,32 +19,28 @@ const Dashboard = ({ articles, categories, users }: DashboardProps) => {
       value: articles.length,
       subtitle: `${publishedArticles.length} gepubliceerd`,
       icon: FileText,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50 dark:bg-blue-950/50"
+      bgColor: "bg-card"
     },
     {
       title: "Categorieën",
       value: categories.length,
       subtitle: "Actieve categorieën",
       icon: FolderOpen,
-      color: "text-green-600",
-      bgColor: "bg-green-50 dark:bg-green-950/50"
+      bgColor: "bg-card"
     },
     {
       title: "Gebruikers",
       value: users.length,
       subtitle: "Geregistreerde gebruikers",
       icon: Users,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50 dark:bg-purple-950/50"
+      bgColor: "bg-card"
     },
     {
       title: "Totaal Weergaven",
       value: totalViews.toLocaleString(),
       subtitle: "Artikel weergaven",
       icon: Eye,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50 dark:bg-orange-950/50"
+      bgColor: "bg-card"
     }
   ];
   
@@ -52,7 +48,7 @@ const Dashboard = ({ articles, categories, users }: DashboardProps) => {
     <div className="space-y-8 animate-fade-in">
       <div className="centered-container">
         <div className="text-center space-y-4 mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold text-foreground">
             Dashboard
           </h1>
           <p className="text-lg text-muted-foreground text-balance">
@@ -62,13 +58,13 @@ const Dashboard = ({ articles, categories, users }: DashboardProps) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
           {stats.map((stat, index) => (
-            <Card key={stat.title} className={`card-hover animate-scale-in ${stat.bgColor} border-0 shadow-lg`} style={{ animationDelay: `${index * 0.1}s` }}>
+            <Card key={stat.title} className={`card-hover animate-scale-in ${stat.bgColor} shadow-lg`} style={{ animationDelay: `${index * 0.1}s` }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
-                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                <div className="p-2 rounded-lg bg-muted/30">
+                  <stat.icon className="h-5 w-5 text-foreground" />
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -86,21 +82,21 @@ const Dashboard = ({ articles, categories, users }: DashboardProps) => {
 
         {/* Quick Actions */}
         <div className="mt-12 text-center">
-          <h2 className="text-2xl font-semibold mb-6">Snelle Acties</h2>
+          <h2 className="text-2xl font-semibold mb-6 text-foreground">Snelle Acties</h2>
           <div className="button-group max-w-2xl">
-            <Card className="card-hover p-6 text-center cursor-pointer group">
-              <FileText className="h-8 w-8 mx-auto mb-3 text-primary group-hover:scale-110 transition-transform" />
-              <h3 className="font-semibold mb-1">Nieuw Artikel</h3>
+            <Card className="card-hover p-6 text-center cursor-pointer group bg-card">
+              <FileText className="h-8 w-8 mx-auto mb-3 text-foreground group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold mb-1 text-foreground">Nieuw Artikel</h3>
               <p className="text-sm text-muted-foreground">Voeg een artikel toe</p>
             </Card>
-            <Card className="card-hover p-6 text-center cursor-pointer group">
-              <FolderOpen className="h-8 w-8 mx-auto mb-3 text-primary group-hover:scale-110 transition-transform" />
-              <h3 className="font-semibold mb-1">Nieuwe Categorie</h3>
+            <Card className="card-hover p-6 text-center cursor-pointer group bg-card">
+              <FolderOpen className="h-8 w-8 mx-auto mb-3 text-foreground group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold mb-1 text-foreground">Nieuwe Categorie</h3>
               <p className="text-sm text-muted-foreground">Organiseer je content</p>
             </Card>
-            <Card className="card-hover p-6 text-center cursor-pointer group">
-              <Users className="h-8 w-8 mx-auto mb-3 text-primary group-hover:scale-110 transition-transform" />
-              <h3 className="font-semibold mb-1">Gebruiker Toevoegen</h3>
+            <Card className="card-hover p-6 text-center cursor-pointer group bg-card">
+              <Users className="h-8 w-8 mx-auto mb-3 text-foreground group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold mb-1 text-foreground">Gebruiker Toevoegen</h3>
               <p className="text-sm text-muted-foreground">Beheer toegang</p>
             </Card>
           </div>

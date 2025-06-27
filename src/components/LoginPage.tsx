@@ -33,15 +33,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
-        <Card className="card-hover border-0 shadow-xl bg-card/50 backdrop-blur-sm">
+        <Card className="card-hover shadow-2xl glass-effect">
           <CardHeader className="text-center space-y-4 pb-8">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center shadow-glow">
-              <span className="text-2xl font-bold text-white">CB</span>
+            <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-glow">
+              <span className="text-2xl font-bold text-primary-foreground">CB</span>
             </div>
             <div>
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <CardTitle className="text-3xl font-bold text-foreground">
                 ClearBase
               </CardTitle>
               <p className="text-muted-foreground mt-2">Log in op je kennisbank</p>
@@ -98,7 +98,7 @@ const LoginPage = () => {
               </Button>
             </form>
             
-            <div className="mt-8 p-4 bg-muted/30 rounded-lg border">
+            <div className="mt-8 p-4 bg-muted/30 rounded-lg border border-border/50">
               <p className="text-sm font-medium text-center mb-3">Demo accounts</p>
               <div className="space-y-2 text-sm text-muted-foreground text-center">
                 <p><span className="font-medium">Manager:</span> manager@example.com / password</p>
