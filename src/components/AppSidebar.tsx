@@ -33,7 +33,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useUser } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AppSidebarProps {
   activeSection: string;
@@ -41,7 +41,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
-  const { isManager } = useUser();
+  const { isManager } = useAuth();
   const { state } = useSidebar();
   const [isStatsOpen, setIsStatsOpen] = useState(true);
 
@@ -61,6 +61,12 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
   ];
 
   const menuItems = isManager ? managerMenuItems : userMenuItems;
+
+  const handleCreateArticle = () => {
+    // Switch to articles section and trigger create mode
+    onSectionChange('articles');
+    // We'll need to add a way to trigger create mode - for now just navigate to articles
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -87,7 +93,11 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           <SidebarGroup>
             <SidebarGroupContent>
               <div className="px-2 py-2">
-                <Button className="w-full bg-clearbase-600 hover:bg-clearbase-700 text-white" size="sm">
+                <Button 
+                  className="w-full bg-clearbase-600 hover:bg-clearbase-700 text-white" 
+                  size="sm"
+                  onClick={handleCreateArticle}
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   {state === "expanded" ? "Nieuw artikel" : ""}
                 </Button>

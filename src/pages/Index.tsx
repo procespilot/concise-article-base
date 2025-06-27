@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -48,6 +49,14 @@ const IndexContent = () => {
 
   const handleSaveArticle = () => {
     handleBackToList();
+  };
+
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section);
+    // Reset article states when switching sections
+    setSelectedArticleId(null);
+    setEditingArticleId(null);
+    setIsCreatingArticle(false);
   };
 
   const renderContent = () => {
@@ -144,7 +153,7 @@ const IndexContent = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <AppSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        <AppSidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
