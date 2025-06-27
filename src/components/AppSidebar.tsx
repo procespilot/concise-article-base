@@ -71,8 +71,8 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="border-b">
+    <Sidebar collapsible="icon" className="border-r bg-white">
+      <SidebarHeader className="border-b bg-white">
         <div className="flex items-center gap-2 px-2 py-2">
           <div className="w-8 h-8 bg-clearbase-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">CB</span>
@@ -90,7 +90,7 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="bg-white">
         {isManager && (
           <SidebarGroup>
             <SidebarGroupContent>
@@ -115,7 +115,7 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input 
                   placeholder={state === "expanded" ? "Zoek artikelen..." : ""} 
-                  className="pl-10 text-sm bg-gray-50 focus:bg-white"
+                  className="pl-10 text-sm bg-gray-50 focus:bg-white border-gray-200"
                 />
               </div>
             </div>
@@ -130,10 +130,14 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                   <SidebarMenuButton
                     onClick={() => onSectionChange(item.id)}
                     isActive={activeSection === item.id}
-                    className="w-full"
+                    className={`w-full bg-white text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
+                      activeSection === item.id 
+                        ? 'bg-clearbase-100 text-clearbase-700 border-r-2 border-clearbase-600' 
+                        : ''
+                    }`}
                   >
                     <item.icon className="w-4 h-4" />
-                    <span>{item.label}</span>
+                    <span className="text-sm font-medium">{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -145,8 +149,8 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
           <SidebarGroup>
             <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
               <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="flex items-center justify-between w-full group/collapsible">
-                  <span>Snelle statistieken</span>
+                <CollapsibleTrigger className="flex items-center justify-between w-full group/collapsible bg-white text-gray-700 hover:bg-gray-50">
+                  <span className="font-medium">Snelle statistieken</span>
                   <ChevronDown className="w-4 h-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
@@ -156,7 +160,7 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex justify-between">
                         <span>Totaal artikelen</span>
-                        <span className="font-medium">127</span>
+                        <span className="font-medium text-gray-900">127</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Gepubliceerd</span>
@@ -168,7 +172,7 @@ export function AppSidebar({ activeSection, onSectionChange, onCreateArticle }: 
                       </div>
                       <div className="flex justify-between">
                         <span>Views deze maand</span>
-                        <span className="font-medium">2,341</span>
+                        <span className="font-medium text-gray-900">2,341</span>
                       </div>
                     </div>
                   </div>
