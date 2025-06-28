@@ -19,6 +19,7 @@ export type Database = {
           featured: boolean | null
           id: string
           keywords: string[] | null
+          search_doc: unknown | null
           status: string | null
           title: string
           updated_at: string | null
@@ -33,6 +34,7 @@ export type Database = {
           featured?: boolean | null
           id?: string
           keywords?: string[] | null
+          search_doc?: unknown | null
           status?: string | null
           title: string
           updated_at?: string | null
@@ -47,6 +49,7 @@ export type Database = {
           featured?: boolean | null
           id?: string
           keywords?: string[] | null
+          search_doc?: unknown | null
           status?: string | null
           title?: string
           updated_at?: string | null
@@ -347,11 +350,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      articles_public: {
+        Row: {
+          author_name: string | null
+          category_name: string | null
+          content: string | null
+          created_at: string | null
+          excerpt: string | null
+          featured: boolean | null
+          id: string | null
+          keywords: string[] | null
+          title: string | null
+          updated_at: string | null
+          views: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       activate_user: {
         Args: { p_user_id: string; p_activation_token?: string }
+        Returns: Json
+      }
+      create_article_secure: {
+        Args: { input: Json }
         Returns: Json
       }
       create_user_with_role: {
@@ -402,6 +424,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_article_views: {
+        Args: { article_id: string }
+        Returns: Json
+      }
       log_notification: {
         Args: {
           p_user_id: string
@@ -411,6 +437,10 @@ export type Database = {
           p_metadata?: Json
         }
         Returns: string
+      }
+      publish_article_secure: {
+        Args: { article_id: string }
+        Returns: Json
       }
     }
     Enums: {

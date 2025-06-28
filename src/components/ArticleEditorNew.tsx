@@ -1,0 +1,252 @@
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ArrowLeft, Save, Eye, Globe, AlertCircle, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Form } from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
+import { articleSchema, ArticleFormData } from '@/schemas/articleSchema';
+import { useArticleOperations } from '@/hooks/useArticleOperations';
+import { useAutosave } from '@/hooks/useAutosave';
+import { ArticleFormFields } from './ArticleFormFields';
+import { ArticlePreview } from './ArticlePreview';
+import { ArticleStats } from './ArticleStats';
+
+interface ArticleEditorNewProps {
+  articleId?: string;
+  onBack: () => void;
+  articles: any[];
+  categories: any[];
+}
+
+export const ArticleEditorNew: React.FC<ArticleEditorNewProps> = ({ 
+  articleId, 
+  onBack, 
+  articles, 
+  categories 
+}) => {
+  const { toast } = useToast();
+  const [isPreview, setIsPreview] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  const {
+    createArticle,
+    publishArticle,
+    isCreating,
+    isPublishing,
+    createError,
+    publishError
+  } = useArticleOperations();
+
+  const isEditing = Boolean(articleId);
+  const article = articleId ? articles.find(a => a.id === articleId) : null;
+
+  const form = useForm<ArticleFormData>({
+    resolver: zodResolver(articleSchema),
+    defaultValues: {
+      title: '',
+      excerpt: '',
+      content: '',
+      category_id: '',
+      keywords: [],
+      featured: false,
+      status: 'Concept'
+    }
+  });
+
+  const watchedValues = form.watch();
+
+  // Load existing article data
+  useEffect(() => {
+    if (article) {
+      form.reset({
+        title: article.title || '',
+        excerpt: article.excerpt || '',
+        content: article.content || '',
+        category_id: article.category_id || '',
+        keywords: article.keywords || [],
+        featured: article.featured || false,
+        status: article.status || 'Concept'
+      });
+      setHasUnsavedChanges(false);
+    }
+  }, [article, form]);
+
+  // Track form changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name && article) {
+        setHasUnsavedChanges(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, article]);
+
+  // Autosave functionality
+  const handleAutosave = useCallback((data: ArticleFormData) => {
+    if (form.formState.isValid) {
+      createArticle(data);
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+    }
+  }, [createArticle, form.formState.isValid]);
+
+  useAutosave({
+    data: watchedValues,
+    onSave: handleAutosave,
+    enabled: !isEditing && form.formState.isValid
+  });
+
+  const handleSave = useCallback(() => {
+    form.handleSubmit((data) => {
+      createArticle(data);
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+    })();
+  }, [form, createArticle]);
+
+  const handlePublish = useCallback(() => {
+    if (!articleId) {
+      toast({
+        title: "Kan niet publiceren",
+        description: "Sla het artikel eerst op als concept",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    publishArticle(articleId);
+  }, [articleId, publishArticle, toast]);
+
+  const handleBack = useCallback(() => {
+    if (hasUnsavedChanges) {
+      if (window.confirm("Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je wilt teruggaan?")) {
+        onBack();
+      }
+    } else {
+      onBack();
+    }
+  }, [hasUnsavedChanges, onBack]);
+
+  const canSave = form.formState.isValid && 
+    watchedValues.title?.trim() && 
+    watchedValues.content?.trim() && 
+    watchedValues.category_id?.trim();
+
+  const canPublish = article && article.status === 'Concept' && canSave;
+
+  return (
+    <div className="animate-fade-in max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <Button variant="outline" onClick={handleBack} disabled={isCreating || isPublishing}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Terug naar overzicht
+        </Button>
+        
+        <div className="flex items-center gap-2">
+          {hasUnsavedChanges && (
+            <Alert className="inline-flex items-center gap-2 p-2 w-auto border-orange-200 bg-orange-50">
+              <AlertCircle className="w-4 h-4 text-orange-600" />
+              <AlertDescription className="text-orange-800 text-sm">
+                Niet opgeslagen wijzigingen
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {lastSaved && (
+            <div className="flex items-center gap-1 text-sm text-green-600">
+              <Clock className="w-4 h-4" />
+              <span>Opgeslagen {lastSaved.toLocaleTimeString()}</span>
+            </div>
+          )}
+          
+          <Button
+            variant="outline"
+            onClick={() => setIsPreview(!isPreview)}
+            disabled={isCreating || isPublishing}
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            {isPreview ? "Bewerken" : "Voorbeeld"}
+          </Button>
+
+          {canPublish && (
+            <Button 
+              onClick={handlePublish}
+              disabled={isPublishing}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Globe className="w-4 h-4 mr-2" />
+              {isPublishing ? "Publiceren..." : "Publiceren"}
+            </Button>
+          )}
+          
+          <Button 
+            onClick={handleSave} 
+            disabled={!canSave || isCreating}
+            className="bg-clearbase-600 hover:bg-clearbase-700"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isCreating ? "Opslaan..." : "Opslaan"}
+          </Button>
+        </div>
+      </div>
+
+      {(createError || publishError) && (
+        <Alert className="mb-6 border-red-200 bg-red-50">
+          <AlertCircle className="w-4 h-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            {createError?.message || publishError?.message || "Er is een fout opgetreden"}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {categories.length === 0 && (
+        <Alert className="mb-6 border-orange-200 bg-orange-50">
+          <AlertCircle className="w-4 h-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            Er zijn nog geen categorieën beschikbaar. Voeg eerst een categorie toe om artikelen te kunnen opslaan.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                {isEditing ? "Artikel bewerken" : "Nieuw artikel"}
+                {article?.status && (
+                  <Badge variant={article.status === 'Gepubliceerd' ? 'default' : 'secondary'}>
+                    {article.status}
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isPreview ? (
+                <ArticlePreview data={watchedValues} />
+              ) : (
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
+                    <ArticleFormFields form={form} categories={categories} />
+                  </form>
+                </Form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-1">
+          <ArticleStats data={watchedValues} article={article} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ArticleEditorNew;
