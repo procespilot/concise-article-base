@@ -48,12 +48,12 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Improved role fetching with the new simplified RLS policies
+  // Improved role fetching with better error handling
   const fetchUserRole = async (userId: string) => {
     try {
       console.log('=== Fetching role for user:', userId);
       
-      // Direct query should now work with the simplified policies
+      // Direct query to user_roles table
       const { data: roleData, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -64,6 +64,19 @@ export const useAuth = () => {
 
       if (error) {
         console.error('Error fetching user role:', error);
+        
+        // If no role found, try to create a default user role
+        if (error.code === 'PGRST116') {
+          console.log('No role found, creating default user role');
+          const { error: insertError } = await supabase
+            .from('user_roles')
+            .insert({ user_id: userId, role: 'user' });
+          
+          if (insertError) {
+            console.error('Error creating default role:', insertError);
+          }
+          return 'user';
+        }
         return 'user';
       }
 
@@ -80,6 +93,36 @@ export const useAuth = () => {
     }
   };
 
+  // Force refresh user data
+  const refreshUserData = async () => {
+    if (!user) return;
+    
+    console.log('=== Refreshing user data for:', user.id);
+    
+    try {
+      // Get profile data
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      console.log('Profile refresh result:', { profileData, profileError });
+
+      if (profileData) {
+        setProfile(profileData);
+      }
+      
+      // Get user role
+      const role = await fetchUserRole(user.id);
+      console.log('Setting refreshed role to:', role);
+      setUserRole(role);
+      
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -93,7 +136,7 @@ export const useAuth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user && event === 'SIGNED_IN') {
+        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
           // Defer data fetching to prevent deadlocks
           setTimeout(async () => {
             if (!mounted) return;
@@ -257,6 +300,7 @@ export const useAuth = () => {
     loading,
     login,
     signOut,
+    refreshUserData,
     isAuthenticated: !!user,
     isManager,
     isAdmin
