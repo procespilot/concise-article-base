@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useSystemSettings } from "@/hooks/useSystemSettings";
+import { isValidHexColor, applyPrimaryColor } from "@/utils/colorUtils";
 
 const Settings = () => {
   const { isManager, user } = useAuth();
@@ -123,6 +123,11 @@ const Settings = () => {
 
   const updateSystemSetting = (key: string, value: any) => {
     setSystemSettingsLocal(prev => ({ ...prev, [key]: value }));
+    
+    // Apply color preview in real-time for primary color changes
+    if (key === 'primaryColor' && isValidHexColor(value)) {
+      applyPrimaryColor(value);
+    }
   };
 
   const isLoading = preferencesLoading || systemLoading;
@@ -223,7 +228,7 @@ const Settings = () => {
             <Button 
               onClick={handleSavePersonal} 
               disabled={isSaving}
-              className="bg-clearbase-600 hover:bg-clearbase-700"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {preferencesSaving ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -379,7 +384,7 @@ const Settings = () => {
                 <Button 
                   onClick={handleSaveSystem} 
                   disabled={!canEditSystem || isSaving}
-                  className="bg-clearbase-600 hover:bg-clearbase-700"
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
                   {systemSaving ? (
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -419,8 +424,15 @@ const Settings = () => {
                     onChange={(e) => updateSystemSetting("primaryColor", e.target.value)}
                     className="flex-1"
                     disabled={!canEditSystem}
+                    placeholder="#3B82F6"
                   />
                 </div>
+                {!isValidHexColor(systemSettingsLocal.primaryColor) && (
+                  <p className="text-sm text-red-500">Voer een geldige hex kleur in (bijv. #3B82F6)</p>
+                )}
+                <p className="text-sm text-gray-500">
+                  Deze kleur wordt gebruikt voor knoppen en accenten in de interface
+                </p>
               </div>
             </CardContent>
           </Card>

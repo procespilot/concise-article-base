@@ -1,8 +1,8 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { applyPrimaryColor, resetToDefaultColor } from '@/utils/colorUtils';
 
 interface SystemSettings {
   id?: string;
@@ -48,7 +48,7 @@ export const useSystemSettings = () => {
 
       if (data) {
         console.log('System settings loaded:', data);
-        setSettings({
+        const loadedSettings = {
           id: data.id,
           site_name: data.site_name || 'ClearBase',
           site_description: data.site_description || 'Knowledge Base Platform',
@@ -57,10 +57,19 @@ export const useSystemSettings = () => {
           enable_comments: data.enable_comments ?? true,
           enable_ratings: data.enable_ratings ?? true,
           primary_color: data.primary_color || '#3B82F6'
-        });
+        };
+        
+        setSettings(loadedSettings);
+        
+        // Apply the primary color immediately when settings are loaded
+        applyPrimaryColor(loadedSettings.primary_color);
+      } else {
+        // Apply default color if no settings found
+        resetToDefaultColor();
       }
     } catch (error: any) {
       console.error('Error loading system settings:', error);
+      resetToDefaultColor(); // Fallback to default on error
       toast({
         title: "Fout bij laden systeeminstellingen",
         description: error.message || "Probeer het opnieuw",
@@ -107,7 +116,13 @@ export const useSystemSettings = () => {
           
         if (error) throw error;
         
-        setSettings(prev => ({ ...prev, ...data }));
+        const updatedSettings = { ...settings, ...data };
+        setSettings(updatedSettings);
+        
+        // Apply the new primary color immediately after saving
+        if (newSettings.primary_color) {
+          applyPrimaryColor(newSettings.primary_color);
+        }
       } else {
         const { data, error } = await query
           .insert(dataToSave)
@@ -116,7 +131,13 @@ export const useSystemSettings = () => {
           
         if (error) throw error;
         
-        setSettings(prev => ({ ...prev, ...data }));
+        const updatedSettings = { ...settings, ...data };
+        setSettings(updatedSettings);
+        
+        // Apply the new primary color immediately after saving
+        if (newSettings.primary_color) {
+          applyPrimaryColor(newSettings.primary_color);
+        }
       }
 
       console.log('System settings saved successfully');
@@ -138,7 +159,7 @@ export const useSystemSettings = () => {
     } finally {
       setSaving(false);
     }
-  }, [user, isManager, settings.id, toast]);
+  }, [user, isManager, settings.id, toast, settings]);
 
   useEffect(() => {
     fetchSettings();
