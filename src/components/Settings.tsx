@@ -17,13 +17,13 @@ import {
   Globe,
   Save
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const Settings = () => {
   const { isManager, user } = useAuth();
   const [settings, setSettings] = useState({
     // Personal Settings
-    displayName: user?.name || "",
+    displayName: user?.email?.split('@')[0] || "",
     email: user?.email || "",
     notifications: true,
     emailUpdates: false,
