@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { ThemeProvider } from "@/components/ui/theme-provider"
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { UserProvider } from '@/contexts/UserContext';
 import ConsolidatedAuthPage from '@/pages/ConsolidatedAuthPage';
 import Index from '@/pages/Index';
@@ -17,7 +17,7 @@ function App() {
     <Router>
       <QueryClientProvider client={new QueryClient()}>
         <AuthProvider>
-          <ThemeProvider defaultTheme="light" storageKey="clearbase-ui-theme">
+          <ThemeProvider>
             <UserProvider>
               <div className="min-h-screen bg-gray-50">
                 <Routes>
