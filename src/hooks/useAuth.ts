@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +44,7 @@ export const useAuth = () => {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .maybeSingle(); // Use maybeSingle to avoid errors when no role exists
+        .maybeSingle();
 
       console.log(`=== [${callId}] Role query result:`, { roleData, error });
 
@@ -129,6 +130,38 @@ export const useAuth = () => {
     
     await fetchUserData(user.id, callId);
   }, [user, fetchUserData]);
+
+  // Update profile function for use by settings components
+  const updateProfile = useCallback(async (updates: Partial<Profile>) => {
+    if (!user || !profile) return false;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+      
+      if (error) {
+        console.error('Profile update error:', error);
+        handleError(getSupabaseErrorMessage(error), toast);
+        return false;
+      }
+      
+      // Update local profile state
+      setProfile(prev => prev ? { ...prev, ...updates } : null);
+      
+      toast({
+        title: "Profiel bijgewerkt",
+        description: "Je profielgegevens zijn succesvol bijgewerkt"
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Profile update error:', error);
+      handleError(getSupabaseErrorMessage(error), toast);
+      return false;
+    }
+  }, [user, profile, toast]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -324,6 +357,7 @@ export const useAuth = () => {
     login,
     signOut,
     refreshUserData,
+    updateProfile,
     isAuthenticated: !!user,
     isManager,
     isAdmin

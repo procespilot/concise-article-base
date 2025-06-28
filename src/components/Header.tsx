@@ -6,13 +6,23 @@ import { Button } from '@/components/ui/button';
 import { LogOut, User, Settings, Bell } from 'lucide-react';
 
 const Header = () => {
-  const { user, isManager, isAdmin, signOut } = useAuth();
+  const { user, profile, isManager, isAdmin, signOut } = useAuth();
 
   const handleLogout = async () => {
     await signOut();
   };
 
   if (!user) return null;
+
+  const getDisplayName = () => {
+    if (profile?.first_name && profile?.last_name) {
+      return `${profile.first_name} ${profile.last_name}`;
+    }
+    if (profile?.first_name) {
+      return profile.first_name;
+    }
+    return user.email;
+  };
 
   const getRoleDisplay = () => {
     if (isAdmin) return "(Admin)";
@@ -25,7 +35,7 @@ const Header = () => {
       <div className="flex items-center space-x-2 text-sm text-gray-600">
         <User className="w-4 h-4" />
         <span>
-          {user.email}
+          {getDisplayName()}
           {(isManager || isAdmin) && (
             <span className="ml-1 text-blue-600 font-medium">
               {getRoleDisplay()}
