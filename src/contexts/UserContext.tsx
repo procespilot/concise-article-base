@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticleOperations } from '@/hooks/useArticleOperations';
@@ -34,58 +34,73 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { isManager } = useAuth();
   const articleOps = useArticleOperations();
 
-  // Wrapper functions to maintain compatibility
-  const createArticle = async (data: any): Promise<boolean> => {
-    return new Promise((resolve) => {
-      articleOps.createArticle(data);
-      // Since mutation is async, we'll resolve optimistically
-      // The actual success/failure is handled by the mutation's onSuccess/onError
-      resolve(true);
-    });
-  };
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => {
+    // Wrapper functions to maintain compatibility
+    const createArticle = async (data: any): Promise<boolean> => {
+      return new Promise((resolve) => {
+        articleOps.createArticle(data);
+        // Since mutation is async, we'll resolve optimistically
+        // The actual success/failure is handled by the mutation's onSuccess/onError
+        resolve(true);
+      });
+    };
 
-  const updateArticle = async (id: string, data: any): Promise<boolean> => {
-    // For now, redirect to create since we don't have update RPC yet
-    return createArticle(data);
-  };
+    const updateArticle = async (id: string, data: any): Promise<boolean> => {
+      // For now, redirect to create since we don't have update RPC yet
+      return createArticle(data);
+    };
 
-  const deleteArticle = async (id: string): Promise<boolean> => {
-    // Placeholder - not implemented yet
-    console.warn('deleteArticle not implemented yet');
-    return false;
-  };
+    const deleteArticle = async (id: string): Promise<boolean> => {
+      // Placeholder - not implemented yet
+      console.warn('deleteArticle not implemented yet');
+      return false;
+    };
 
-  const incrementViews = (id: string): void => {
-    articleOps.incrementViews(id);
-  };
+    const incrementViews = (id: string): void => {
+      articleOps.incrementViews(id);
+    };
 
-  // Wrapper functions to handle Query return types
-  const refetchArticles = async (): Promise<any[]> => {
-    const result = await supabaseData.refetchArticles();
-    return result.data || [];
-  };
+    // Wrapper functions to handle Query return types
+    const refetchArticles = async (): Promise<any[]> => {
+      const result = await supabaseData.refetchArticles();
+      return result.data || [];
+    };
 
-  const refetchCategories = async (): Promise<any[]> => {
-    const result = await supabaseData.refetchCategories();
-    return result.data || [];
-  };
+    const refetchCategories = async (): Promise<any[]> => {
+      const result = await supabaseData.refetchCategories();
+      return result.data || [];
+    };
 
-  const refetchUsers = async (): Promise<any[]> => {
-    const result = await supabaseData.refetchUsers();
-    return result.data || [];
-  };
+    const refetchUsers = async (): Promise<any[]> => {
+      const result = await supabaseData.refetchUsers();
+      return result.data || [];
+    };
 
-  const contextValue = {
-    ...supabaseData,
+    return {
+      ...supabaseData,
+      isManager,
+      createArticle,
+      updateArticle,
+      deleteArticle,
+      incrementViews,
+      refetchArticles,
+      refetchCategories,
+      refetchUsers
+    };
+  }, [
+    supabaseData.articles,
+    supabaseData.categories,
+    supabaseData.users,
+    supabaseData.loading,
+    supabaseData.refetchArticles,
+    supabaseData.refetchCategories,
+    supabaseData.refetchUsers,
+    supabaseData.refreshAllData,
     isManager,
-    createArticle,
-    updateArticle,
-    deleteArticle,
-    incrementViews,
-    refetchArticles,
-    refetchCategories,
-    refetchUsers
-  };
+    articleOps.createArticle,
+    articleOps.incrementViews
+  ]);
 
   return (
     <UserContext.Provider value={contextValue}>

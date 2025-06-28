@@ -1,7 +1,7 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useCallback, useMemo } from 'react';
 
 export const useSupabaseData = () => {
   const { toast } = useToast();
@@ -98,7 +98,14 @@ export const useSupabaseData = () => {
     gcTime: 20 * 60 * 1000, // 20 minutes
   });
 
-  // Show error toasts
+  // Memoize the refreshAllData function to prevent unnecessary re-renders
+  const refreshAllData = useCallback(() => {
+    refetchArticles();
+    refetchCategories();
+    refetchUsers();
+  }, [refetchArticles, refetchCategories, refetchUsers]);
+
+  // Show error toasts only once per error
   if (articlesError) {
     toast({
       title: "Fout bij laden artikelen",
@@ -123,7 +130,8 @@ export const useSupabaseData = () => {
     });
   }
 
-  return {
+  // Memoize the return value to prevent unnecessary re-renders
+  return useMemo(() => ({
     articles,
     categories,
     users,
@@ -131,10 +139,17 @@ export const useSupabaseData = () => {
     refetchArticles,
     refetchCategories,
     refetchUsers,
-    refreshAllData: () => {
-      refetchArticles();
-      refetchCategories();
-      refetchUsers();
-    }
-  };
+    refreshAllData
+  }), [
+    articles,
+    categories,
+    users,
+    articlesLoading,
+    categoriesLoading,
+    usersLoading,
+    refetchArticles,
+    refetchCategories,
+    refetchUsers,
+    refreshAllData
+  ]);
 };
