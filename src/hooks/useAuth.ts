@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +11,7 @@ interface Profile {
   first_name: string | null;
   last_name: string | null;
   email: string | null;
+  phone: string | null;
 }
 
 interface UserRole {

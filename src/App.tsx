@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { UserProvider } from '@/contexts/UserContext';
 import ConsolidatedAuthPage from '@/pages/ConsolidatedAuthPage';
-import Index from '@/pages';
+import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
 import UserSettingsPage from '@/pages/UserSettingsPage';
 import NotificationsPage from '@/pages/NotificationsPage';
