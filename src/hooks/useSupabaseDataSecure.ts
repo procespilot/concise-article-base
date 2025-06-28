@@ -1,9 +1,9 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback, useMemo, useRef } from 'react';
-import { Article, UserProfile, Category } from '@/types/article';
+import { Article } from '@/types/article';
+import { UserProfile, Category } from '@/types/user';
 
 export const useSupabaseDataSecure = () => {
   const { toast } = useToast();

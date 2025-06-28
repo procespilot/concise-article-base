@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useMemo } from 'react';
 import { useSupabaseDataSecure } from '@/hooks/useSupabaseDataSecure';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticleOperationsSecure } from '@/hooks/useArticleOperationsSecure';
-import { Article, UserProfile, Category, ArticleFormData } from '@/types/article';
+import { Article, ArticleFormData } from '@/types/article';
+import { UserProfile, Category } from '@/types/user';
 
 interface UserContextSecureType {
   articles: Article[];
