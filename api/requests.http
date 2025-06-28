@@ -1,0 +1,151 @@
+
+### API Gateway Test Requests
+### Use with VS Code REST Client extension
+
+@baseUrl = http://localhost:3001
+@apiKey = test-api-key
+
+### Health Checks
+GET {{baseUrl}}/health
+
+###
+GET {{baseUrl}}/health/detailed
+
+###
+GET {{baseUrl}}/health/metrics
+
+### Articles API
+
+### List articles (with authentication)
+GET {{baseUrl}}/api/articles
+x-api-key: {{apiKey}}
+
+### List articles with search and filters
+GET {{baseUrl}}/api/articles?q=test&page=1&pageSize=10&status=Gepubliceerd
+x-api-key: {{apiKey}}
+
+### Get single article
+GET {{baseUrl}}/api/articles/123e4567-e89b-12d3-a456-426614174000
+x-api-key: {{apiKey}}
+
+### Create new article
+POST {{baseUrl}}/api/articles
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "title": "Test Article from API",
+  "excerpt": "This is a test article created via the API Gateway",
+  "content": "# Test Article\n\nThis is the full content of the test article created through our new API Gateway. It demonstrates the create functionality.",
+  "status": "Concept",
+  "featured": false,
+  "keywords": ["test", "api", "gateway"]
+}
+
+### Update article
+PUT {{baseUrl}}/api/articles/123e4567-e89b-12d3-a456-426614174000
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "title": "Updated Test Article",
+  "content": "This content has been updated via the API Gateway"
+}
+
+### Publish article
+PATCH {{baseUrl}}/api/articles/123e4567-e89b-12d3-a456-426614174000/publish
+x-api-key: {{apiKey}}
+
+### Increment article views (no auth required)
+POST {{baseUrl}}/api/articles/123e4567-e89b-12d3-a456-426614174000/view
+
+### Categories API
+
+### List categories
+GET {{baseUrl}}/api/categories
+
+### Get single category
+GET {{baseUrl}}/api/categories/123e4567-e89b-12d3-a456-426614174000
+
+### Create category
+POST {{baseUrl}}/api/categories
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "name": "API Testing",
+  "description": "Category for testing API functionality"
+}
+
+### Update category
+PUT {{baseUrl}}/api/categories/123e4567-e89b-12d3-a456-426614174000
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "name": "Updated API Testing",
+  "description": "Updated description for API testing category"
+}
+
+### Users API (Admin only)
+
+### List users
+GET {{baseUrl}}/api/users
+x-api-key: {{apiKey}}
+
+### List users with filters
+GET {{baseUrl}}/api/users?role=manager&is_active=true
+x-api-key: {{apiKey}}
+
+### Get single user
+GET {{baseUrl}}/api/users/123e4567-e89b-12d3-a456-426614174000
+x-api-key: {{apiKey}}
+
+### Create user (invite)
+POST {{baseUrl}}/api/users
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "email": "newuser@example.com",
+  "first_name": "New",
+  "last_name": "User",
+  "role": "user",
+  "auto_activate": false
+}
+
+### Activate user
+PATCH {{baseUrl}}/api/users/123e4567-e89b-12d3-a456-426614174000/activate
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "is_active": true
+}
+
+### Error Testing
+
+### Test authentication failure
+GET {{baseUrl}}/api/articles
+
+### Test invalid API key
+GET {{baseUrl}}/api/articles
+x-api-key: invalid-key
+
+### Test rate limiting (send multiple requests quickly)
+GET {{baseUrl}}/api/articles
+x-api-key: {{apiKey}}
+
+### Test validation error
+POST {{baseUrl}}/api/articles
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+  "title": "",
+  "content": ""
+}
+
+### Test permission error (try user management with user role)
+GET {{baseUrl}}/api/users
+Authorization: Bearer user-jwt-token-here
