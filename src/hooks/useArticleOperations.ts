@@ -34,6 +34,11 @@ export const useArticleOperations = () => {
         throw new Error(error.message);
       }
 
+      // Type assertion with proper error handling
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response from server');
+      }
+
       return data as CreateArticleResponse;
     },
     onSuccess: (data) => {
@@ -74,6 +79,11 @@ export const useArticleOperations = () => {
       if (error) {
         console.error('Publish RPC Error:', error);
         throw new Error(error.message);
+      }
+
+      // Type assertion with proper error handling
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response from server');
       }
 
       return data as PublishArticleResponse;
