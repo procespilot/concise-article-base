@@ -22,6 +22,7 @@ import {
   LazySettings,
   ComponentLoader 
 } from "@/components/LazyComponents";
+import InformativeHomepage from "@/components/InformativeHomepage";
 
 const Index = () => {
   const {
@@ -225,21 +226,17 @@ const Index = () => {
     switch (activeSection) {
       case "dashboard":
         return isManager ? 
-          <Dashboard 
-            articles={supabaseData.articles} 
-            categories={supabaseData.categories} 
-            users={supabaseData.users}
+          <InformativeHomepage 
+            articles={supabaseData.articles}
             onCreateArticle={handleCreateArticle}
-            onCreateCategory={handleCreateCategory}
-            onManageUsers={handleManageUsers}
+            onArticleClick={handleArticleClick}
+            isManager={isManager}
           /> : 
-          <ArticlesList 
-            articles={supabaseData.articles} 
-            categories={supabaseData.categories} 
-            onArticleClick={handleArticleClick} 
-            onCreateArticle={handleCreateArticle} 
-            isManager={isManager} 
-            searchInputRef={searchInputRef} 
+          <InformativeHomepage 
+            articles={supabaseData.articles}
+            onCreateArticle={handleCreateArticle}
+            onArticleClick={handleArticleClick}
+            isManager={isManager}
           />;
       case "articles":
         return <ArticlesList 
@@ -292,23 +289,12 @@ const Index = () => {
           </Suspense>
         );
       default:
-        return isManager ? 
-          <Dashboard 
-            articles={supabaseData.articles} 
-            categories={supabaseData.categories} 
-            users={supabaseData.users}
-            onCreateArticle={handleCreateArticle}
-            onCreateCategory={handleCreateCategory}
-            onManageUsers={handleManageUsers}
-          /> : 
-          <ArticlesList 
-            articles={supabaseData.articles} 
-            categories={supabaseData.categories} 
-            onArticleClick={handleArticleClick} 
-            onCreateArticle={handleCreateArticle} 
-            isManager={isManager} 
-            searchInputRef={searchInputRef} 
-          />;
+        return <InformativeHomepage 
+          articles={supabaseData.articles}
+          onCreateArticle={handleCreateArticle}
+          onArticleClick={handleArticleClick}
+          isManager={isManager}
+        />;
     }
   };
 
