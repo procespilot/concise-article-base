@@ -59,13 +59,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     articleOps.incrementViews(id);
   };
 
+  // Wrapper functions to handle Query return types
+  const refetchArticles = async (): Promise<any[]> => {
+    const result = await supabaseData.refetchArticles();
+    return result.data || [];
+  };
+
+  const refetchCategories = async (): Promise<any[]> => {
+    const result = await supabaseData.refetchCategories();
+    return result.data || [];
+  };
+
+  const refetchUsers = async (): Promise<any[]> => {
+    const result = await supabaseData.refetchUsers();
+    return result.data || [];
+  };
+
   const contextValue = {
     ...supabaseData,
     isManager,
     createArticle,
     updateArticle,
     deleteArticle,
-    incrementViews
+    incrementViews,
+    refetchArticles,
+    refetchCategories,
+    refetchUsers
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import { useState, useRef, Suspense } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
@@ -12,7 +13,7 @@ import UserForm from "@/components/UserForm";
 import CategoryForm from "@/components/CategoryForm";
 import UserRoleDebug from "@/components/UserRoleDebug";
 import { useAuth } from "@/hooks/useAuth";
-import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { useUser } from "@/contexts/UserContext";
 import { useCommonShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { 
   LazyAnalytics, 
@@ -30,7 +31,7 @@ const Index = () => {
     isManager,
     loading: authLoading
   } = useAuth();
-  const supabaseData = useSupabaseData();
+  const userData = useUser();
   const [activeSection, setActiveSection] = useState(isManager ? "dashboard" : "articles");
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
@@ -57,7 +58,7 @@ const Index = () => {
     }
   });
 
-  if (authLoading || supabaseData.loading) {
+  if (authLoading || userData.loading) {
     return <div className="min-h-screen flex items-center justify-center bg-white">
         <LoadingSpinner size="lg" text="Applicatie laden..." />
       </div>;
@@ -72,7 +73,7 @@ const Index = () => {
     setSelectedArticleId(articleId);
     setEditingArticleId(null);
     setIsCreatingArticle(false);
-    supabaseData.incrementViews(articleId);
+    userData.incrementViews(articleId);
   };
 
   const handleBackToList = () => {
@@ -101,13 +102,13 @@ const Index = () => {
     console.log("Save article", articleData);
     let success = false;
     if (isCreatingArticle) {
-      success = await supabaseData.createArticle(articleData);
+      success = await userData.createArticle(articleData);
     } else if (editingArticleId) {
-      success = await supabaseData.updateArticle(editingArticleId, articleData);
+      success = await userData.updateArticle(editingArticleId, articleData);
     }
     if (success) {
       handleBackToList();
-      await supabaseData.refreshAllData();
+      await userData.refetchArticles();
     }
   };
 
@@ -120,11 +121,11 @@ const Index = () => {
   };
 
   const handleRefreshCategories = async () => {
-    await supabaseData.refetchCategories();
+    await userData.refetchCategories();
   };
 
   const handleRefreshUsers = async () => {
-    await supabaseData.refetchUsers();
+    await userData.refetchUsers();
   };
 
   const handleCreateCategory = () => {
@@ -153,13 +154,13 @@ const Index = () => {
         isActive: !selectedArticleId && !editingArticleId && !isCreatingArticle
       });
       if (selectedArticleId) {
-        const article = supabaseData.articles.find(a => a.id === selectedArticleId);
+        const article = userData.articles.find(a => a.id === selectedArticleId);
         breadcrumbs.push({
           label: article?.title || "Artikel",
           isActive: true
         });
       } else if (editingArticleId) {
-        const article = supabaseData.articles.find(a => a.id === editingArticleId);
+        const article = userData.articles.find(a => a.id === editingArticleId);
         breadcrumbs.push({
           label: `${article?.title || "Artikel"} bewerken`,
           isActive: true
@@ -198,15 +199,15 @@ const Index = () => {
             articleId={editingArticleId || undefined} 
             onBack={handleBackToList} 
             onSave={handleSaveArticle} 
-            articles={supabaseData.articles} 
-            categories={supabaseData.categories} 
+            articles={userData.articles} 
+            categories={userData.categories} 
           />
         </Suspense>
       );
     }
 
     if (selectedArticleId) {
-      const article = supabaseData.articles.find(a => a.id === selectedArticleId);
+      const article = userData.articles.find(a => a.id === selectedArticleId);
       if (!article) {
         return <div className="text-center py-12 bg-white">
             <p className="text-gray-600">Artikel niet gevonden</p>
@@ -227,21 +228,21 @@ const Index = () => {
       case "dashboard":
         return isManager ? 
           <InformativeHomepage 
-            articles={supabaseData.articles}
+            articles={userData.articles}
             onCreateArticle={handleCreateArticle}
             onArticleClick={handleArticleClick}
             isManager={isManager}
           /> : 
           <InformativeHomepage 
-            articles={supabaseData.articles}
+            articles={userData.articles}
             onCreateArticle={handleCreateArticle}
             onArticleClick={handleArticleClick}
             isManager={isManager}
           />;
       case "articles":
         return <ArticlesList 
-          articles={supabaseData.articles} 
-          categories={supabaseData.categories} 
+          articles={userData.articles} 
+          categories={userData.categories} 
           onArticleClick={handleArticleClick} 
           onCreateArticle={handleCreateArticle} 
           isManager={isManager} 
@@ -251,14 +252,14 @@ const Index = () => {
         return isManager ? (
           <Suspense fallback={<ComponentLoader />}>
             <LazyAnalytics 
-              articles={supabaseData.articles} 
-              categories={supabaseData.categories} 
+              articles={userData.articles} 
+              categories={userData.categories} 
             />
           </Suspense>
         ) : (
           <ArticlesList 
-            articles={supabaseData.articles} 
-            categories={supabaseData.categories} 
+            articles={userData.articles} 
+            categories={userData.categories} 
             onArticleClick={handleArticleClick} 
             onCreateArticle={handleCreateArticle} 
             isManager={isManager} 
@@ -267,8 +268,8 @@ const Index = () => {
         );
       case "categories":
         return <Categories 
-          categories={supabaseData.categories} 
-          articles={supabaseData.articles} 
+          categories={userData.categories} 
+          articles={userData.articles} 
           onRefresh={handleRefreshCategories}
           onCreateCategory={handleCreateCategory}
         />;
@@ -276,7 +277,7 @@ const Index = () => {
         return (
           <Suspense fallback={<ComponentLoader />}>
             <LazyUsers 
-              users={supabaseData.users} 
+              users={userData.users} 
               onRefresh={handleRefreshUsers}
               onCreateUser={handleShowUserForm}
             />
@@ -290,7 +291,7 @@ const Index = () => {
         );
       default:
         return <InformativeHomepage 
-          articles={supabaseData.articles}
+          articles={userData.articles}
           onCreateArticle={handleCreateArticle}
           onArticleClick={handleArticleClick}
           isManager={isManager}
