@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -113,7 +112,7 @@ export const useAuth = () => {
         setProfile(profileData);
       }
       
-      // Get user role
+      // Get user role and force state update
       const role = await fetchUserRole(user.id);
       console.log('Setting refreshed role to:', role);
       setUserRole(role);
@@ -158,11 +157,17 @@ export const useAuth = () => {
                 setProfile(profileData);
               }
               
-              // Get user role with improved method
+              // Get user role with improved method and force state update
               const role = await fetchUserRole(session.user.id);
               if (mounted) {
                 console.log('Setting role to:', role);
                 setUserRole(role);
+                // Force a second state update to ensure it's applied
+                setTimeout(() => {
+                  if (mounted) {
+                    setUserRole(role);
+                  }
+                }, 50);
               }
               
             } catch (error) {
