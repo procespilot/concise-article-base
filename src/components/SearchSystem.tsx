@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Tag, Clock, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -6,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Article, Category } from '@/types/article';
-import { SearchHighlight } from '@/components/SearchHighlight';
+import { Article } from '@/types/article';
+import { Category } from '@/types/user';
+import SearchHighlight from '@/components/SearchHighlight';
 
 interface SearchSystemProps {
   articles: Article[];

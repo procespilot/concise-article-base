@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Article, Category } from '@/types/article';
+import { Article } from '@/types/article';
+import { Category } from '@/types/user';
 import SearchSystem from './SearchSystem';
 import ArticleBookmarks from './ArticleBookmarks';
 import { PaginationControls } from './PaginationControls';
@@ -91,13 +92,16 @@ const ArticleListEnhanced = ({
   }, [articles, selectedCategory, showFeatured, searchQuery, sortBy, sortOrder]);
 
   const {
-    currentItems: paginatedArticles,
+    paginatedData: paginatedArticles,
     currentPage,
     totalPages,
     goToPage,
-    goToNextPage,
-    goToPreviousPage
-  } = usePagination(filteredAndSortedArticles, 12);
+    nextPage,
+    prevPage,
+    hasNextPage,
+    hasPrevPage,
+    totalItems
+  } = usePagination({ data: filteredAndSortedArticles, itemsPerPage: 12 });
 
   const ArticleCard = ({ article }: { article: Article }) => (
     <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
@@ -341,8 +345,10 @@ const ArticleListEnhanced = ({
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={goToPage}
-          onNextPage={goToNextPage}
-          onPreviousPage={goToPreviousPage}
+          hasNextPage={hasNextPage}
+          hasPrevPage={hasPrevPage}
+          totalItems={totalItems}
+          itemsPerPage={12}
         />
       )}
     </div>
