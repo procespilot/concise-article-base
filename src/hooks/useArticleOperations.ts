@@ -17,6 +17,15 @@ interface PublishArticleResponse {
   message?: string;
 }
 
+// Type guard functions
+const isCreateArticleResponse = (data: any): data is CreateArticleResponse => {
+  return data && typeof data === 'object' && typeof data.success === 'boolean';
+};
+
+const isPublishArticleResponse = (data: any): data is PublishArticleResponse => {
+  return data && typeof data === 'object' && typeof data.success === 'boolean';
+};
+
 export const useArticleOperations = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -34,12 +43,20 @@ export const useArticleOperations = () => {
         throw new Error(error.message);
       }
 
-      // Type assertion with proper error handling
-      if (!data || typeof data !== 'object') {
-        throw new Error('Invalid response from server');
+      // Safe type conversion with validation
+      if (!data) {
+        throw new Error('No response data received');
       }
 
-      return data as CreateArticleResponse;
+      // Convert to unknown first, then validate
+      const response = data as unknown;
+      
+      if (!isCreateArticleResponse(response)) {
+        console.error('Invalid response format:', response);
+        throw new Error('Invalid response format from server');
+      }
+
+      return response;
     },
     onSuccess: (data) => {
       if (data.success) {
@@ -81,12 +98,20 @@ export const useArticleOperations = () => {
         throw new Error(error.message);
       }
 
-      // Type assertion with proper error handling
-      if (!data || typeof data !== 'object') {
-        throw new Error('Invalid response from server');
+      // Safe type conversion with validation
+      if (!data) {
+        throw new Error('No response data received');
       }
 
-      return data as PublishArticleResponse;
+      // Convert to unknown first, then validate
+      const response = data as unknown;
+      
+      if (!isPublishArticleResponse(response)) {
+        console.error('Invalid response format:', response);
+        throw new Error('Invalid response format from server');
+      }
+
+      return response;
     },
     onSuccess: (data) => {
       if (data.success) {
