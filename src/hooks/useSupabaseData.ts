@@ -17,12 +17,13 @@ export const useSupabaseData = () => {
     queryKey: ['articles'],
     queryFn: async () => {
       console.log('Fetching articles with optimized query...');
+      
+      // Simplified query to avoid the profiles recursion issue
       const { data, error } = await supabase
         .from('articles')
         .select(`
           *,
-          categories(name),
-          profiles!articles_author_id_fkey(first_name, last_name)
+          categories(name)
         `)
         .order('created_at', { ascending: false });
 

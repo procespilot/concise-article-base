@@ -38,7 +38,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const contextValue = useMemo(() => {
     const createArticle = async (data: any): Promise<boolean> => {
       try {
-        articleOps.createArticle(data);
+        await articleOps.createArticle(data);
         return true;
       } catch (error) {
         console.error('Error creating article:', error);
@@ -48,7 +48,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const updateArticle = async (id: string, data: any): Promise<boolean> => {
       try {
-        return createArticle(data);
+        // For now, since we don't have an update mutation, we'll create a new article
+        // This should be replaced with proper update logic when available
+        console.warn('Update functionality not fully implemented, creating new article instead');
+        await articleOps.createArticle(data);
+        return true;
       } catch (error) {
         console.error('Error updating article:', error);
         return false;
@@ -118,8 +122,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabaseData.users,
     supabaseData.loading,
     isManager,
-    articleOps.createArticle,
-    articleOps.incrementViews,
+    articleOps,
     supabaseData.refetchArticles,
     supabaseData.refetchCategories,
     supabaseData.refetchUsers
