@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { User, Mail, Phone, Bell, Shield, Palette } from 'lucide-react';
+import { User, Mail, Phone, Bell, Shield, Palette, ArrowLeft, Home } from 'lucide-react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import EmailChangeForm from '@/components/EmailChangeForm';
 import { useToast } from '@/hooks/use-toast';
@@ -97,6 +98,16 @@ const UserSettings = () => {
   if (showEmailChange) {
     return (
       <div className="max-w-2xl mx-auto p-6">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => setShowEmailChange(false)}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Terug naar instellingen
+          </Button>
+        </div>
         <EmailChangeForm 
           currentEmail={user?.email || ''} 
           onBack={() => setShowEmailChange(false)} 
@@ -107,12 +118,21 @@ const UserSettings = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <div className="flex items-center space-x-3">
-        <User className="w-8 h-8 text-blue-600" />
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gebruikersinstellingen</h1>
-          <p className="text-gray-600">Beheer je profiel en voorkeuren</p>
+      {/* Navigation header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <User className="w-8 h-8 text-blue-600" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Gebruikersinstellingen</h1>
+            <p className="text-gray-600">Beheer je profiel en voorkeuren</p>
+          </div>
         </div>
+        <Button variant="outline" asChild>
+          <Link to="/">
+            <Home className="w-4 h-4 mr-2" />
+            Terug naar hoofdpagina
+          </Link>
+        </Button>
       </div>
 
       {(isManager || isAdmin) && (
