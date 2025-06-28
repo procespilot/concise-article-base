@@ -17,7 +17,7 @@ import { sanitizeInput } from '@/utils/sanitization';
 
 const UserSettings = () => {
   const { user, profile, loading: authLoading, updateProfile, isManager, isAdmin } = useAuth();
-  const { preferences, updatePreferences, loading: prefsLoading } = useUserPreferences();
+  const { preferences, savePreferences, loading: prefsLoading } = useUserPreferences();
   const { toast } = useToast();
 
   const [profileForm, setProfileForm] = useState({
@@ -71,7 +71,7 @@ const UserSettings = () => {
 
   const handlePreferenceChange = async (key: string, value: boolean) => {
     try {
-      await updatePreferences({ [key]: value });
+      await savePreferences({ [key]: value });
       toast({
         title: "Voorkeuren bijgewerkt",
         description: "Je voorkeuren zijn opgeslagen"
@@ -97,7 +97,10 @@ const UserSettings = () => {
   if (showEmailChange) {
     return (
       <div className="max-w-2xl mx-auto p-6">
-        <EmailChangeForm onBack={() => setShowEmailChange(false)} />
+        <EmailChangeForm 
+          currentEmail={user?.email || ''} 
+          onBack={() => setShowEmailChange(false)} 
+        />
       </div>
     );
   }
