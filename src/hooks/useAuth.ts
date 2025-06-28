@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { validateEmail } from '@/utils/sanitization';
 import { handleError, getSupabaseErrorMessage } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/use-toast';
+import { cleanupAuthState, forceLogout } from './useAuthCleanup';
 
 interface Profile {
   id: string;
@@ -16,29 +17,6 @@ interface Profile {
 interface UserRole {
   role: 'user' | 'manager' | 'admin';
 }
-
-// Security cleanup utility
-const cleanupAuthState = () => {
-  try {
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Remove from sessionStorage if exists
-    if (typeof sessionStorage !== 'undefined') {
-      Object.keys(sessionStorage).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          sessionStorage.removeItem(key);
-        }
-      });
-    }
-  } catch (error) {
-    console.warn('Failed to cleanup auth state:', error);
-  }
-};
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -266,30 +244,63 @@ export const useAuth = () => {
 
   const signOut = async () => {
     try {
+      console.log('=== Starting logout process');
+      
       // Clear active fetch operations
       activeFetchRef.current = null;
       
       // Clean up auth state first
       cleanupAuthState();
       
-      // Attempt global sign out
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        console.warn('Failed to sign out:', err);
+      // Attempt multiple logout strategies
+      const logoutStrategies = [
+        () => supabase.auth.signOut({ scope: 'global' }),
+        () => supabase.auth.signOut({ scope: 'local' }),
+        () => supabase.auth.signOut()
+      ];
+
+      let logoutSuccess = false;
+      for (const strategy of logoutStrategies) {
+        try {
+          await strategy();
+          logoutSuccess = true;
+          console.log('=== Logout strategy succeeded');
+          break;
+        } catch (err) {
+          console.warn('=== Logout strategy failed:', err);
+          continue;
+        }
       }
       
-      // Reset state
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setUserRole('user');
+      // Reset state regardless of logout success
+      if (mountedRef.current) {
+        setUser(null);
+        setSession(null);
+        setProfile(null);
+        setUserRole('user');
+      }
       
-      // Force page reload for clean state
-      window.location.href = '/';
+      // Show success message only after successful logout
+      if (logoutSuccess) {
+        toast({
+          title: "Uitgelogd",
+          description: "Je bent succesvol uitgelogd"
+        });
+      }
+      
+      // Force page reload for complete cleanup
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
+      
     } catch (error) {
-      console.error('Error signing out:', error);
-      handleError('Fout bij uitloggen', toast);
+      console.error('=== Critical logout error:', error);
+      // Force logout even on error
+      toast({
+        title: "Uitgelogd", 
+        description: "Je bent uitgelogd (geforceerd)"
+      });
+      forceLogout();
     }
   };
 

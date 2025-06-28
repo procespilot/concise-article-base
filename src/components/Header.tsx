@@ -1,35 +1,23 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { LogOut, User } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 const Header = () => {
-  const { user, isManager } = useAuth();
-  const { toast } = useToast();
+  const { user, isManager, isAdmin, signOut } = useAuth();
 
   const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Uitgelogd",
-        description: "Je bent succesvol uitgelogd"
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast({
-        title: "Fout bij uitloggen",
-        description: "Probeer het opnieuw",
-        variant: "destructive"
-      });
-    }
+    await signOut();
   };
 
   if (!user) return null;
+
+  const getRoleDisplay = () => {
+    if (isAdmin) return "(Admin)";
+    if (isManager) return "(Manager)";
+    return "";
+  };
 
   return (
     <div className="flex items-center justify-end space-x-4">
@@ -37,7 +25,11 @@ const Header = () => {
         <User className="w-4 h-4" />
         <span>
           {user.email}
-          {isManager && <span className="ml-1 text-blue-600 font-medium">(Manager)</span>}
+          {(isManager || isAdmin) && (
+            <span className="ml-1 text-blue-600 font-medium">
+              {getRoleDisplay()}
+            </span>
+          )}
         </span>
       </div>
       <Button variant="outline" size="sm" onClick={handleLogout}>

@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Dashboard from "@/components/Dashboard";
 import ArticlesList from "@/components/ArticlesList";
 import Categories from "@/components/Categories";
-import AuthPage from "@/components/AuthPage";
+import ConsolidatedAuthPage from "@/components/ConsolidatedAuthPage";
 import UserForm from "@/components/UserForm";
 import CategoryForm from "@/components/CategoryForm";
 import UserRoleDebug from "@/components/UserRoleDebug";
@@ -63,7 +63,7 @@ const Index = () => {
   }
 
   if (!isAuthenticated) {
-    return <AuthPage />;
+    return <ConsolidatedAuthPage />;
   }
 
   const handleArticleClick = (articleId: string) => {
