@@ -47,11 +47,41 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Fetch user role with better error handling
+  const fetchUserRole = async (userId: string) => {
+    try {
+      console.log('Fetching role for user:', userId);
+      
+      // Try direct query first
+      const { data: roleData, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return 'user';
+      }
+
+      if (roleData) {
+        console.log('Role found:', roleData.role);
+        return roleData.role;
+      }
+
+      console.log('No role found, defaulting to user');
+      return 'user';
+    } catch (error) {
+      console.error('Exception in fetchUserRole:', error);
+      return 'user';
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event);
+        console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -59,36 +89,29 @@ export const useAuth = () => {
           // Defer data fetching to prevent deadlocks
           setTimeout(async () => {
             try {
-              // Get profile data using the new RLS policies
-              const { data: profileData } = await supabase
+              // Get profile data
+              const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
-                .maybeSingle();
+                .single();
 
-              if (profileData) {
+              if (profileError) {
+                console.error('Profile error:', profileError);
+              } else if (profileData) {
+                console.log('Profile loaded:', profileData);
                 setProfile(profileData);
               }
               
-              // Get user role directly from user_roles table
-              const { data: roleData } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
-
-              if (roleData) {
-                console.log('User role found:', roleData.role);
-                setUserRole(roleData.role);
-              } else {
-                console.log('No role found, defaulting to user');
-                setUserRole('user');
-              }
+              // Get user role
+              const role = await fetchUserRole(session.user.id);
+              setUserRole(role);
+              
             } catch (error) {
               console.error('Error fetching user data:', error);
               handleError(getSupabaseErrorMessage(error), toast);
             }
-          }, 0);
+          }, 100);
         } else if (event === 'SIGNED_OUT') {
           setProfile(null);
           setUserRole('user');
@@ -100,6 +123,7 @@ export const useAuth = () => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -188,6 +212,8 @@ export const useAuth = () => {
       handleError('Fout bij uitloggen', toast);
     }
   };
+
+  console.log('useAuth state:', { userRole, isManager: userRole === 'manager' || userRole === 'admin' });
 
   return {
     user,

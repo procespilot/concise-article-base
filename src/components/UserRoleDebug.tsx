@@ -6,83 +6,103 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const UserRoleDebug = () => {
   const { user, userRole, isManager, isAdmin } = useAuth();
-  const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
-  const [currentUserRoles, setCurrentUserRoles] = useState<any[]>([]);
+  const [debugInfo, setDebugInfo] = useState<any>({});
+  const [directRoleQuery, setDirectRoleQuery] = useState<any>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDebugInfo = async () => {
+      if (!user) return;
+
       try {
-        // Get current user's profile using new RLS policies
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-          setCurrentUserProfile(profile);
+        console.log('=== DEBUG: Starting role query ===');
+        
+        // Direct role query
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', user.id);
+          
+        console.log('Direct role query result:', { roleData, roleError });
+        setDirectRoleQuery({ data: roleData, error: roleError });
 
-          // Get current user's roles directly
-          const { data: roles } = await supabase
-            .from('user_roles')
-            .select('*')
-            .eq('user_id', user.id);
-          setCurrentUserRoles(roles || []);
-        }
+        // Profile query
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+          
+        console.log('Profile query result:', { profileData, profileError });
 
-        // Get all users with roles using RPC function
-        const { data: users, error } = await supabase.rpc('get_users_with_roles');
-        if (error) {
-          console.error('Error fetching users:', error);
-        } else {
-          setAllUsers(users || []);
-        }
+        // RPC query
+        const { data: usersData, error: usersError } = await supabase
+          .rpc('get_users_with_roles');
+          
+        console.log('RPC query result:', { usersData, usersError });
+
+        setDebugInfo({
+          roleData,
+          roleError: roleError?.message,
+          profileData,
+          profileError: profileError?.message,
+          usersData,
+          usersError: usersError?.message
+        });
       } catch (error) {
-        console.error('Error in fetchData:', error);
+        console.error('Debug fetch error:', error);
+        setDebugInfo({ fetchError: error });
       }
     };
 
-    fetchData();
+    fetchDebugInfo();
   }, [user]);
+
+  if (!user) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Debug: Niet ingelogd</CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4 p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Huidige Gebruiker Debug Info</CardTitle>
+          <CardTitle>Auth State Debug</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2 text-sm">
-            <p><strong>Auth User ID:</strong> {user?.id || 'Niet ingelogd'}</p>
-            <p><strong>Auth User Email:</strong> {user?.email || 'Geen email'}</p>
-            <p><strong>Detected Role:</strong> {userRole}</p>
-            <p><strong>Is Manager:</strong> {isManager ? 'Ja' : 'Nee'}</p>
-            <p><strong>Is Admin:</strong> {isAdmin ? 'Ja' : 'Nee'}</p>
-            <p><strong>Profile Data:</strong> {JSON.stringify(currentUserProfile, null, 2)}</p>
-            <p><strong>Direct Role Query:</strong> {JSON.stringify(currentUserRoles, null, 2)}</p>
+          <div className="space-y-2 text-sm font-mono">
+            <p><strong>User ID:</strong> {user.id}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Detected Role:</strong> <span className="bg-yellow-200 px-2 py-1">{userRole}</span></p>
+            <p><strong>Is Manager:</strong> <span className={isManager ? 'bg-green-200' : 'bg-red-200'}>{isManager ? 'JA' : 'NEE'}</span></p>
+            <p><strong>Is Admin:</strong> <span className={isAdmin ? 'bg-green-200' : 'bg-red-200'}>{isAdmin ? 'JA' : 'NEE'}</span></p>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Alle Gebruikers in Database</CardTitle>
+          <CardTitle>Direct Role Query</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {allUsers.map((user, index) => (
-              <div key={index} className="border p-2 rounded text-sm">
-                <p><strong>ID:</strong> {user.id}</p>
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Naam:</strong> {user.first_name} {user.last_name}</p>
-                <p><strong>Actief:</strong> {user.is_active ? 'Ja' : 'Nee'}</p>
-                <p><strong>Rollen:</strong> {JSON.stringify(user.roles || user.user_roles, null, 2)}</p>
-              </div>
-            ))}
-            {allUsers.length === 0 && (
-              <p className="text-gray-500">Geen gebruikers gevonden of geen toegang</p>
-            )}
-          </div>
+          <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto">
+            {JSON.stringify(directRoleQuery, null, 2)}
+          </pre>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Complete Debug Info</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-96">
+            {JSON.stringify(debugInfo, null, 2)}
+          </pre>
         </CardContent>
       </Card>
     </div>
