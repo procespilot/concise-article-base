@@ -132,6 +132,48 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          allow_registration: boolean | null
+          created_at: string | null
+          enable_comments: boolean | null
+          enable_ratings: boolean | null
+          id: string
+          primary_color: string | null
+          require_approval: boolean | null
+          site_description: string | null
+          site_name: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          allow_registration?: boolean | null
+          created_at?: string | null
+          enable_comments?: boolean | null
+          enable_ratings?: boolean | null
+          id?: string
+          primary_color?: string | null
+          require_approval?: boolean | null
+          site_description?: string | null
+          site_name?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          allow_registration?: boolean | null
+          created_at?: string | null
+          enable_comments?: boolean | null
+          enable_ratings?: boolean | null
+          id?: string
+          primary_color?: string | null
+          require_approval?: boolean | null
+          site_description?: string | null
+          site_name?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_audit_log: {
         Row: {
           action: string
@@ -156,6 +198,42 @@ export type Database = {
           id?: string
           performed_by?: string | null
           target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          email_updates: boolean | null
+          id: string
+          notifications: boolean | null
+          session_timeout: number | null
+          two_factor_auth: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          email_updates?: boolean | null
+          id?: string
+          notifications?: boolean | null
+          session_timeout?: number | null
+          two_factor_auth?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          email_updates?: boolean | null
+          id?: string
+          notifications?: boolean | null
+          session_timeout?: number | null
+          two_factor_auth?: boolean | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

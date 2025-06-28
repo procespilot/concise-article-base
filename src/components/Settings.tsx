@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { 
   Settings as SettingsIcon, 
   User, 
@@ -15,44 +16,125 @@ import {
   Database,
   Mail,
   Globe,
-  Save
+  Save,
+  RefreshCw
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 
 const Settings = () => {
   const { isManager, user } = useAuth();
-  const [settings, setSettings] = useState({
-    // Personal Settings
-    displayName: user?.email?.split('@')[0] || "",
-    email: user?.email || "",
+  const { 
+    preferences, 
+    loading: preferencesLoading, 
+    saving: preferencesSaving, 
+    savePreferences 
+  } = useUserPreferences();
+  const { 
+    settings: systemSettings, 
+    loading: systemLoading, 
+    saving: systemSaving, 
+    saveSettings: saveSystemSettings,
+    canEdit: canEditSystem 
+  } = useSystemSettings();
+
+  const [personalSettings, setPersonalSettings] = useState({
+    displayName: "",
+    email: "",
     notifications: true,
     emailUpdates: false,
-    
-    // System Settings (Manager only)
+    twoFactorAuth: false,
+    sessionTimeout: 60
+  });
+
+  const [systemSettingsLocal, setSystemSettingsLocal] = useState({
     siteName: "ClearBase",
     siteDescription: "Knowledge Base Platform",
     allowRegistration: true,
     requireApproval: false,
     enableComments: true,
     enableRatings: true,
-    
-    // Appearance
-    theme: "light",
-    primaryColor: "#3B82F6",
-    
-    // Security
-    twoFactorAuth: false,
-    sessionTimeout: 60
+    primaryColor: "#3B82F6"
   });
 
-  const handleSave = () => {
-    console.log("Settings saved:", settings);
-    // In real app, this would save to backend
+  // Update local state when preferences load
+  useEffect(() => {
+    if (preferences) {
+      setPersonalSettings({
+        displayName: preferences.display_name || user?.email?.split('@')[0] || "",
+        email: user?.email || "",
+        notifications: preferences.notifications,
+        emailUpdates: preferences.email_updates,
+        twoFactorAuth: preferences.two_factor_auth,
+        sessionTimeout: preferences.session_timeout
+      });
+    }
+  }, [preferences, user]);
+
+  // Update local state when system settings load
+  useEffect(() => {
+    if (systemSettings) {
+      setSystemSettingsLocal({
+        siteName: systemSettings.site_name,
+        siteDescription: systemSettings.site_description,
+        allowRegistration: systemSettings.allow_registration,
+        requireApproval: systemSettings.require_approval,
+        enableComments: systemSettings.enable_comments,
+        enableRatings: systemSettings.enable_ratings,
+        primaryColor: systemSettings.primary_color
+      });
+    }
+  }, [systemSettings]);
+
+  const handleSavePersonal = async () => {
+    const success = await savePreferences({
+      display_name: personalSettings.displayName,
+      notifications: personalSettings.notifications,
+      email_updates: personalSettings.emailUpdates,
+      two_factor_auth: personalSettings.twoFactorAuth,
+      session_timeout: personalSettings.sessionTimeout
+    });
+
+    if (success) {
+      console.log("Personal settings saved successfully");
+    }
   };
 
-  const updateSetting = (key: string, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+  const handleSaveSystem = async () => {
+    const success = await saveSystemSettings({
+      site_name: systemSettingsLocal.siteName,
+      site_description: systemSettingsLocal.siteDescription,
+      allow_registration: systemSettingsLocal.allowRegistration,
+      require_approval: systemSettingsLocal.requireApproval,
+      enable_comments: systemSettingsLocal.enableComments,
+      enable_ratings: systemSettingsLocal.enableRatings,
+      primary_color: systemSettingsLocal.primaryColor
+    });
+
+    if (success) {
+      console.log("System settings saved successfully");
+    }
   };
+
+  const updatePersonalSetting = (key: string, value: any) => {
+    setPersonalSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateSystemSetting = (key: string, value: any) => {
+    setSystemSettingsLocal(prev => ({ ...prev, [key]: value }));
+  };
+
+  const isLoading = preferencesLoading || systemLoading;
+  const isSaving = preferencesSaving || systemSaving;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in max-w-4xl">
@@ -84,8 +166,8 @@ const Settings = () => {
               <Label htmlFor="displayName">Weergavenaam</Label>
               <Input
                 id="displayName"
-                value={settings.displayName}
-                onChange={(e) => updateSetting("displayName", e.target.value)}
+                value={personalSettings.displayName}
+                onChange={(e) => updatePersonalSetting("displayName", e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -93,9 +175,12 @@ const Settings = () => {
               <Input
                 id="email"
                 type="email"
-                value={settings.email}
-                onChange={(e) => updateSetting("email", e.target.value)}
+                value={personalSettings.email}
+                onChange={(e) => updatePersonalSetting("email", e.target.value)}
+                disabled
+                className="bg-gray-50"
               />
+              <p className="text-xs text-gray-500">E-mailadres kan niet worden gewijzigd</p>
             </div>
           </div>
           
@@ -114,8 +199,8 @@ const Settings = () => {
                 </div>
                 <Switch
                   id="notifications"
-                  checked={settings.notifications}
-                  onCheckedChange={(checked) => updateSetting("notifications", checked)}
+                  checked={personalSettings.notifications}
+                  onCheckedChange={(checked) => updatePersonalSetting("notifications", checked)}
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -125,11 +210,28 @@ const Settings = () => {
                 </div>
                 <Switch
                   id="emailUpdates"
-                  checked={settings.emailUpdates}
-                  onCheckedChange={(checked) => updateSetting("emailUpdates", checked)}
+                  checked={personalSettings.emailUpdates}
+                  onCheckedChange={(checked) => updatePersonalSetting("emailUpdates", checked)}
                 />
               </div>
             </div>
+          </div>
+
+          <Separator />
+
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleSavePersonal} 
+              disabled={isSaving}
+              className="bg-clearbase-600 hover:bg-clearbase-700"
+            >
+              {preferencesSaving ? (
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              Persoonlijke instellingen opslaan
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -153,8 +255,8 @@ const Settings = () => {
             </div>
             <Switch
               id="twoFactorAuth"
-              checked={settings.twoFactorAuth}
-              onCheckedChange={(checked) => updateSetting("twoFactorAuth", checked)}
+              checked={personalSettings.twoFactorAuth}
+              onCheckedChange={(checked) => updatePersonalSetting("twoFactorAuth", checked)}
             />
           </div>
           
@@ -163,8 +265,8 @@ const Settings = () => {
             <Input
               id="sessionTimeout"
               type="number"
-              value={settings.sessionTimeout}
-              onChange={(e) => updateSetting("sessionTimeout", parseInt(e.target.value))}
+              value={personalSettings.sessionTimeout}
+              onChange={(e) => updatePersonalSetting("sessionTimeout", parseInt(e.target.value))}
               className="max-w-xs"
             />
             <p className="text-sm text-gray-500">Automatisch uitloggen na inactiviteit</p>
@@ -191,16 +293,18 @@ const Settings = () => {
                   <Label htmlFor="siteName">Site naam</Label>
                   <Input
                     id="siteName"
-                    value={settings.siteName}
-                    onChange={(e) => updateSetting("siteName", e.target.value)}
+                    value={systemSettingsLocal.siteName}
+                    onChange={(e) => updateSystemSetting("siteName", e.target.value)}
+                    disabled={!canEditSystem}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="siteDescription">Site beschrijving</Label>
                   <Input
                     id="siteDescription"
-                    value={settings.siteDescription}
-                    onChange={(e) => updateSetting("siteDescription", e.target.value)}
+                    value={systemSettingsLocal.siteDescription}
+                    onChange={(e) => updateSystemSetting("siteDescription", e.target.value)}
+                    disabled={!canEditSystem}
                   />
                 </div>
               </div>
@@ -217,8 +321,9 @@ const Settings = () => {
                     </div>
                     <Switch
                       id="allowRegistration"
-                      checked={settings.allowRegistration}
-                      onCheckedChange={(checked) => updateSetting("allowRegistration", checked)}
+                      checked={systemSettingsLocal.allowRegistration}
+                      onCheckedChange={(checked) => updateSystemSetting("allowRegistration", checked)}
+                      disabled={!canEditSystem}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -228,8 +333,9 @@ const Settings = () => {
                     </div>
                     <Switch
                       id="requireApproval"
-                      checked={settings.requireApproval}
-                      onCheckedChange={(checked) => updateSetting("requireApproval", checked)}
+                      checked={systemSettingsLocal.requireApproval}
+                      onCheckedChange={(checked) => updateSystemSetting("requireApproval", checked)}
+                      disabled={!canEditSystem}
                     />
                   </div>
                 </div>
@@ -247,8 +353,9 @@ const Settings = () => {
                     </div>
                     <Switch
                       id="enableComments"
-                      checked={settings.enableComments}
-                      onCheckedChange={(checked) => updateSetting("enableComments", checked)}
+                      checked={systemSettingsLocal.enableComments}
+                      onCheckedChange={(checked) => updateSystemSetting("enableComments", checked)}
+                      disabled={!canEditSystem}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -258,11 +365,29 @@ const Settings = () => {
                     </div>
                     <Switch
                       id="enableRatings"
-                      checked={settings.enableRatings}
-                      onCheckedChange={(checked) => updateSetting("enableRatings", checked)}
+                      checked={systemSettingsLocal.enableRatings}
+                      onCheckedChange={(checked) => updateSystemSetting("enableRatings", checked)}
+                      disabled={!canEditSystem}
                     />
                   </div>
                 </div>
+              </div>
+
+              <Separator />
+
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleSaveSystem} 
+                  disabled={!canEditSystem || isSaving}
+                  className="bg-clearbase-600 hover:bg-clearbase-700"
+                >
+                  {systemSaving ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Systeeminstellingen opslaan
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -284,14 +409,16 @@ const Settings = () => {
                   <Input
                     id="primaryColor"
                     type="color"
-                    value={settings.primaryColor}
-                    onChange={(e) => updateSetting("primaryColor", e.target.value)}
+                    value={systemSettingsLocal.primaryColor}
+                    onChange={(e) => updateSystemSetting("primaryColor", e.target.value)}
                     className="w-20 h-10"
+                    disabled={!canEditSystem}
                   />
                   <Input
-                    value={settings.primaryColor}
-                    onChange={(e) => updateSetting("primaryColor", e.target.value)}
+                    value={systemSettingsLocal.primaryColor}
+                    onChange={(e) => updateSystemSetting("primaryColor", e.target.value)}
                     className="flex-1"
+                    disabled={!canEditSystem}
                   />
                 </div>
               </div>
@@ -299,14 +426,6 @@ const Settings = () => {
           </Card>
         </>
       )}
-
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} className="bg-clearbase-600 hover:bg-clearbase-700">
-          <Save className="w-4 h-4 mr-2" />
-          Instellingen opslaan
-        </Button>
-      </div>
     </div>
   );
 };
