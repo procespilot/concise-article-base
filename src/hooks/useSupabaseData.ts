@@ -1,10 +1,12 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 export const useSupabaseData = () => {
   const { toast } = useToast();
+  const hasShownErrorRef = useRef({ articles: false, categories: false, users: false });
 
   const {
     data: articles = [],
@@ -32,8 +34,10 @@ export const useSupabaseData = () => {
       console.log('Articles fetched successfully:', data?.length || 0);
       return data || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+    retryOnMount: false
   });
 
   const {
@@ -58,8 +62,10 @@ export const useSupabaseData = () => {
       console.log('Categories fetched successfully:', data?.length || 0);
       return data || [];
     },
-    staleTime: 15 * 60 * 1000, // 15 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    retryOnMount: false
   });
 
   const {
@@ -94,43 +100,47 @@ export const useSupabaseData = () => {
       console.log('Users fetched successfully:', transformedUsers?.length || 0);
       return transformedUsers;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 20 * 60 * 1000, // 20 minutes
+    staleTime: 10 * 60 * 1000,
+    gcTime: 20 * 60 * 1000,
+    retry: 1,
+    retryOnMount: false
   });
 
-  // Memoize the refreshAllData function to prevent unnecessary re-renders
+  // Stable refresh function
   const refreshAllData = useCallback(() => {
     refetchArticles();
     refetchCategories();
     refetchUsers();
   }, [refetchArticles, refetchCategories, refetchUsers]);
 
-  // Show error toasts only once per error
-  if (articlesError) {
+  // Show error toasts only once per session
+  if (articlesError && !hasShownErrorRef.current.articles) {
+    hasShownErrorRef.current.articles = true;
     toast({
       title: "Fout bij laden artikelen",
-      description: articlesError.message,
+      description: "Er is een probleem met het laden van artikelen",
       variant: "destructive"
     });
   }
 
-  if (categoriesError) {
+  if (categoriesError && !hasShownErrorRef.current.categories) {
+    hasShownErrorRef.current.categories = true;
     toast({
       title: "Fout bij laden categorieën",
-      description: categoriesError.message,
+      description: "Er is een probleem met het laden van categorieën",
       variant: "destructive"
     });
   }
 
-  if (usersError) {
+  if (usersError && !hasShownErrorRef.current.users) {
+    hasShownErrorRef.current.users = true;
     toast({
       title: "Fout bij laden gebruikers",
-      description: usersError.message,
+      description: "Er is een probleem met het laden van gebruikers",
       variant: "destructive"
     });
   }
 
-  // Memoize the return value to prevent unnecessary re-renders
   return useMemo(() => ({
     articles,
     categories,

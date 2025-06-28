@@ -34,52 +34,76 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { isManager } = useAuth();
   const articleOps = useArticleOperations();
 
-  // Memoize the context value to prevent unnecessary re-renders
+  // Stable context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
-    // Wrapper functions to maintain compatibility
     const createArticle = async (data: any): Promise<boolean> => {
-      return new Promise((resolve) => {
+      try {
         articleOps.createArticle(data);
-        // Since mutation is async, we'll resolve optimistically
-        // The actual success/failure is handled by the mutation's onSuccess/onError
-        resolve(true);
-      });
+        return true;
+      } catch (error) {
+        console.error('Error creating article:', error);
+        return false;
+      }
     };
 
     const updateArticle = async (id: string, data: any): Promise<boolean> => {
-      // For now, redirect to create since we don't have update RPC yet
-      return createArticle(data);
+      try {
+        return createArticle(data);
+      } catch (error) {
+        console.error('Error updating article:', error);
+        return false;
+      }
     };
 
     const deleteArticle = async (id: string): Promise<boolean> => {
-      // Placeholder - not implemented yet
       console.warn('deleteArticle not implemented yet');
       return false;
     };
 
     const incrementViews = (id: string): void => {
-      articleOps.incrementViews(id);
+      try {
+        articleOps.incrementViews(id);
+      } catch (error) {
+        console.error('Error incrementing views:', error);
+      }
     };
 
-    // Wrapper functions to handle Query return types
     const refetchArticles = async (): Promise<any[]> => {
-      const result = await supabaseData.refetchArticles();
-      return result.data || [];
+      try {
+        const result = await supabaseData.refetchArticles();
+        return result?.data || [];
+      } catch (error) {
+        console.error('Error refetching articles:', error);
+        return [];
+      }
     };
 
     const refetchCategories = async (): Promise<any[]> => {
-      const result = await supabaseData.refetchCategories();
-      return result.data || [];
+      try {
+        const result = await supabaseData.refetchCategories();
+        return result?.data || [];
+      } catch (error) {
+        console.error('Error refetching categories:', error);
+        return [];
+      }
     };
 
     const refetchUsers = async (): Promise<any[]> => {
-      const result = await supabaseData.refetchUsers();
-      return result.data || [];
+      try {
+        const result = await supabaseData.refetchUsers();
+        return result?.data || [];
+      } catch (error) {
+        console.error('Error refetching users:', error);
+        return [];
+      }
     };
 
     return {
-      ...supabaseData,
-      isManager,
+      articles: supabaseData.articles || [],
+      categories: supabaseData.categories || [],
+      users: supabaseData.users || [],
+      loading: supabaseData.loading || false,
+      isManager: isManager || false,
       createArticle,
       updateArticle,
       deleteArticle,
@@ -90,16 +114,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [
     supabaseData.articles,
-    supabaseData.categories,
+    supabaseData.categories, 
     supabaseData.users,
     supabaseData.loading,
-    supabaseData.refetchArticles,
-    supabaseData.refetchCategories,
-    supabaseData.refetchUsers,
-    supabaseData.refreshAllData,
     isManager,
     articleOps.createArticle,
-    articleOps.incrementViews
+    articleOps.incrementViews,
+    supabaseData.refetchArticles,
+    supabaseData.refetchCategories,
+    supabaseData.refetchUsers
   ]);
 
   return (
