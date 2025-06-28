@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { validateEmail } from '@/utils/sanitization';
@@ -46,91 +47,121 @@ export const useAuth = () => {
   const [userRole, setUserRole] = useState<string>('user');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  
+  // Track active fetch operations to prevent race conditions
+  const activeFetchRef = useRef<string | null>(null);
+  const mountedRef = useRef(true);
 
-  // Improved role fetching with better error handling
-  const fetchUserRole = async (userId: string) => {
+  // Memoized role fetching with race condition prevention
+  const fetchUserRole = useCallback(async (userId: string, callId: string) => {
+    console.log(`=== [${callId}] Starting role fetch for user:`, userId);
+    
+    // Set this as the active fetch
+    activeFetchRef.current = callId;
+    
     try {
-      console.log('=== Fetching role for user:', userId);
-      
       // Direct query to user_roles table
       const { data: roleData, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid errors when no role exists
 
-      console.log('Role query result:', { roleData, error });
+      console.log(`=== [${callId}] Role query result:`, { roleData, error });
+
+      // Check if this call is still the active one
+      if (activeFetchRef.current !== callId) {
+        console.log(`=== [${callId}] Call superseded, ignoring result`);
+        return null;
+      }
 
       if (error) {
-        console.error('Error fetching user role:', error);
-        
-        // If no role found, try to create a default user role
-        if (error.code === 'PGRST116') {
-          console.log('No role found, creating default user role');
-          const { error: insertError } = await supabase
-            .from('user_roles')
-            .insert({ user_id: userId, role: 'user' });
-          
-          if (insertError) {
-            console.error('Error creating default role:', insertError);
-          }
-          return 'user';
-        }
+        console.error(`=== [${callId}] Error fetching user role:`, error);
         return 'user';
       }
 
       if (roleData) {
-        console.log('Role found:', roleData.role);
+        console.log(`=== [${callId}] Role found:`, roleData.role);
         return roleData.role;
       }
 
-      console.log('No role found, defaulting to user');
+      // No role found, create default user role
+      console.log(`=== [${callId}] No role found, creating default user role`);
+      const { error: insertError } = await supabase
+        .from('user_roles')
+        .insert({ user_id: userId, role: 'user' });
+      
+      if (insertError) {
+        console.error(`=== [${callId}] Error creating default role:`, insertError);
+      }
+      
       return 'user';
     } catch (error) {
-      console.error('Exception in fetchUserRole:', error);
+      console.error(`=== [${callId}] Exception in fetchUserRole:`, error);
       return 'user';
     }
-  };
+  }, []);
 
-  // Force refresh user data
-  const refreshUserData = async () => {
-    if (!user) return;
+  // Consolidated user data fetching function
+  const fetchUserData = useCallback(async (userId: string, callId: string) => {
+    if (!mountedRef.current) return;
     
-    console.log('=== Refreshing user data for:', user.id);
+    console.log(`=== [${callId}] Fetching user data for:`, userId);
     
     try {
-      // Get profile data
+      // Fetch profile and role in sequence to avoid conflicts
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
-        .single();
+        .eq('id', userId)
+        .maybeSingle();
 
-      console.log('Profile refresh result:', { profileData, profileError });
+      console.log(`=== [${callId}] Profile query result:`, { profileData, profileError });
 
-      if (profileData) {
+      if (profileError) {
+        console.error(`=== [${callId}] Profile error:`, profileError);
+      } else if (profileData && mountedRef.current) {
+        console.log(`=== [${callId}] Profile loaded:`, profileData);
         setProfile(profileData);
       }
       
-      // Get user role and force state update
-      const role = await fetchUserRole(user.id);
-      console.log('Setting refreshed role to:', role);
-      setUserRole(role);
+      // Fetch role after profile
+      const role = await fetchUserRole(userId, callId);
+      
+      // Only update if this is still the active call and component is mounted
+      if (mountedRef.current && activeFetchRef.current === callId && role !== null) {
+        console.log(`=== [${callId}] Setting role to:`, role);
+        setUserRole(role);
+      }
       
     } catch (error) {
-      console.error('Error refreshing user data:', error);
+      console.error(`=== [${callId}] Error fetching user data:`, error);
+      if (mountedRef.current) {
+        handleError(getSupabaseErrorMessage(error), toast);
+      }
     }
-  };
+  }, [fetchUserRole, toast]);
+
+  // Force refresh user data with race condition prevention
+  const refreshUserData = useCallback(async () => {
+    if (!user) return;
+    
+    const callId = `refresh-${Date.now()}`;
+    console.log(`=== [${callId}] Refreshing user data for:`, user.id);
+    
+    await fetchUserData(user.id, callId);
+  }, [user, fetchUserData]);
 
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('=== Auth state change:', event, session?.user?.id);
+        const eventCallId = `auth-${event}-${Date.now()}`;
+        console.log(`=== [${eventCallId}] Auth state change:`, event, session?.user?.id);
         
-        if (!mounted) return;
+        if (!mountedRef.current) return;
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -138,73 +169,45 @@ export const useAuth = () => {
         if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
           // Defer data fetching to prevent deadlocks
           setTimeout(async () => {
-            if (!mounted) return;
-            
-            try {
-              // Get profile data
-              const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-
-              console.log('Profile query result:', { profileData, profileError });
-
-              if (profileError) {
-                console.error('Profile error:', profileError);
-              } else if (profileData && mounted) {
-                console.log('Profile loaded:', profileData);
-                setProfile(profileData);
-              }
-              
-              // Get user role with improved method and force state update
-              const role = await fetchUserRole(session.user.id);
-              if (mounted) {
-                console.log('Setting role to:', role);
-                setUserRole(role);
-                // Force a second state update to ensure it's applied
-                setTimeout(() => {
-                  if (mounted) {
-                    setUserRole(role);
-                  }
-                }, 50);
-              }
-              
-            } catch (error) {
-              console.error('Error fetching user data:', error);
-              if (mounted) {
-                handleError(getSupabaseErrorMessage(error), toast);
-              }
-            }
+            if (!mountedRef.current) return;
+            await fetchUserData(session.user.id, eventCallId);
           }, 100);
         } else if (event === 'SIGNED_OUT') {
-          if (mounted) {
+          if (mountedRef.current) {
             setProfile(null);
             setUserRole('user');
+            activeFetchRef.current = null; // Clear active fetch
           }
         }
         
-        if (mounted) {
+        if (mountedRef.current) {
           setLoading(false);
         }
       }
     );
 
     // Check for existing session
+    const initCallId = `init-${Date.now()}`;
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
+      if (!mountedRef.current) return;
       
-      console.log('=== Initial session:', session?.user?.id);
+      console.log(`=== [${initCallId}] Initial session:`, session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchUserData(session.user.id, initCallId);
+      }
+      
       setLoading(false);
     });
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
+      activeFetchRef.current = null;
       subscription.unsubscribe();
     };
-  }, [toast]);
+  }, [fetchUserData]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -263,6 +266,9 @@ export const useAuth = () => {
 
   const signOut = async () => {
     try {
+      // Clear active fetch operations
+      activeFetchRef.current = null;
+      
       // Clean up auth state first
       cleanupAuthState();
       
@@ -294,7 +300,8 @@ export const useAuth = () => {
     userRole, 
     isManager, 
     isAdmin,
-    userId: user?.id 
+    userId: user?.id,
+    activeFetch: activeFetchRef.current
   });
 
   return {
