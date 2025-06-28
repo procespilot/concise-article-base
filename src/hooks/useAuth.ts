@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,17 +48,19 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Fetch user role with better error handling
+  // Improved role fetching with the new simplified RLS policies
   const fetchUserRole = async (userId: string) => {
     try {
-      console.log('Fetching role for user:', userId);
+      console.log('=== Fetching role for user:', userId);
       
-      // Try direct query first
+      // Direct query should now work with the simplified policies
       const { data: roleData, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .single();
+
+      console.log('Role query result:', { roleData, error });
 
       if (error) {
         console.error('Error fetching user role:', error);
@@ -78,16 +81,23 @@ export const useAuth = () => {
   };
 
   useEffect(() => {
-    // Set up auth state listener first
+    let mounted = true;
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
+        console.log('=== Auth state change:', event, session?.user?.id);
+        
+        if (!mounted) return;
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user && event === 'SIGNED_IN') {
           // Defer data fetching to prevent deadlocks
           setTimeout(async () => {
+            if (!mounted) return;
+            
             try {
               // Get profile data
               const { data: profileData, error: profileError } = await supabase
@@ -96,40 +106,56 @@ export const useAuth = () => {
                 .eq('id', session.user.id)
                 .single();
 
+              console.log('Profile query result:', { profileData, profileError });
+
               if (profileError) {
                 console.error('Profile error:', profileError);
-              } else if (profileData) {
+              } else if (profileData && mounted) {
                 console.log('Profile loaded:', profileData);
                 setProfile(profileData);
               }
               
-              // Get user role
+              // Get user role with improved method
               const role = await fetchUserRole(session.user.id);
-              setUserRole(role);
+              if (mounted) {
+                console.log('Setting role to:', role);
+                setUserRole(role);
+              }
               
             } catch (error) {
               console.error('Error fetching user data:', error);
-              handleError(getSupabaseErrorMessage(error), toast);
+              if (mounted) {
+                handleError(getSupabaseErrorMessage(error), toast);
+              }
             }
           }, 100);
         } else if (event === 'SIGNED_OUT') {
-          setProfile(null);
-          setUserRole('user');
+          if (mounted) {
+            setProfile(null);
+            setUserRole('user');
+          }
         }
         
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.id);
+      if (!mounted) return;
+      
+      console.log('=== Initial session:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [toast]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -213,7 +239,15 @@ export const useAuth = () => {
     }
   };
 
-  console.log('useAuth state:', { userRole, isManager: userRole === 'manager' || userRole === 'admin' });
+  const isManager = userRole === 'manager' || userRole === 'admin';
+  const isAdmin = userRole === 'admin';
+
+  console.log('=== useAuth state:', { 
+    userRole, 
+    isManager, 
+    isAdmin,
+    userId: user?.id 
+  });
 
   return {
     user,
@@ -224,7 +258,7 @@ export const useAuth = () => {
     login,
     signOut,
     isAuthenticated: !!user,
-    isManager: userRole === 'manager' || userRole === 'admin',
-    isAdmin: userRole === 'admin'
+    isManager,
+    isAdmin
   };
 };
