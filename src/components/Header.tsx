@@ -1,8 +1,9 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Settings, Bell } from 'lucide-react';
 
 const Header = () => {
   const { user, isManager, isAdmin, signOut } = useAuth();
@@ -32,10 +33,25 @@ const Header = () => {
           )}
         </span>
       </div>
-      <Button variant="outline" size="sm" onClick={handleLogout}>
-        <LogOut className="w-4 h-4 mr-2" />
-        Uitloggen
-      </Button>
+      
+      <div className="flex items-center space-x-2">
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/notifications">
+            <Bell className="w-4 h-4" />
+          </Link>
+        </Button>
+        
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/settings">
+            <Settings className="w-4 h-4" />
+          </Link>
+        </Button>
+        
+        <Button variant="outline" size="sm" onClick={handleLogout}>
+          <LogOut className="w-4 h-4 mr-2" />
+          Uitloggen
+        </Button>
+      </div>
     </div>
   );
 };

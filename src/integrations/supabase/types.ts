@@ -93,6 +93,78 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          created_at: string | null
+          html_content: string
+          id: string
+          is_active: boolean | null
+          subject: string
+          template_name: string
+          text_content: string | null
+          updated_at: string | null
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          html_content: string
+          id?: string
+          is_active?: boolean | null
+          subject: string
+          template_name: string
+          text_content?: string | null
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          html_content?: string
+          id?: string
+          is_active?: boolean | null
+          subject?: string
+          template_name?: string
+          text_content?: string | null
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Relationships: []
+      }
+      notification_logs: {
+        Row: {
+          created_at: string | null
+          delivery_status: string | null
+          id: string
+          message: string | null
+          metadata: Json | null
+          notification_type: string
+          sent_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_status?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          notification_type: string
+          sent_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          delivery_status?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          notification_type?: string
+          sent_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activated_at: string | null
@@ -203,37 +275,52 @@ export type Database = {
       }
       user_preferences: {
         Row: {
+          article_updates: boolean | null
           created_at: string | null
           display_name: string | null
+          email_notifications: boolean | null
           email_updates: boolean | null
           id: string
           notifications: boolean | null
+          push_notifications: boolean | null
+          security_alerts: boolean | null
           session_timeout: number | null
           two_factor_auth: boolean | null
           updated_at: string | null
           user_id: string
+          weekly_digest: boolean | null
         }
         Insert: {
+          article_updates?: boolean | null
           created_at?: string | null
           display_name?: string | null
+          email_notifications?: boolean | null
           email_updates?: boolean | null
           id?: string
           notifications?: boolean | null
+          push_notifications?: boolean | null
+          security_alerts?: boolean | null
           session_timeout?: number | null
           two_factor_auth?: boolean | null
           updated_at?: string | null
           user_id: string
+          weekly_digest?: boolean | null
         }
         Update: {
+          article_updates?: boolean | null
           created_at?: string | null
           display_name?: string | null
+          email_notifications?: boolean | null
           email_updates?: boolean | null
           id?: string
           notifications?: boolean | null
+          push_notifications?: boolean | null
+          security_alerts?: boolean | null
           session_timeout?: number | null
           two_factor_auth?: boolean | null
           updated_at?: string | null
           user_id?: string
+          weekly_digest?: boolean | null
         }
         Relationships: []
       }
@@ -314,6 +401,16 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      log_notification: {
+        Args: {
+          p_user_id: string
+          p_type: string
+          p_title: string
+          p_message?: string
+          p_metadata?: Json
+        }
+        Returns: string
       }
     }
     Enums: {

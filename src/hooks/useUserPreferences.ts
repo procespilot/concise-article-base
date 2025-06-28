@@ -11,6 +11,11 @@ interface UserPreferences {
   email_updates: boolean;
   two_factor_auth: boolean;
   session_timeout: number;
+  email_notifications: boolean;
+  push_notifications: boolean;
+  security_alerts: boolean;
+  article_updates: boolean;
+  weekly_digest: boolean;
 }
 
 export const useUserPreferences = () => {
@@ -19,7 +24,12 @@ export const useUserPreferences = () => {
     notifications: true,
     email_updates: false,
     two_factor_auth: false,
-    session_timeout: 60
+    session_timeout: 60,
+    email_notifications: true,
+    push_notifications: false,
+    security_alerts: true,
+    article_updates: false,
+    weekly_digest: false
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -52,7 +62,12 @@ export const useUserPreferences = () => {
           notifications: data.notifications,
           email_updates: data.email_updates,
           two_factor_auth: data.two_factor_auth,
-          session_timeout: data.session_timeout
+          session_timeout: data.session_timeout,
+          email_notifications: data.email_notifications,
+          push_notifications: data.push_notifications,
+          security_alerts: data.security_alerts,
+          article_updates: data.article_updates,
+          weekly_digest: data.weekly_digest
         });
       } else {
         // Set default values from user profile if no preferences exist
@@ -87,7 +102,12 @@ export const useUserPreferences = () => {
         notifications: newPreferences.notifications,
         email_updates: newPreferences.email_updates,
         two_factor_auth: newPreferences.two_factor_auth,
-        session_timeout: newPreferences.session_timeout
+        session_timeout: newPreferences.session_timeout,
+        email_notifications: newPreferences.email_notifications,
+        push_notifications: newPreferences.push_notifications,
+        security_alerts: newPreferences.security_alerts,
+        article_updates: newPreferences.article_updates,
+        weekly_digest: newPreferences.weekly_digest
       };
 
       const { data, error } = await supabase
@@ -108,7 +128,12 @@ export const useUserPreferences = () => {
         notifications: data.notifications,
         email_updates: data.email_updates,
         two_factor_auth: data.two_factor_auth,
-        session_timeout: data.session_timeout
+        session_timeout: data.session_timeout,
+        email_notifications: data.email_notifications,
+        push_notifications: data.push_notifications,
+        security_alerts: data.security_alerts,
+        article_updates: data.article_updates,
+        weekly_digest: data.weekly_digest
       });
 
       toast({
