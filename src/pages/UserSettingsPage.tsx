@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import UserSettings from '@/components/UserSettings';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ThemeConfigProvider } from '@/contexts/ThemeConfigContext';
 
 const UserSettingsPage = () => {
   const { user, loading } = useAuth();
@@ -20,7 +21,11 @@ const UserSettingsPage = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  return <UserSettings />;
+  return (
+    <ThemeConfigProvider>
+      <UserSettings />
+    </ThemeConfigProvider>
+  );
 };
 
 export default UserSettingsPage;
