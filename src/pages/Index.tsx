@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import Header from "@/components/Header";
 import Dashboard from "@/components/Dashboard";
-import ArticlesList from "@/components/ArticlesList";
+import ArticleListPage from "@/pages/ArticleListPage";
 import Categories from "@/components/Categories";
 import ConsolidatedAuthPage from "@/components/ConsolidatedAuthPage";
 import UserForm from "@/components/UserForm";
@@ -240,13 +240,12 @@ const Index = () => {
             isManager={isManager}
           />;
       case "articles":
-        return <ArticlesList 
+        return <ArticleListPage 
           articles={userData.articles} 
           categories={userData.categories} 
           onArticleClick={handleArticleClick} 
           onCreateArticle={handleCreateArticle} 
           isManager={isManager} 
-          searchInputRef={searchInputRef} 
         />;
       case "analytics":
         return isManager ? (
@@ -257,13 +256,12 @@ const Index = () => {
             />
           </Suspense>
         ) : (
-          <ArticlesList 
+          <ArticleListPage 
             articles={userData.articles} 
             categories={userData.categories} 
             onArticleClick={handleArticleClick} 
             onCreateArticle={handleCreateArticle} 
             isManager={isManager} 
-            searchInputRef={searchInputRef} 
           />
         );
       case "categories":
