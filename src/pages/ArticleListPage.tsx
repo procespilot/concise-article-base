@@ -555,7 +555,7 @@ const ArticleListPage = ({
               onToggleFeatured={(id) => toast({ title: "Featured", description: `Toggle featured voor ${id}` })}
               onAIAction={handleAIAction}
               isManager={isManager}
-              showAIHints={true}
+              showAIHints={false}
             />
           ))}
         </div>
