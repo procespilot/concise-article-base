@@ -47,13 +47,13 @@ const Callout = ({ type = 'info', title, children }: {
 };
 
 const BlockQuote = ({ children, author }: { children: React.ReactNode; author?: string }) => (
-  <blockquote className="my-8 pl-6 border-l-4 border-primary animate-fade-in">
+  <blockquote className="my-8 pl-6 border-l-4 border-primary animate-fade-in max-w-[700px]">
     <Quote className="h-8 w-8 text-muted-foreground mb-4" />
-    <div className="text-xl italic leading-relaxed text-foreground mb-4">
+    <div className="text-xl italic leading-[1.8] text-black mb-4">
       {children}
     </div>
     {author && (
-      <cite className="text-sm text-muted-foreground not-italic">— {author}</cite>
+      <cite className="text-sm text-gray-600 not-italic">— {author}</cite>
     )}
   </blockquote>
 );
@@ -73,14 +73,14 @@ const CodeBlock = ({ children, language = 'text' }: { children: string; language
 );
 
 const ChecklistItem = ({ checked, children }: { checked: boolean; children: React.ReactNode }) => (
-  <div className="flex items-start gap-3 my-2 animate-fade-in">
+  <div className="flex items-start gap-3 my-2 animate-fade-in max-w-[700px]">
     <CheckCircle className={cn(
       'h-5 w-5 mt-0.5 flex-shrink-0',
       checked ? 'text-success' : 'text-muted-foreground'
     )} />
     <span className={cn(
-      'leading-relaxed',
-      checked ? 'text-foreground' : 'text-muted-foreground'
+      'leading-[1.8]',
+      checked ? 'text-black' : 'text-gray-600'
     )}>
       {children}
     </span>
@@ -104,19 +104,19 @@ const InfoBlock = ({ title, children }: { title: string; children: React.ReactNo
 const TableOfContents = ({ content, activeSection }: { content: string; activeSection: string }) => {
   const headings = content.match(/^#{1,3}\s+(.+)$/gm) || [];
   
-  if (headings.length === 0) return null;
+  if (headings.length < 3) return null; // Only show TOC for articles with 3+ headings
 
   return (
     <Card className="sticky top-24 animate-fade-in">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <BookOpen className="h-4 w-4" />
           Inhoudsopgave
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[300px]">
-          <nav className="space-y-1">
+        <ScrollArea className="h-[400px]">
+          <nav className="space-y-2">
             {headings.map((heading, index) => {
               const level = heading.match(/^#+/)?.[0].length || 1;
               const text = heading.replace(/^#+\s+/, '');
@@ -127,11 +127,11 @@ const TableOfContents = ({ content, activeSection }: { content: string; activeSe
                   key={index}
                   href={`#${id}`}
                   className={cn(
-                    'block py-1 text-sm transition-colors hover:text-primary',
-                    level === 1 && 'font-medium',
-                    level === 2 && 'pl-4',
-                    level === 3 && 'pl-8',
-                    activeSection === id ? 'text-primary font-medium' : 'text-muted-foreground'
+                    'block py-2 px-3 text-sm transition-all hover:bg-muted/50 rounded-md',
+                    level === 1 && 'font-semibold text-foreground',
+                    level === 2 && 'pl-6 font-medium text-foreground',
+                    level === 3 && 'pl-9 text-muted-foreground',
+                    activeSection === id ? 'bg-primary/10 text-primary border-l-2 border-primary' : ''
                   )}
                 >
                   {text}
@@ -145,33 +145,68 @@ const TableOfContents = ({ content, activeSection }: { content: string; activeSe
   );
 };
 
-const RelatedArticles = ({ currentArticleId }: { currentArticleId: string }) => {
-  // Mock related articles - in real implementation, this would use AI or content similarity
-  const relatedArticles = [
-    { id: '1', title: 'Gerelateerd artikel 1', excerpt: 'Een kort overzicht...' },
-    { id: '2', title: 'Gerelateerd artikel 2', excerpt: 'Meer informatie over...' },
-    { id: '3', title: 'Gerelateerd artikel 3', excerpt: 'Volgende stappen...' }
+// TL;DR Takeaway Block Component
+const TakeawayBlock = ({ article }: { article: any }) => {
+  // Generate key takeaways - in real implementation, this could use AI
+  const takeaways = [
+    "Belangrijkste punt uit het artikel",
+    "Sleutelpraktijk die geïmplementeerd kan worden",
+    "Belangrijke consideratie om te onthouden"
   ];
 
   return (
-    <Card className="mt-8 animate-fade-in">
+    <Card className="my-8 bg-primary/5 border-primary/20">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ChevronRight className="h-5 w-5" />
-          Gerelateerde artikelen
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <CheckCircle className="h-5 w-5 text-primary" />
+          Dit moet je weten
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {relatedArticles.map((article) => (
-            <div key={article.id} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-              <h4 className="font-medium mb-1">{article.title}</h4>
-              <p className="text-sm text-muted-foreground">{article.excerpt}</p>
-            </div>
+        <ul className="space-y-3">
+          {takeaways.map((takeaway, index) => (
+            <li key={index} className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs font-semibold text-primary">{index + 1}</span>
+              </div>
+              <span className="text-sm leading-relaxed text-black">{takeaway}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </CardContent>
     </Card>
+  );
+};
+
+const RelatedArticles = ({ currentArticleId }: { currentArticleId: string }) => {
+  // Mock related articles - in real implementation, this would use AI or content similarity
+  const relatedArticles = [
+    { id: '1', title: 'Gerelateerd artikel 1', excerpt: 'Een kort overzicht van het eerste gerelateerde artikel' },
+    { id: '2', title: 'Gerelateerd artikel 2', excerpt: 'Meer informatie over het tweede onderwerp' },
+    { id: '3', title: 'Gerelateerd artikel 3', excerpt: 'Volgende stappen en aanvullende informatie' }
+  ];
+
+  return (
+    <div className="mt-12 space-y-6">
+      <h3 className="text-2xl font-bold text-black flex items-center gap-2">
+        <ChevronRight className="h-6 w-6" />
+        Gerelateerde artikelen
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {relatedArticles.map((article) => (
+          <Card key={article.id} className="group hover:shadow-md transition-all duration-200 cursor-pointer">
+            <CardContent className="p-6">
+              <h4 className="font-semibold text-black mb-3 group-hover:text-primary transition-colors">
+                {article.title}
+              </h4>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {article.excerpt}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -320,7 +355,7 @@ const ArticleDetail = ({ article, onBack, onEdit }: ArticleDetailProps) => {
             key={index}
             id={id}
             className={cn(
-              'font-bold leading-tight mt-8 mb-4 scroll-mt-24',
+              'font-bold leading-tight mt-12 mb-6 scroll-mt-24 text-black max-w-[700px]',
               level === 1 && 'text-3xl',
               level === 2 && 'text-2xl',
               level === 3 && 'text-xl'
@@ -391,7 +426,7 @@ const ArticleDetail = ({ article, onBack, onEdit }: ArticleDetailProps) => {
 
       // Regular paragraph
       return (
-        <p key={index} className="mb-6 leading-relaxed text-foreground">
+        <p key={index} className="mb-6 leading-[1.8] text-black max-w-[700px]">
           {section}
         </p>
       );
@@ -460,19 +495,19 @@ const ArticleDetail = ({ article, onBack, onEdit }: ArticleDetailProps) => {
                 </Badge>
               </div>
               
-              <h1 className="text-4xl lg:text-5xl font-bold leading-tight">
+              <h1 className="text-4xl lg:text-5xl font-bold leading-[1.2] text-black max-w-[700px]">
                 {article.title}
               </h1>
               
               {article.excerpt && (
-                <p className="text-xl text-muted-foreground leading-relaxed">
+                <p className="text-xl leading-[1.6] text-gray-700 max-w-[700px]">
                   {article.excerpt}
                 </p>
               )}
 
-              {/* Metadata */}
-              <div className="flex items-center gap-6 text-sm text-muted-foreground border-y py-4">
-                <div className="flex items-center gap-2">
+              {/* Streamlined Metadata */}
+              <div className="flex items-center gap-4 text-sm text-gray-600 bg-gray-50 px-4 py-3 rounded-lg">
+                <div className="flex items-center gap-1">
                   <User className="w-4 h-4" />
                   <span>
                     {article.profiles 
@@ -481,11 +516,13 @@ const ArticleDetail = ({ article, onBack, onEdit }: ArticleDetailProps) => {
                     }
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <span className="text-gray-400">•</span>
+                <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  <span>{new Date(article.updated_at).toLocaleDateString('nl-NL')}</span>
+                  <span>Bijgewerkt {new Date(article.updated_at).toLocaleDateString('nl-NL')}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <span className="text-gray-400">•</span>
+                <div className="flex items-center gap-1">
                   <Eye className="w-4 h-4" />
                   <span>{article.views} weergaven</span>
                 </div>
@@ -503,6 +540,9 @@ const ArticleDetail = ({ article, onBack, onEdit }: ArticleDetailProps) => {
                 </div>
               )}
             </header>
+
+            {/* TL;DR Takeaway Block */}
+            <TakeawayBlock article={article} />
 
             {/* Article content */}
             <main 
