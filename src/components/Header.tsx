@@ -51,10 +51,15 @@ const Header = () => {
           </Link>
         </Button>
         
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/settings">
-            <Settings className="w-4 h-4" />
-          </Link>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => {
+            // Use a custom event to communicate with the main app
+            window.dispatchEvent(new CustomEvent('navigate-to-settings'));
+          }}
+        >
+          <Settings className="w-4 h-4" />
         </Button>
         
         <Button variant="outline" size="sm" onClick={handleLogout}>

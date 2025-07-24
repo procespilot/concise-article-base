@@ -1,5 +1,5 @@
 
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -57,6 +57,18 @@ const Index = () => {
       }
     }
   });
+
+  // Listen for settings navigation from header
+  useEffect(() => {
+    const handleSettingsNavigation = () => {
+      handleSectionChange('settings');
+    };
+
+    window.addEventListener('navigate-to-settings', handleSettingsNavigation);
+    return () => {
+      window.removeEventListener('navigate-to-settings', handleSettingsNavigation);
+    };
+  }, []);
 
   if (authLoading || userData.loading) {
     return <div className="min-h-screen flex items-center justify-center bg-white">
