@@ -163,7 +163,7 @@ const WorkflowManagement = ({ articleId, showAllWorkflows = false }: WorkflowMan
             if (step.id === stepId) {
               return {
                 ...step,
-                status: action === 'approve' ? 'completed' : 'rejected',
+                status: action === 'approve' ? 'completed' as const : 'rejected' as const,
                 completed_at: new Date().toISOString(),
                 comments: reviewComment
               };

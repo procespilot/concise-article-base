@@ -76,7 +76,7 @@ const CommentSystem = ({ articleId }: CommentSystemProps) => {
       const comment: Comment = {
         id: Date.now().toString(),
         content: newComment,
-        author_name: `${user.first_name} ${user.last_name}`,
+        author_name: `${user.user_metadata?.first_name || user.email?.split('@')[0] || 'Onbekend'} ${user.user_metadata?.last_name || ''}`.trim(),
         author_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -109,7 +109,7 @@ const CommentSystem = ({ articleId }: CommentSystemProps) => {
       const reply: Comment = {
         id: Date.now().toString(),
         content: replyContent,
-        author_name: `${user.first_name} ${user.last_name}`,
+        author_name: `${user.user_metadata?.first_name || user.email?.split('@')[0] || 'Onbekend'} ${user.user_metadata?.last_name || ''}`.trim(),
         author_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
