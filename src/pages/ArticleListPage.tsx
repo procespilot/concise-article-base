@@ -453,12 +453,12 @@ const ArticleListPage = ({
         </div>
       </div>
 
-      {/* Active filters */}
+      {/* Active filters pills */}
       {activeFilters.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-muted-foreground">Actieve filters:</span>
+        <div className="flex items-center gap-2 flex-wrap py-2 px-3 bg-muted/30 rounded-lg border border-border/50">
+          <span className="text-sm font-medium text-muted-foreground">Actieve filters:</span>
           {activeFilters.map((filter, index) => (
-            <Badge key={index} variant="secondary" className="text-xs">
+            <Badge key={index} variant="secondary" className="text-xs px-2 py-1 bg-background border">
               {filter}
             </Badge>
           ))}
@@ -466,60 +466,126 @@ const ArticleListPage = ({
             variant="ghost"
             size="sm"
             onClick={handleClearFilters}
-            className="text-xs h-6 px-2"
+            className="text-xs h-6 px-2 hover:bg-background"
           >
-            Wissen
+            Alles wissen
           </Button>
         </div>
       )}
 
-      {/* View controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {isManager && (
-            <Checkbox
-              checked={selectedArticles.size === paginatedArticles.length && paginatedArticles.length > 0}
-              onCheckedChange={handleSelectAll}
-              className="mr-2"
-              aria-label="Selecteer alle zichtbare artikelen"
-            />
-          )}
+      {/* View controls & List headers */}
+      {viewMode === 'list' && paginatedArticles.length > 0 && (
+        <div className="space-y-4">
+          {/* Controls row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {isManager && (
+                <Checkbox
+                  checked={selectedArticles.size === paginatedArticles.length && paginatedArticles.length > 0}
+                  onCheckedChange={handleSelectAll}
+                  className="mr-2 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  aria-label="Selecteer alle zichtbare artikelen"
+                />
+              )}
+              
+              <div className="flex items-center border rounded-lg bg-background">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none border-r h-9"
+                  aria-label="Grid weergave"
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-none border-r h-9"
+                  aria-label="Lijst weergave"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'compact' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('compact')}
+                  className="rounded-l-none h-9"
+                  aria-label="Compacte weergave"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <p className="text-sm text-muted-foreground font-medium">
+              {filteredAndSortedArticles.length} van {articles.length} artikel{filteredAndSortedArticles.length !== 1 ? 'en' : ''}
+            </p>
+          </div>
           
-          <div className="flex items-center border rounded-md">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="rounded-r-none border-r"
-              aria-label="Grid weergave"
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="rounded-none border-r"
-              aria-label="Lijst weergave"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'compact' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('compact')}
-              className="rounded-l-none"
-              aria-label="Compacte weergave"
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
+          {/* List Headers - sticky */}
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
+            <div className="flex items-center gap-4 p-4 text-sm font-semibold text-muted-foreground">
+              {isManager && <div className="w-6"></div>}
+              <div className="w-24">Status</div>
+              <div className="flex-1">Titel & Inhoud</div>
+              <div className="w-32">Categorie</div>
+              <div className="w-24 text-right">Acties</div>
+            </div>
           </div>
         </div>
-        
-        <p className="text-sm text-muted-foreground">
-          {filteredAndSortedArticles.length} van {articles.length} artikel{filteredAndSortedArticles.length !== 1 ? 'en' : ''}
-        </p>
-      </div>
+      )}
+
+      {/* Grid/Compact view controls */}
+      {viewMode !== 'list' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {isManager && (
+              <Checkbox
+                checked={selectedArticles.size === paginatedArticles.length && paginatedArticles.length > 0}
+                onCheckedChange={handleSelectAll}
+                className="mr-2 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                aria-label="Selecteer alle zichtbare artikelen"
+              />
+            )}
+            
+            <div className="flex items-center border rounded-lg bg-background">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none border-r h-9"
+                aria-label="Grid weergave"
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="rounded-none border-r h-9"
+                aria-label="Lijst weergave"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'compact' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('compact')}
+                className="rounded-l-none h-9"
+                aria-label="Compacte weergave"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <p className="text-sm text-muted-foreground font-medium">
+            {filteredAndSortedArticles.length} van {articles.length} artikel{filteredAndSortedArticles.length !== 1 ? 'en' : ''}
+          </p>
+        </div>
+      )}
 
       {/* Articles display */}
       {error ? (
@@ -546,7 +612,7 @@ const ArticleListPage = ({
             <ArticleCard
               key={article.id}
               article={article}
-              variant={viewMode === 'grid' ? 'default' : viewMode === 'list' ? 'detailed' : 'compact'}
+              variant={viewMode === 'grid' ? 'default' : viewMode === 'list' ? 'list' : 'compact'}
               isSelectable={isManager}
               isSelected={selectedArticles.has(article.id)}
               onSelect={handleSelectArticle}
