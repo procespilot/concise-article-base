@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { X, Plus } from 'lucide-react';
+import { BlockEditor, Block } from '@/components/blocks/BlockEditor';
 import {
   FormControl,
   FormDescription,
@@ -85,24 +86,78 @@ export const ArticleFormFields: React.FC<ArticleFormFieldsProps> = ({ form, cate
       <FormField
         control={form.control}
         name="content"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Inhoud *</FormLabel>
-            <FormControl>
-              <Textarea 
-                placeholder="Schrijf je artikel hier..."
-                {...field}
-                maxLength={50000}
-                rows={15}
-                className="resize-y"
-              />
-            </FormControl>
-            <FormDescription>
-              {field.value?.length || 0}/50.000 karakters
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
+        render={({ field }) => {
+          // Convert content string to blocks
+          const blocks = useMemo(() => {
+            if (!field.value) {
+              return [];
+            }
+            
+            // For now, convert existing content to a single paragraph block
+            // Later this can be enhanced to parse structured content
+            if (typeof field.value === 'string' && field.value.trim()) {
+              return [{
+                id: `block_${Date.now()}`,
+                type: 'paragraph' as const,
+                content: field.value
+              }];
+            }
+            
+            return [];
+          }, [field.value]);
+
+          const handleBlocksChange = (newBlocks: Block[]) => {
+            // Convert blocks back to string for now
+            // Later this can be enhanced to store structured data
+            const content = newBlocks
+              .map(block => {
+                switch (block.type) {
+                  case 'heading':
+                    const level = block.meta?.level || 2;
+                    const headingPrefix = '#'.repeat(level);
+                    return `${headingPrefix} ${block.content}`;
+                  case 'quote':
+                    return `> ${block.content}`;
+                  case 'code':
+                    const language = block.meta?.language || '';
+                    return `\`\`\`${language}\n${block.content}\n\`\`\``;
+                  case 'checklist':
+                    return Array.isArray(block.content) 
+                      ? block.content.map(item => `${item.checked ? '- [x]' : '- [ ]'} ${item.text}`).join('\n')
+                      : '';
+                  case 'callout':
+                    const variant = block.meta?.variant || 'info';
+                    return `> **${variant.toUpperCase()}**: ${block.content}`;
+                  case 'divider':
+                    return '---';
+                  default:
+                    return block.content;
+                }
+              })
+              .join('\n\n');
+            
+            field.onChange(content);
+          };
+
+          return (
+            <FormItem>
+              <FormLabel>Inhoud *</FormLabel>
+              <FormControl>
+                <div className="border rounded-md p-4 min-h-[200px]">
+                  <BlockEditor
+                    blocks={blocks}
+                    onChange={handleBlocksChange}
+                    placeholder="Begin met typen of druk '/' voor blokopties..."
+                  />
+                </div>
+              </FormControl>
+              <FormDescription>
+                {field.value?.length || 0}/50.000 karakters - Gebruik '/' voor blokopties
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          );
+        }}
       />
 
       <FormField
