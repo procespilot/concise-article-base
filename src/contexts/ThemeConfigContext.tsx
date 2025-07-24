@@ -90,7 +90,7 @@ export const ThemeConfigProvider: React.FC<{ children: React.ReactNode }> = ({ c
         .eq('user_id', user.id)
         .single();
 
-      if (preferences?.theme_colors) {
+      if (preferences?.theme_colors && typeof preferences.theme_colors === 'string') {
         const savedTheme = JSON.parse(preferences.theme_colors);
         setCurrentTheme({ ...defaultTheme, ...savedTheme });
         applyThemeToCSS({ ...defaultTheme, ...savedTheme });

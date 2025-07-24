@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProvider } from "@/contexts/UserContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeConfigProvider } from "@/contexts/ThemeConfigContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 import Index from "./pages/Index.tsx";
@@ -36,7 +37,8 @@ createRoot(document.getElementById("root")!).render(
         <ThemeProvider>
           <AuthProvider>
             <UserProvider>
-              <BrowserRouter>
+              <ThemeConfigProvider>
+                <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<ConsolidatedAuthPage />} />
@@ -47,6 +49,7 @@ createRoot(document.getElementById("root")!).render(
                 </Routes>
                 <Toaster />
               </BrowserRouter>
+              </ThemeConfigProvider>
             </UserProvider>
           </AuthProvider>
         </ThemeProvider>

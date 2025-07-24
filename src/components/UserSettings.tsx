@@ -9,10 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { User, Mail, Phone, Bell, Shield, Palette, ArrowLeft, Home } from 'lucide-react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import EmailChangeForm from '@/components/EmailChangeForm';
+import ThemeConfigurator from '@/components/ThemeConfigurator';
 import { useToast } from '@/hooks/use-toast';
 import { sanitizeInput } from '@/utils/sanitization';
 
@@ -144,208 +146,240 @@ const UserSettings = () => {
         </Alert>
       )}
 
-      {/* Profile Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <User className="w-5 h-5" />
-            <span>Profielinformatie</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleProfileUpdate} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first_name">Voornaam</Label>
-                <Input
-                  id="first_name"
-                  value={profileForm.first_name}
-                  onChange={(e) => setProfileForm(prev => ({
-                    ...prev,
-                    first_name: sanitizeInput(e.target.value)
-                  }))}
-                  placeholder="Je voornaam"
-                  maxLength={50}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name">Achternaam</Label>
-                <Input
-                  id="last_name"
-                  value={profileForm.last_name}
-                  onChange={(e) => setProfileForm(prev => ({
-                    ...prev,
-                    last_name: sanitizeInput(e.target.value)
-                  }))}
-                  placeholder="Je achternaam"
-                  maxLength={50}
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefoonnummer</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={profileForm.phone}
-                onChange={(e) => setProfileForm(prev => ({
-                  ...prev,
-                  phone: sanitizeInput(e.target.value)
-                }))}
-                placeholder="Je telefoonnummer"
-                maxLength={20}
-              />
-            </div>
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="profile" className="flex items-center space-x-2">
+            <User className="w-4 h-4" />
+            <span>Profiel</span>
+          </TabsTrigger>
+          <TabsTrigger value="email" className="flex items-center space-x-2">
+            <Mail className="w-4 h-4" />
+            <span>Email</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center space-x-2">
+            <Bell className="w-4 h-4" />
+            <span>Notificaties</span>
+          </TabsTrigger>
+          <TabsTrigger value="theme" className="flex items-center space-x-2">
+            <Palette className="w-4 h-4" />
+            <span>Thema</span>
+          </TabsTrigger>
+        </TabsList>
 
-            <Button 
-              type="submit" 
-              disabled={profileLoading}
-              className="w-full md:w-auto"
-            >
-              {profileLoading ? (
-                <div className="flex items-center gap-2">
-                  <LoadingSpinner size="sm" />
-                  Bijwerken...
+        <TabsContent value="profile">
+          {/* Profile Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <User className="w-5 h-5" />
+                <span>Profielinformatie</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleProfileUpdate} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="first_name">Voornaam</Label>
+                    <Input
+                      id="first_name"
+                      value={profileForm.first_name}
+                      onChange={(e) => setProfileForm(prev => ({
+                        ...prev,
+                        first_name: sanitizeInput(e.target.value)
+                      }))}
+                      placeholder="Je voornaam"
+                      maxLength={50}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="last_name">Achternaam</Label>
+                    <Input
+                      id="last_name"
+                      value={profileForm.last_name}
+                      onChange={(e) => setProfileForm(prev => ({
+                        ...prev,
+                        last_name: sanitizeInput(e.target.value)
+                      }))}
+                      placeholder="Je achternaam"
+                      maxLength={50}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Telefoonnummer</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={profileForm.phone}
+                    onChange={(e) => setProfileForm(prev => ({
+                      ...prev,
+                      phone: sanitizeInput(e.target.value)
+                    }))}
+                    placeholder="Je telefoonnummer"
+                    maxLength={20}
+                  />
+                </div>
+
+                <Button 
+                  type="submit" 
+                  disabled={profileLoading}
+                  className="w-full md:w-auto"
+                >
+                  {profileLoading ? (
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
+                      Bijwerken...
+                    </div>
+                  ) : (
+                    "Profiel bijwerken"
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="email">
+          {/* Email Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Mail className="w-5 h-5" />
+                <span>Email instellingen</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Huidig email adres</p>
+                  <p className="text-sm text-gray-600">{user?.email}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEmailChange(true)}
+                >
+                  Email wijzigen
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          {/* Notification Preferences */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Bell className="w-5 h-5" />
+                <span>Notificatie voorkeuren</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {prefsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <LoadingSpinner size="md" />
                 </div>
               ) : (
-                "Profiel bijwerken"
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="email_notifications" className="text-base font-medium">
+                        Email notificaties
+                      </Label>
+                      <p className="text-sm text-gray-600">
+                        Ontvang updates via email
+                      </p>
+                    </div>
+                    <Switch
+                      id="email_notifications"
+                      checked={preferences?.email_notifications ?? true}
+                      onCheckedChange={(checked) => handlePreferenceChange('email_notifications', checked)}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="push_notifications" className="text-base font-medium">
+                        Push notificaties
+                      </Label>
+                      <p className="text-sm text-gray-600">
+                        Ontvang push notificaties in je browser
+                      </p>
+                    </div>
+                    <Switch
+                      id="push_notifications"
+                      checked={preferences?.push_notifications ?? false}
+                      onCheckedChange={(checked) => handlePreferenceChange('push_notifications', checked)}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="article_updates" className="text-base font-medium">
+                        Artikel updates
+                      </Label>
+                      <p className="text-sm text-gray-600">
+                        Krijg notificaties bij nieuwe artikelen
+                      </p>
+                    </div>
+                    <Switch
+                      id="article_updates"
+                      checked={preferences?.article_updates ?? false}
+                      onCheckedChange={(checked) => handlePreferenceChange('article_updates', checked)}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="weekly_digest" className="text-base font-medium">
+                        Wekelijkse samenvatting
+                      </Label>
+                      <p className="text-sm text-gray-600">
+                        Ontvang een wekelijks overzicht
+                      </p>
+                    </div>
+                    <Switch
+                      id="weekly_digest"
+                      checked={preferences?.weekly_digest ?? false}
+                      onCheckedChange={(checked) => handlePreferenceChange('weekly_digest', checked)}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="security_alerts" className="text-base font-medium">
+                        Beveiligingswaarschuwingen
+                      </Label>
+                      <p className="text-sm text-gray-600">
+                        Ontvang belangrijke beveiligingsupdates
+                      </p>
+                    </div>
+                    <Switch
+                      id="security_alerts"
+                      checked={preferences?.security_alerts ?? true}
+                      onCheckedChange={(checked) => handlePreferenceChange('security_alerts', checked)}
+                    />
+                  </div>
+                </div>
               )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Email Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Mail className="w-5 h-5" />
-            <span>Email instellingen</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Huidig email adres</p>
-              <p className="text-sm text-gray-600">{user?.email}</p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowEmailChange(true)}
-            >
-              Email wijzigen
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Notification Preferences */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Bell className="w-5 h-5" />
-            <span>Notificatie voorkeuren</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {prefsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <LoadingSpinner size="md" />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="email_notifications" className="text-base font-medium">
-                    Email notificaties
-                  </Label>
-                  <p className="text-sm text-gray-600">
-                    Ontvang updates via email
-                  </p>
-                </div>
-                <Switch
-                  id="email_notifications"
-                  checked={preferences?.email_notifications ?? true}
-                  onCheckedChange={(checked) => handlePreferenceChange('email_notifications', checked)}
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="push_notifications" className="text-base font-medium">
-                    Push notificaties
-                  </Label>
-                  <p className="text-sm text-gray-600">
-                    Ontvang push notificaties in je browser
-                  </p>
-                </div>
-                <Switch
-                  id="push_notifications"
-                  checked={preferences?.push_notifications ?? false}
-                  onCheckedChange={(checked) => handlePreferenceChange('push_notifications', checked)}
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="article_updates" className="text-base font-medium">
-                    Artikel updates
-                  </Label>
-                  <p className="text-sm text-gray-600">
-                    Krijg notificaties bij nieuwe artikelen
-                  </p>
-                </div>
-                <Switch
-                  id="article_updates"
-                  checked={preferences?.article_updates ?? false}
-                  onCheckedChange={(checked) => handlePreferenceChange('article_updates', checked)}
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="weekly_digest" className="text-base font-medium">
-                    Wekelijkse samenvatting
-                  </Label>
-                  <p className="text-sm text-gray-600">
-                    Ontvang een wekelijks overzicht
-                  </p>
-                </div>
-                <Switch
-                  id="weekly_digest"
-                  checked={preferences?.weekly_digest ?? false}
-                  onCheckedChange={(checked) => handlePreferenceChange('weekly_digest', checked)}
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="security_alerts" className="text-base font-medium">
-                    Beveiligingswaarschuwingen
-                  </Label>
-                  <p className="text-sm text-gray-600">
-                    Ontvang belangrijke beveiligingsupdates
-                  </p>
-                </div>
-                <Switch
-                  id="security_alerts"
-                  checked={preferences?.security_alerts ?? true}
-                  onCheckedChange={(checked) => handlePreferenceChange('security_alerts', checked)}
-                />
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        <TabsContent value="theme">
+          {/* Theme Configuration */}
+          <ThemeConfigurator />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
