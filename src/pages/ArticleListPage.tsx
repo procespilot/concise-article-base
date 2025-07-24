@@ -490,7 +490,7 @@ const ArticleListPage = ({
               
               <div className="flex items-center border rounded-lg bg-background">
                 <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  variant={(viewMode as ViewMode) === 'grid' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
                   className="rounded-r-none border-r h-9"
@@ -499,7 +499,7 @@ const ArticleListPage = ({
                   <Grid className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  variant={(viewMode as ViewMode) === 'list' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('list')}
                   className="rounded-none border-r h-9"
@@ -508,7 +508,7 @@ const ArticleListPage = ({
                   <List className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === 'compact' ? 'default' : 'ghost'}
+                  variant={(viewMode as ViewMode) === 'compact' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('compact')}
                   className="rounded-l-none h-9"
@@ -552,7 +552,7 @@ const ArticleListPage = ({
             
             <div className="flex items-center border rounded-lg bg-background">
               <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                variant={(viewMode as ViewMode) === 'grid' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
                 className="rounded-r-none border-r h-9"
@@ -561,7 +561,7 @@ const ArticleListPage = ({
                 <Grid className="h-4 w-4" />
               </Button>
               <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                variant={(viewMode as ViewMode) === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
                 className="rounded-none border-r h-9"
@@ -570,7 +570,7 @@ const ArticleListPage = ({
                 <List className="h-4 w-4" />
               </Button>
               <Button
-                variant={viewMode === 'compact' ? 'default' : 'ghost'}
+                variant={(viewMode as ViewMode) === 'compact' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('compact')}
                 className="rounded-l-none h-9"
