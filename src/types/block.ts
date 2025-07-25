@@ -24,7 +24,7 @@ export interface BlockMeta {
   language?: string; // for code blocks
   variant?: 'info' | 'warning' | 'success' | 'error'; // for callouts
   alignment?: 'left' | 'center' | 'right'; // for images
-  size?: 'small' | 'medium' | 'large'; // for images
+  size?: 'small' | 'medium' | 'large' | 'full'; // for images
   alt?: string; // for images
   caption?: string; // for images
   url?: string; // for embeds

@@ -7,10 +7,11 @@ import { Block } from '@/types/block';
 
 interface CodeBlockProps {
   block: Block;
-  onChange: (content: string, meta?: any) => void;
+  onChange: (updates: Partial<Block>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
   placeholder?: string;
 }
 
@@ -33,6 +34,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   onDelete,
   onDuplicate,
   onKeyDown,
+  onFocus,
   placeholder = "// Voeg je code hier toe..."
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -46,11 +48,11 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   }, [block.content]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+    onChange({ content: e.target.value });
   };
 
   const handleLanguageChange = (newLanguage: string) => {
-    onChange(block.content, { language: newLanguage });
+    onChange({ meta: { ...block.meta, language: newLanguage } });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -63,7 +65,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
       const end = e.currentTarget.selectionEnd;
       const value = e.currentTarget.value;
       const newValue = value.substring(0, start) + '  ' + value.substring(end);
-      onChange(newValue);
+      onChange({ content: newValue });
       
       // Set cursor position after the inserted spaces
       setTimeout(() => {
@@ -112,9 +114,10 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
       <div className="bg-gray-900 rounded-lg border p-4">
         <Textarea
           ref={textareaRef}
-          value={block.content}
+          value={block.content || ''}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onFocus={onFocus}
           placeholder={placeholder}
           className="min-h-[120px] resize-none border-none focus:ring-0 focus-visible:ring-0 p-0 text-sm font-mono bg-transparent text-gray-100"
           style={{ 

@@ -9,10 +9,11 @@ import { Block, ChecklistItem } from '@/types/block';
 
 interface ChecklistBlockProps {
   block: Block;
-  onChange: (content: ChecklistItem[]) => void;
+  onChange: (updates: Partial<Block>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
   placeholder?: string;
 }
 
@@ -22,6 +23,7 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
   onDelete,
   onDuplicate,
   onKeyDown,
+  onFocus,
   placeholder = "Voeg een taak toe..."
 }) => {
   const items: ChecklistItem[] = Array.isArray(block.content) ? block.content : [{ id: '1', text: '', checked: false }];
@@ -30,18 +32,18 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
     const newItems = items.map((item, i) => 
       i === index ? { ...item, ...updates } : item
     );
-    onChange(newItems);
+    onChange({ content: newItems });
   };
 
   const addItem = () => {
     const newId = Date.now().toString();
-    onChange([...items, { id: newId, text: '', checked: false }]);
+    onChange({ content: [...items, { id: newId, text: '', checked: false }] });
   };
 
   const removeItem = (index: number) => {
     if (items.length > 1) {
       const newItems = items.filter((_, i) => i !== index);
-      onChange(newItems);
+      onChange({ content: newItems });
     }
   };
 
@@ -90,6 +92,7 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
               value={item.text}
               onChange={(e) => updateItem(index, { text: e.target.value })}
               onKeyDown={(e) => handleKeyDown(e, index)}
+              onFocus={onFocus}
               placeholder={index === 0 ? placeholder : "Nog een taak..."}
               className="flex-1 border-none focus:ring-0 focus-visible:ring-0 bg-transparent"
               style={{

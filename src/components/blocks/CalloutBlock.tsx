@@ -8,10 +8,11 @@ import { cn } from '@/lib/utils';
 
 interface CalloutBlockProps {
   block: Block;
-  onChange: (content: string, meta?: any) => void;
+  onChange: (updates: Partial<Block>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
   placeholder?: string;
 }
 
@@ -48,6 +49,7 @@ export const CalloutBlock: React.FC<CalloutBlockProps> = ({
   onDelete,
   onDuplicate,
   onKeyDown,
+  onFocus,
   placeholder = "Voeg een belangrijk bericht toe..."
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -63,11 +65,11 @@ export const CalloutBlock: React.FC<CalloutBlockProps> = ({
   }, [block.content]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+    onChange({ content: e.target.value });
   };
 
   const handleVariantChange = (newVariant: string) => {
-    onChange(block.content, { variant: newVariant });
+    onChange({ meta: { ...block.meta, variant: newVariant as 'info' | 'warning' | 'success' | 'error' } });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -117,9 +119,10 @@ export const CalloutBlock: React.FC<CalloutBlockProps> = ({
           <Icon className={cn("w-5 h-5 mt-0.5 flex-shrink-0", calloutConfig.iconClassName)} />
           <Textarea
             ref={textareaRef}
-            value={block.content}
+            value={block.content || ''}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
+            onFocus={onFocus}
             placeholder={placeholder}
             className="min-h-[2.5rem] resize-none border-none focus:ring-0 focus-visible:ring-0 p-0 text-base leading-relaxed bg-transparent"
             style={{ 

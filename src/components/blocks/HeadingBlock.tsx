@@ -7,10 +7,11 @@ import { cn } from '@/lib/utils';
 
 interface HeadingBlockProps {
   block: Block;
-  onChange: (content: string, meta?: any) => void;
+  onChange: (updates: Partial<Block>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
   placeholder?: string;
 }
 
@@ -20,6 +21,7 @@ export const HeadingBlock: React.FC<HeadingBlockProps> = ({
   onDelete,
   onDuplicate,
   onKeyDown,
+  onFocus,
   placeholder = "Koptekst..."
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,11 +35,11 @@ export const HeadingBlock: React.FC<HeadingBlockProps> = ({
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+    onChange({ content: e.target.value });
   };
 
   const handleLevelChange = (newLevel: string) => {
-    onChange(block.content, { level: parseInt(newLevel) });
+    onChange({ meta: { ...block.meta, level: parseInt(newLevel) } });
   };
 
   const getHeadingClasses = (level: number) => {
@@ -76,9 +78,10 @@ export const HeadingBlock: React.FC<HeadingBlockProps> = ({
 
       <Input
         ref={inputRef}
-        value={block.content}
+        value={block.content || ''}
         onChange={handleChange}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
         placeholder={placeholder}
         className={cn(
           "border-none focus:ring-0 focus-visible:ring-0 p-0 bg-transparent",

@@ -6,10 +6,11 @@ import { Block } from '@/types/block';
 
 interface QuoteBlockProps {
   block: Block;
-  onChange: (content: string) => void;
+  onChange: (updates: Partial<Block>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
   placeholder?: string;
 }
 
@@ -31,7 +32,7 @@ export const QuoteBlock: React.FC<QuoteBlockProps> = ({
   }, [block.content]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+    onChange({ content: e.target.value });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

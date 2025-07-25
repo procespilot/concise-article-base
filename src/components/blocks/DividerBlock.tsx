@@ -5,10 +5,11 @@ import { Block } from '@/types/block';
 
 interface DividerBlockProps {
   block: Block;
-  onChange: (content: any) => void;
+  onChange: (updates: Partial<Block>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
   placeholder?: string;
 }
 
@@ -17,10 +18,11 @@ export const DividerBlock: React.FC<DividerBlockProps> = ({
   onChange,
   onDelete,
   onDuplicate,
-  onKeyDown
+  onKeyDown,
+  onFocus
 }) => {
   return (
-    <div className="group relative py-4">
+    <div className="group relative py-4 cursor-pointer" onClick={onFocus} tabIndex={0}>
       <div className="flex justify-center mb-2">
         <BlockActions
           onDelete={onDelete}

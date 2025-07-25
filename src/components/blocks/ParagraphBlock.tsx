@@ -5,10 +5,11 @@ import { Block } from '@/types/block';
 
 interface ParagraphBlockProps {
   block: Block;
-  onChange: (content: string) => void;
+  onChange: (updates: Partial<Block>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
   placeholder?: string;
 }
 
@@ -18,6 +19,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   onDelete,
   onDuplicate,
   onKeyDown,
+  onFocus,
   placeholder = "Begin met typen..."
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -30,7 +32,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   }, [block.content]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+    onChange({ content: e.target.value });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -52,9 +54,10 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       <div className="relative">
         <Textarea
           ref={textareaRef}
-          value={block.content}
+          value={block.content || ''}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onFocus={onFocus}
           placeholder={placeholder}
           className="min-h-[2.5rem] resize-none border-none focus:ring-0 focus-visible:ring-0 p-3 text-base leading-relaxed bg-transparent"
           style={{ 

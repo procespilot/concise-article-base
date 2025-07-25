@@ -9,10 +9,11 @@ import { cn } from '@/lib/utils';
 
 interface ImageBlockProps {
   block: Block;
-  onChange: (content: any, meta?: any) => void;
+  onChange: (updates: Partial<Block>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
   placeholder?: string;
 }
 
@@ -22,7 +23,8 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   onChange,
   onDelete,
   onDuplicate,
-  onKeyDown
+  onKeyDown,
+  onFocus
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -39,9 +41,11 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
       // Create object URL for preview (in a real app, upload to storage)
       const src = URL.createObjectURL(file);
       onChange({
-        ...content,
-        src,
-        alt: file.name
+        content: {
+          ...content,
+          src,
+          alt: file.name
+        }
       });
     } catch (error) {
       console.error('Upload failed:', error);
@@ -62,9 +66,11 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   const handleUrlSubmit = () => {
     if (urlInput.trim()) {
       onChange({
-        ...content,
-        src: urlInput.trim(),
-        alt: 'Uploaded image'
+        content: {
+          ...content,
+          src: urlInput.trim(),
+          alt: 'Uploaded image'
+        }
       });
       setUrlInput('');
       setShowUrlInput(false);
@@ -72,19 +78,27 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   };
 
   const updateCaption = (caption: string) => {
-    onChange({ ...content, caption });
+    onChange({ 
+      content: { ...content, caption }
+    });
   };
 
   const updateAlt = (alt: string) => {
-    onChange({ ...content, alt });
+    onChange({ 
+      content: { ...content, alt }
+    });
   };
 
   const updateAlignment = (alignment: string) => {
-    onChange(content, { ...block.meta, alignment });
+    onChange({ 
+      meta: { ...block.meta, alignment: alignment as 'left' | 'center' | 'right' }
+    });
   };
 
   const updateSize = (size: string) => {
-    onChange(content, { ...block.meta, size });
+    onChange({ 
+      meta: { ...block.meta, size: size as 'small' | 'medium' | 'large' | 'full' }
+    });
   };
 
   const getImageClasses = () => {
