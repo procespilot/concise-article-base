@@ -252,45 +252,63 @@ export const ArticleEditorNew: React.FC<ArticleEditorNewProps> = ({
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        <div className="xl:col-span-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                {isEditing ? "Artikel bewerken" : "Nieuw artikel"}
-                {article?.status && (
-                  <Badge variant={article.status === 'Gepubliceerd' ? 'default' : 'secondary'}>
-                    {article.status}
-                  </Badge>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSave)} className="hidden">
+          {/* Hidden form for validation */}
+        </form>
+        
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+          <div className="xl:col-span-3">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  {isEditing ? "Artikel bewerken" : "Nieuw artikel"}
+                  {article?.status && (
+                    <Badge variant={article.status === 'Gepubliceerd' ? 'default' : 'secondary'}>
+                      {article.status}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isPreview ? (
+                  <ArticlePreview data={watchedValues} />
+                ) : (
+                  <div onMouseUp={handleTextSelection}>
+                    <ArticleFormFields form={form} categories={categories} />
+                  </div>
                 )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isPreview ? (
-                <ArticlePreview data={watchedValues} />
-              ) : (
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
-                    <div onMouseUp={handleTextSelection}>
-                      <ArticleFormFields form={form} categories={categories} />
-                    </div>
-                  </form>
-                </Form>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        <div className="xl:col-span-1">
-          <ArticleMetadataSidebar 
-            form={form} 
-            categories={categories}
-            article={article}
-            isEditing={isEditing}
-            className="sticky top-6"
-          />
+          <div className="xl:col-span-1">
+            {isPreview ? (
+              <div className="sticky top-6">
+                {/* Preview mode sidebar content */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Voorbeeldmodus</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Je bekijkt nu het voorbeeld van je artikel.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <ArticleMetadataSidebar 
+                form={form} 
+                categories={categories}
+                article={article}
+                isEditing={isEditing}
+                className="sticky top-6"
+              />
+            )}
+          </div>
         </div>
-      </div>
+      </Form>
 
       {/* Inline Toolbar */}
       <InlineToolbar
