@@ -4,12 +4,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Plus, X } from 'lucide-react';
 import { BlockActions } from './BlockActions';
-import { Block } from './BlockEditor';
+import { Block, ChecklistItem } from '@/types/block';
 
-interface ChecklistItem {
-  text: string;
-  checked: boolean;
-}
 
 interface ChecklistBlockProps {
   block: Block;
@@ -28,7 +24,7 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
   onKeyDown,
   placeholder = "Voeg een taak toe..."
 }) => {
-  const items: ChecklistItem[] = Array.isArray(block.content) ? block.content : [{ text: '', checked: false }];
+  const items: ChecklistItem[] = Array.isArray(block.content) ? block.content : [{ id: '1', text: '', checked: false }];
 
   const updateItem = (index: number, updates: Partial<ChecklistItem>) => {
     const newItems = items.map((item, i) => 
@@ -38,7 +34,8 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
   };
 
   const addItem = () => {
-    onChange([...items, { text: '', checked: false }]);
+    const newId = Date.now().toString();
+    onChange([...items, { id: newId, text: '', checked: false }]);
   };
 
   const removeItem = (index: number) => {

@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BlockActions } from './BlockActions';
-import { Block } from './BlockEditor';
+import { Block } from '@/types/block';
 import { cn } from '@/lib/utils';
 
 interface HeadingBlockProps {

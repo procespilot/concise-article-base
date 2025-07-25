@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Quote } from 'lucide-react';
 import { BlockActions } from './BlockActions';
-import { Block } from './BlockEditor';
+import { Block } from '@/types/block';
 
 interface QuoteBlockProps {
   block: Block;

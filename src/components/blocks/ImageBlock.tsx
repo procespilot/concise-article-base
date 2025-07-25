@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, Image, Link, Trash2 } from 'lucide-react';
 import { BlockActions } from './BlockActions';
-import { Block } from './BlockEditor';
+import { Block, ImageContent } from '@/types/block';
 import { cn } from '@/lib/utils';
 
 interface ImageBlockProps {
@@ -16,11 +16,6 @@ interface ImageBlockProps {
   placeholder?: string;
 }
 
-interface ImageContent {
-  src: string;
-  alt: string;
-  caption?: string;
-}
 
 export const ImageBlock: React.FC<ImageBlockProps> = ({
   block,

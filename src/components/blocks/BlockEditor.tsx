@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Plus, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Block, BlockType } from '@/types/block';
 import { BlockTypeSelector } from './BlockTypeSelector';
 import { ParagraphBlock } from './ParagraphBlock';
 import { HeadingBlock } from './HeadingBlock';
@@ -12,19 +13,6 @@ import { CodeBlock } from './CodeBlock';
 import { ChecklistBlock } from './ChecklistBlock';
 import { DividerBlock } from './DividerBlock';
 import { ImageBlock } from './ImageBlock';
-
-export interface Block {
-  id: string;
-  type: 'paragraph' | 'heading' | 'callout' | 'quote' | 'code' | 'checklist' | 'divider' | 'image';
-  content: any;
-  meta?: {
-    level?: number; // for headings
-    variant?: string; // for callouts
-    language?: string; // for code blocks
-    alignment?: string; // for images
-    size?: string; // for images
-  };
-}
 
 interface BlockEditorProps {
   blocks: Block[];
@@ -41,7 +29,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
 
   const generateId = () => `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  const addBlock = useCallback((type: Block['type'], position: number, initialContent?: any) => {
+  const addBlock = useCallback((type: BlockType, position: number, initialContent?: any) => {
     const newBlock: Block = {
       id: generateId(),
       type,
@@ -212,7 +200,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
   );
 };
 
-function getDefaultContent(type: Block['type']): any {
+function getDefaultContent(type: BlockType): any {
   switch (type) {
     case 'heading':
       return '';
@@ -228,12 +216,16 @@ function getDefaultContent(type: Block['type']): any {
       return null;
     case 'image':
       return { src: '', alt: '', caption: '' };
+    case 'table':
+      return { headers: ['Kolom 1', 'Kolom 2'], rows: [['', '']] };
+    case 'embed':
+      return { url: '', type: 'generic' };
     default:
       return '';
   }
 }
 
-function getDefaultMeta(type: Block['type']): Block['meta'] {
+function getDefaultMeta(type: BlockType): Block['meta'] {
   switch (type) {
     case 'heading':
       return { level: 2 };
@@ -243,6 +235,10 @@ function getDefaultMeta(type: Block['type']): Block['meta'] {
       return { language: 'javascript' };
     case 'image':
       return { alignment: 'center', size: 'medium' };
+    case 'table':
+      return { rows: 2, cols: 2 };
+    case 'embed':
+      return { url: '' };
     default:
       return {};
   }

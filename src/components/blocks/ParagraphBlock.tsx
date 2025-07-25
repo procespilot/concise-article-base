@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { BlockActions } from './BlockActions';
-import { Block } from './BlockEditor';
+import { Block } from '@/types/block';
 
 interface ParagraphBlockProps {
   block: Block;

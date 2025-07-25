@@ -123,14 +123,15 @@ export const TableBlock: React.FC<TableBlockProps> = ({
         break;
       
       case 'ArrowLeft':
-        if (colIndex > 0 && e.currentTarget.selectionStart === 0) {
+        const leftInput = e.currentTarget as HTMLInputElement;
+        if (colIndex > 0 && leftInput.selectionStart === 0) {
           setFocusedCell({ row: rowIndex, col: colIndex - 1 });
         }
         break;
       
       case 'ArrowRight':
-        const input = e.currentTarget as HTMLInputElement;
-        if (colIndex < tableContent.headers.length - 1 && input.selectionStart === input.value.length) {
+        const inputElement = e.currentTarget as HTMLInputElement;
+        if (colIndex < tableContent.headers.length - 1 && inputElement.selectionStart === inputElement.value.length) {
           setFocusedCell({ row: rowIndex, col: colIndex + 1 });
         }
         break;

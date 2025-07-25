@@ -3,7 +3,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Info, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { BlockActions } from './BlockActions';
-import { Block } from './BlockEditor';
+import { Block } from '@/types/block';
 import { cn } from '@/lib/utils';
 
 interface CalloutBlockProps {

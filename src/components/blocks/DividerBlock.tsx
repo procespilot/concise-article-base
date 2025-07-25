@@ -1,7 +1,7 @@
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
 import { BlockActions } from './BlockActions';
-import { Block } from './BlockEditor';
+import { Block } from '@/types/block';
 
 interface DividerBlockProps {
   block: Block;

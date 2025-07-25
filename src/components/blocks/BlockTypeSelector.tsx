@@ -10,7 +10,9 @@ import {
   CheckSquare, 
   Minus,
   FileText,
-  Image
+  Image,
+  Grid3X3,
+  ExternalLink
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,6 +80,20 @@ const blockTypes = [
     description: 'Scheidingslijn tussen secties',
     icon: Minus,
     shortcut: 'D'
+  },
+  {
+    type: 'table' as const,
+    label: 'Tabel',
+    description: 'Gestructureerde data in rijen en kolommen',
+    icon: Grid3X3,
+    shortcut: 'table'
+  },
+  {
+    type: 'embed' as const,
+    label: 'Embed',
+    description: 'YouTube, Vimeo, Twitter en andere embeds',
+    icon: ExternalLink,
+    shortcut: 'embed'
   }
 ];
 
