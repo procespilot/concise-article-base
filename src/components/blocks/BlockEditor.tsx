@@ -11,15 +11,18 @@ import { QuoteBlock } from './QuoteBlock';
 import { CodeBlock } from './CodeBlock';
 import { ChecklistBlock } from './ChecklistBlock';
 import { DividerBlock } from './DividerBlock';
+import { ImageBlock } from './ImageBlock';
 
 export interface Block {
   id: string;
-  type: 'paragraph' | 'heading' | 'callout' | 'quote' | 'code' | 'checklist' | 'divider';
+  type: 'paragraph' | 'heading' | 'callout' | 'quote' | 'code' | 'checklist' | 'divider' | 'image';
   content: any;
   meta?: {
     level?: number; // for headings
     variant?: string; // for callouts
     language?: string; // for code blocks
+    alignment?: string; // for images
+    size?: string; // for images
   };
 }
 
@@ -129,6 +132,8 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         return <ChecklistBlock {...commonProps} />;
       case 'divider':
         return <DividerBlock {...commonProps} />;
+      case 'image':
+        return <ImageBlock {...commonProps} />;
       default:
         return <ParagraphBlock {...commonProps} />;
     }
@@ -221,6 +226,8 @@ function getDefaultContent(type: Block['type']): any {
       return [{ text: '', checked: false }];
     case 'divider':
       return null;
+    case 'image':
+      return { src: '', alt: '', caption: '' };
     default:
       return '';
   }
@@ -234,6 +241,8 @@ function getDefaultMeta(type: Block['type']): Block['meta'] {
       return { variant: 'info' };
     case 'code':
       return { language: 'javascript' };
+    case 'image':
+      return { alignment: 'center', size: 'medium' };
     default:
       return {};
   }

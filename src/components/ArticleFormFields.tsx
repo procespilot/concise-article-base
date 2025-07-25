@@ -125,6 +125,13 @@ export const ArticleFormFields: React.FC<ArticleFormFieldsProps> = ({ form, cate
                     return Array.isArray(block.content) 
                       ? block.content.map(item => `${item.checked ? '- [x]' : '- [ ]'} ${item.text}`).join('\n')
                       : '';
+                  case 'image':
+                    const imageContent = block.content;
+                    let imageMarkdown = `![${imageContent.alt || ''}](${imageContent.src})`;
+                    if (imageContent.caption) {
+                      imageMarkdown += `\n*${imageContent.caption}*`;
+                    }
+                    return imageMarkdown;
                   case 'callout':
                     const variant = block.meta?.variant || 'info';
                     return `> **${variant.toUpperCase()}**: ${block.content}`;

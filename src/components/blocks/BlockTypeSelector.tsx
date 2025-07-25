@@ -9,7 +9,8 @@ import {
   Code, 
   CheckSquare, 
   Minus,
-  FileText
+  FileText,
+  Image
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -62,6 +63,13 @@ const blockTypes = [
     description: 'To-do lijst met afvinkboxen',
     icon: CheckSquare,
     shortcut: 'T'
+  },
+  {
+    type: 'image' as const,
+    label: 'Afbeelding',
+    description: 'Upload of embed een afbeelding',
+    icon: Image,
+    shortcut: 'I'
   },
   {
     type: 'divider' as const,

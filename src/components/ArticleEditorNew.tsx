@@ -14,7 +14,9 @@ import { useArticleOperations } from '@/hooks/useArticleOperations';
 import { useAutosave } from '@/hooks/useAutosave';
 import { ArticleFormFields } from './ArticleFormFields';
 import { ArticlePreview } from './ArticlePreview';
-import { ArticleStats } from './ArticleStats';
+import { ArticleMetadataSidebar } from './ArticleMetadataSidebar';
+import { AIAssistant } from './blocks/AIAssistant';
+import { InlineToolbar } from './blocks/InlineToolbar';
 
 interface ArticleEditorNewProps {
   articleId?: string;
@@ -33,6 +35,9 @@ export const ArticleEditorNew: React.FC<ArticleEditorNewProps> = ({
   const [isPreview, setIsPreview] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [selectedText, setSelectedText] = useState('');
+  const [toolbarPosition, setToolbarPosition] = useState<{ x: number; y: number } | null>(null);
   
   const {
     createArticle,
@@ -133,6 +138,39 @@ export const ArticleEditorNew: React.FC<ArticleEditorNewProps> = ({
     }
   }, [hasUnsavedChanges, onBack]);
 
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim()) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      setSelectedText(selection.toString());
+      setToolbarPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top + window.scrollY
+      });
+    } else {
+      setSelectedText('');
+      setToolbarPosition(null);
+    }
+  };
+
+  const handleFormat = (format: string, value?: string) => {
+    // This would integrate with the block editor's formatting
+    console.log('Format:', format, value);
+    setToolbarPosition(null);
+  };
+
+  const handleAIAssistant = () => {
+    setShowAIAssistant(true);
+    setToolbarPosition(null);
+  };
+
+  const handleAIInsert = (text: string) => {
+    // This would insert the AI-generated text into the current block
+    console.log('AI Insert:', text);
+    setShowAIAssistant(false);
+  };
+
   const canSave = form.formState.isValid && 
     watchedValues.title?.trim() && 
     watchedValues.content?.trim() && 
@@ -214,8 +252,8 @@ export const ArticleEditorNew: React.FC<ArticleEditorNewProps> = ({
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div className="xl:col-span-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -233,7 +271,9 @@ export const ArticleEditorNew: React.FC<ArticleEditorNewProps> = ({
               ) : (
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
-                    <ArticleFormFields form={form} categories={categories} />
+                    <div onMouseUp={handleTextSelection}>
+                      <ArticleFormFields form={form} categories={categories} />
+                    </div>
                   </form>
                 </Form>
               )}
@@ -241,10 +281,34 @@ export const ArticleEditorNew: React.FC<ArticleEditorNewProps> = ({
           </Card>
         </div>
 
-        <div className="lg:col-span-1">
-          <ArticleStats data={watchedValues} article={article} />
+        <div className="xl:col-span-1">
+          <ArticleMetadataSidebar 
+            form={form} 
+            categories={categories}
+            article={article}
+            isEditing={isEditing}
+            className="sticky top-6"
+          />
         </div>
       </div>
+
+      {/* Inline Toolbar */}
+      <InlineToolbar
+        onFormat={handleFormat}
+        onAIAssist={handleAIAssistant}
+        selectedText={selectedText}
+        position={toolbarPosition}
+        visible={!!selectedText && !!toolbarPosition}
+      />
+
+      {/* AI Assistant */}
+      {showAIAssistant && (
+        <AIAssistant
+          content={watchedValues.content || ''}
+          onInsert={handleAIInsert}
+          onClose={() => setShowAIAssistant(false)}
+        />
+      )}
     </div>
   );
 };
