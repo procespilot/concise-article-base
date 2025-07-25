@@ -16,7 +16,7 @@ import { ArticleFormFields } from './ArticleFormFields';
 import { ArticlePreview } from './ArticlePreview';
 import { ArticleMetadataSidebar } from './ArticleMetadataSidebar';
 import { AIAssistant } from './blocks/AIAssistant';
-import { InlineToolbar } from './blocks/InlineToolbar';
+import { EnhancedInlineToolbar } from './blocks/EnhancedInlineToolbar';
 
 interface ArticleEditorNewProps {
   articleId?: string;
@@ -310,8 +310,8 @@ export const ArticleEditorNew: React.FC<ArticleEditorNewProps> = ({
         </div>
       </Form>
 
-      {/* Inline Toolbar */}
-      <InlineToolbar
+      {/* Enhanced Inline Toolbar */}
+      <EnhancedInlineToolbar
         onFormat={handleFormat}
         onAIAssist={handleAIAssistant}
         selectedText={selectedText}

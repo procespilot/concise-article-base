@@ -14,9 +14,55 @@ export type Database = {
   }
   public: {
     Tables: {
+      article_versions: {
+        Row: {
+          article_id: string
+          blocks: Json
+          content: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          version: number
+        }
+        Insert: {
+          article_id: string
+          blocks?: Json
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          version: number
+        }
+        Update: {
+          article_id?: string
+          blocks?: Json
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_versions_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_versions_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           author_id: string | null
+          blocks: Json | null
           category_id: string | null
           content: string
           created_at: string | null
@@ -28,10 +74,13 @@ export type Database = {
           status: string | null
           title: string
           updated_at: string | null
+          updated_by: string | null
+          version: number | null
           views: number | null
         }
         Insert: {
           author_id?: string | null
+          blocks?: Json | null
           category_id?: string | null
           content: string
           created_at?: string | null
@@ -43,10 +92,13 @@ export type Database = {
           status?: string | null
           title: string
           updated_at?: string | null
+          updated_by?: string | null
+          version?: number | null
           views?: number | null
         }
         Update: {
           author_id?: string | null
+          blocks?: Json | null
           category_id?: string | null
           content?: string
           created_at?: string | null
@@ -58,6 +110,8 @@ export type Database = {
           status?: string | null
           title?: string
           updated_at?: string | null
+          updated_by?: string | null
+          version?: number | null
           views?: number | null
         }
         Relationships: [
@@ -406,6 +460,16 @@ export type Database = {
       deactivate_user: {
         Args: { p_user_id: string }
         Returns: Json
+      }
+      get_article_history: {
+        Args: { article_uuid: string }
+        Returns: {
+          version: number
+          blocks: Json
+          content: string
+          created_at: string
+          created_by: string
+        }[]
       }
       get_current_user_role: {
         Args: Record<PropertyKey, never>

@@ -2,7 +2,8 @@
 import React, { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { X, Plus } from 'lucide-react';
-import { BlockEditor, Block } from '@/components/blocks/BlockEditor';
+import { AdvancedBlockEditor } from '@/components/blocks/AdvancedBlockEditor';
+import { Block } from '@/types/block';
 import {
   FormControl,
   FormDescription,
@@ -93,57 +94,32 @@ export const ArticleFormFields: React.FC<ArticleFormFieldsProps> = ({ form, cate
               return [];
             }
             
-            // For now, convert existing content to a single paragraph block
-            // Later this can be enhanced to parse structured content
-            if (typeof field.value === 'string' && field.value.trim()) {
-              return [{
-                id: `block_${Date.now()}`,
-                type: 'paragraph' as const,
-                content: field.value
-              }];
+            // Check if content is already in blocks format (JSON)
+            if (typeof field.value === 'string') {
+              try {
+                const parsed = JSON.parse(field.value);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  return parsed;
+                }
+              } catch {
+                // Not JSON, treat as markdown/text
+                if (field.value.trim()) {
+                  return [{
+                    id: `block_${Date.now()}`,
+                    type: 'paragraph' as const,
+                    content: field.value
+                  }];
+                }
+              }
             }
             
             return [];
           }, [field.value]);
 
           const handleBlocksChange = (newBlocks: Block[]) => {
-            // Convert blocks back to string for now
-            // Later this can be enhanced to store structured data
-            const content = newBlocks
-              .map(block => {
-                switch (block.type) {
-                  case 'heading':
-                    const level = block.meta?.level || 2;
-                    const headingPrefix = '#'.repeat(level);
-                    return `${headingPrefix} ${block.content}`;
-                  case 'quote':
-                    return `> ${block.content}`;
-                  case 'code':
-                    const language = block.meta?.language || '';
-                    return `\`\`\`${language}\n${block.content}\n\`\`\``;
-                  case 'checklist':
-                    return Array.isArray(block.content) 
-                      ? block.content.map(item => `${item.checked ? '- [x]' : '- [ ]'} ${item.text}`).join('\n')
-                      : '';
-                  case 'image':
-                    const imageContent = block.content;
-                    let imageMarkdown = `![${imageContent.alt || ''}](${imageContent.src})`;
-                    if (imageContent.caption) {
-                      imageMarkdown += `\n*${imageContent.caption}*`;
-                    }
-                    return imageMarkdown;
-                  case 'callout':
-                    const variant = block.meta?.variant || 'info';
-                    return `> **${variant.toUpperCase()}**: ${block.content}`;
-                  case 'divider':
-                    return '---';
-                  default:
-                    return block.content;
-                }
-              })
-              .join('\n\n');
-            
-            field.onChange(content);
+            // Store blocks as JSON for advanced functionality
+            const blocksJSON = JSON.stringify(newBlocks);
+            field.onChange(blocksJSON);
           };
 
           return (
@@ -151,15 +127,17 @@ export const ArticleFormFields: React.FC<ArticleFormFieldsProps> = ({ form, cate
               <FormLabel>Inhoud *</FormLabel>
               <FormControl>
                 <div className="border rounded-md p-4 min-h-[200px]">
-                  <BlockEditor
+                  <AdvancedBlockEditor
                     blocks={blocks}
                     onChange={handleBlocksChange}
                     placeholder="Begin met typen of druk '/' voor blokopties..."
+                    showToolbar={true}
+                    autoSave={false}
                   />
                 </div>
               </FormControl>
               <FormDescription>
-                {field.value?.length || 0}/50.000 karakters - Gebruik '/' voor blokopties
+                {blocks.length} {blocks.length === 1 ? 'blok' : 'blokken'} - Gebruik '/' voor blokopties, Ctrl+Z voor ongedaan maken
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -14,11 +14,12 @@ import {
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Block } from './BlockEditor';
+import { Block } from '@/types/block';
 
 interface BlockTypeSelectorProps {
   onSelect: (type: Block['type']) => void;
   onClose: () => void;
+  position?: { x: number; y: number };
 }
 
 const blockTypes = [
@@ -80,7 +81,7 @@ const blockTypes = [
   }
 ];
 
-export const BlockTypeSelector: React.FC<BlockTypeSelectorProps> = ({ onSelect, onClose }) => {
+export const BlockTypeSelector: React.FC<BlockTypeSelectorProps> = ({ onSelect, onClose, position }) => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       onClose();
